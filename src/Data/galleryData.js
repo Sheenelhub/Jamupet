@@ -6,7 +6,6 @@ import TsavoImg from "../assets/Tsavo.jpg";
 import BreezeImg from "../assets/Breeze.jpg";
 import DianiImg from "../assets/Diani.jpg";
 import groupImg from "../assets/group.jpg";
-import HikingImg from "../assets/Hiking.jpg";
 
 
 // 2. Export the array
