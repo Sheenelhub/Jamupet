@@ -28,11 +28,11 @@ export default function Navbar() {
     }`}>
       <div className="max-w-[1440px] mx-auto px-6 md:px-12 flex justify-between items-center">
         
-        {/* LOGO - Replaced text with Image as requested */}
+        {/* LOGO  */}
         <Link to="/" className="flex items-center">
           <img 
-            src="/jts-logoo.png" // Update this to your actual logo path
-            alt="Jamupet Logo" 
+            src="/jts-logoo.png" 
+            alt="Jamupet Logo" alt="Jamupet Transit" width="156" height="80"
             className="h-16 md:h-20 w-auto object-contain"
           />
         </Link>
