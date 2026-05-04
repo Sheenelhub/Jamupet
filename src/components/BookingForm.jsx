@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { useLocation } from "react-router-dom"; // <-- Added this import
-import { Calendar, Clock, MapPin, Users, Car, ChevronRight, Info } from "lucide-react";
+import { useLocation } from "react-router-dom";
+import { Calendar, Clock, MapPin, Users, Car, ChevronRight, Info, Hourglass } from "lucide-react";
 import BackButton from "../components/BackButton";
 
 export default function BookingForm() {
-  const location = useLocation(); // <-- Added to catch navigation data
+  const location = useLocation();
 
   // Initialize state directly from location data if it exists
   const [formData, setFormData] = useState({
@@ -12,9 +12,10 @@ export default function BookingForm() {
     destination: location.state?.type === "Hotel Transfer" ? location.state.location : "",
     date: "",
     time: "",
+    hours: "Transfer Only", // <-- Added hours state
     passengers: "1",
     vehicleType: "Executive Sedan",
-    serviceCategory: location.state?.type || "" // <-- Tracks if it's an Airport/Hotel transfer
+    serviceCategory: location.state?.type || "" 
   });
 
   const handleChange = (e) => {
@@ -26,17 +27,18 @@ export default function BookingForm() {
     e.preventDefault();
     const phoneNumber = "254705416781"; 
     
-    // Updated message to include the service category at the top
-    const message = `NEW BOOKING INQUIRY` +
-      (formData.serviceCategory ? `Service: ${formData.serviceCategory}` : "") +
-      ` From: ${formData.pickup}` +
-      ` To: ${formData.destination}` +
-      ` Date: ${formData.date}` +
-      `Time: ${formData.time}` +
-      ` Pax: ${formData.passengers}` +
-      `Vehicle: ${formData.vehicleType}`;
+    // Updated message to include the Hours and formatted cleanly for WhatsApp
+    const message = `*NEW BOOKING INQUIRY*\n` +
+      (formData.serviceCategory ? `*Service:* ${formData.serviceCategory}\n` : "") +
+      `*From:* ${formData.pickup}\n` +
+      `*To:* ${formData.destination}\n` +
+      `*Date:* ${formData.date}\n` +
+      `*Time:* ${formData.time}\n` +
+      `*Duration:* ${formData.hours}\n` + // <-- Added to payload
+      `*Pax:* ${formData.passengers}\n` +
+      `*Vehicle:* ${formData.vehicleType}`;
       
-    window.open(`https://wa.me/${phoneNumber}?text=${message}`, "_blank");
+    window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`, "_blank");
   };
 
   return (
@@ -50,7 +52,6 @@ export default function BookingForm() {
             <div className="relative z-10">
               <div className="flex items-center gap-3 mb-3">
                 <span className="text-[#C5A059] text-xs font-bold uppercase tracking-[0.3em] block">Reservation Desk</span>
-                {/* Dynamically show a badge if a service category was passed from the Services page */}
                 {formData.serviceCategory && (
                   <span className="bg-[#B35A38] text-white text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-widest">
                     {formData.serviceCategory}
@@ -60,7 +61,6 @@ export default function BookingForm() {
               <h2 className="text-4xl font-heading font-bold mb-2">Book Your Transfer</h2>
               <p className="text-gray-400 font-light italic">Enter your details for a personalized chauffeur experience.</p>
             </div>
-            {/* Decorative background element */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-[#B35A38] opacity-10 rounded-full -mr-20 -mt-20 blur-3xl" />
           </div>
 
@@ -102,9 +102,10 @@ export default function BookingForm() {
             {/* SECTION 2: SCHEDULE & PAX */}
             <div className="space-y-6">
               <h4 className="flex items-center gap-2 text-sm font-bold text-gray-900 border-b border-gray-100 pb-4 uppercase tracking-widest">
-                <Calendar size={18} className="text-[#B35A38]" /> 02. Schedule
+                <Calendar size={18} className="text-[#B35A38]" /> 02. Schedule & Duration
               </h4>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {/* Changed grid to 4 columns on large screens to fit the new Hours dropdown neatly */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div>
                   <label className="text-[10px] font-black uppercase text-gray-400 mb-2 block ml-2">Date</label>
                   <input 
@@ -128,14 +129,29 @@ export default function BookingForm() {
                   />
                 </div>
                 <div>
+                  <label className="text-[10px] font-black uppercase text-gray-400 mb-2 block ml-2">Duration (Hours)</label>
+                  <select 
+                    name="hours"
+                    value={formData.hours}
+                    onChange={handleChange}
+                    className="w-full p-5 bg-gray-50 rounded-2xl border-none focus:ring-2 focus:ring-[#C5A059] text-gray-800 font-medium appearance-none cursor-pointer"
+                  >
+                    <option value="Transfer Only">Transfer Only</option>
+                    {[1, 2, 3, 4, 5, 6, 8, 12, 24].map(h => (
+                      <option key={h} value={`${h} Hour${h > 1 ? 's' : ''}`}>{h} Hour{h > 1 ? 's' : ''}</option>
+                    ))}
+                    <option value="Multiple Days">Multiple Days</option>
+                  </select>
+                </div>
+                <div>
                   <label className="text-[10px] font-black uppercase text-gray-400 mb-2 block ml-2">Passengers</label>
                   <select 
                     name="passengers"
                     value={formData.passengers}
                     onChange={handleChange}
-                    className="w-full p-5 bg-gray-50 rounded-2xl border-none focus:ring-2 focus:ring-[#C5A059] text-gray-800 font-medium appearance-none"
+                    className="w-full p-5 bg-gray-50 rounded-2xl border-none focus:ring-2 focus:ring-[#C5A059] text-gray-800 font-medium appearance-none cursor-pointer"
                   >
-                    {[1,2,3,4,5,6,7,8].map(n => <option key={n} value={n}>{n} Passengers</option>)}
+                    {[1,2,3,4,5,6,7,8].map(n => <option key={n} value={n}>{n} Pax</option>)}
                   </select>
                 </div>
               </div>
@@ -147,7 +163,7 @@ export default function BookingForm() {
                 <Car size={18} className="text-[#B35A38]" /> 03. Vehicle Class
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {['Executive Sedan', 'Luxury 4x4', 'Safari Van'].map((type) => (
+                {['Executive Sedan', 'Luxury SUV', 'Safari Class'].map((type) => (
                   <button
                     key={type}
                     type="button"
