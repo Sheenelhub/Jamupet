@@ -1,62 +1,54 @@
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, Award, Shield } from "lucide-react";
+import { ArrowRight, CheckCircle2 } from "lucide-react";
 
 export default function AboutTeaser() {
   const navigate = useNavigate();
 
   return (
-    <section className="py-14 bg-white overflow-hidden"> {/* Reduced from py-20 */}
+    <section className="py-24 bg-[#1A1A1A] text-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
-          
-          {/* Left Side: Visuals */}
-          <div className="relative order-2 lg:order-1">
-            <div className="relative z-10 rounded-[2rem] overflow-hidden shadow-xl">
-              <img 
-                src="cars.jpg" 
-                alt="Roam Kenya Chauffeur" 
-                className="w-full h-[300px] md:h-[400px] object-cover hover:scale-105 transition-transform duration-700"
-              />
-            </div>
-            <div className="absolute -bottom-4 -right-4 w-20 h-20 bg-[#C5A059]/10 rounded-full -z-10" />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-start">
+
+          {/* Left Side: Big Heading */}
+          <div className="space-y-6">
+            <span className="text-[#B35A38] font-bold tracking-[.3em] uppercase text-[10px]">What We Do</span>
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
+              What We Provide Is Luxury Transport And The Most <span className="text-[#C5A059] italic">Comfortable Experience.</span>
+            </h2>
           </div>
 
-          {/* Right Side: Content */}
-          <div className="space-y-5 order-1 lg:order-2">
-            <div>
-              <span className="text-[#B35A38] font-bold tracking-[.3em] uppercase text-[10px]">Our Heritage</span>
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2 leading-tight">
-                More Than Just a Ride, <br />
-                <span className="italic font-serif text-[#C5A059]">A Kenyan Experience.</span>
-              </h2>
-            </div>
-
-            <p className="text-gray-500 leading-relaxed text-sm md:text-base font-light max-w-lg">
-              Founded in Nairobi, Jamupet Transit Solutions was born to provide reliable, 
-              discreet, and professional chauffeur services. 
+          {/* Right Side: Content & SEO Keywords */}
+          <div className="space-y-8 pt-2">
+            <p className="text-gray-400 leading-relaxed text-base md:text-lg font-light">
+              Step into a world of reliability with plush seating, pristine interiors, and state-of-the-art features designed to maximize comfort. Whether you need VIP airport transfers or want to <strong className="text-white font-medium">save money with our rentals</strong>, we offer highly competitive, <strong className="text-white font-medium">cheap rental services in Nairobi</strong> without ever compromising on our premium standards.
             </p>
 
-            <div className="flex gap-4">
-              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
-                <Shield size={16} className="text-[#C5A059]" />
-                <span className="font-bold text-[10px] uppercase">Vetted</span>
-              </div>
-              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
-                <Award size={16} className="text-[#C5A059]" />
-                <span className="font-bold text-[10px] uppercase">VIP Service</span>
-              </div>
-            </div>
+            <ul className="space-y-4">
+              {[
+                "Our diverse fleet includes executive sedans, luxury SUVs, and safari cruisers.",
+                "We offer flexible options to suit any occasion, from corporate events to weddings.",
+                "Our experienced, courteous chauffeurs are trained to ensure a safe, private journey."
+              ].map((item, i) => (
+                <li key={i} className="flex items-start gap-3 text-sm text-gray-300">
+                  <div className="mt-1">
+                    <CheckCircle2 size={16} className="text-[#C5A059]" />
+                  </div>
+                  <span className="leading-relaxed">{item}</span>
+                </li>
+              ))}
+            </ul>
 
-            <button 
+            <button
               onClick={() => navigate("/about")}
-              className="flex items-center gap-4 text-gray-900 font-bold hover:text-[#B35A38] transition-all text-sm group pt-2"
+              className="flex items-center gap-4 text-white font-bold hover:text-[#B35A38] transition-all text-sm group pt-4"
             >
-              Read Our Full Story 
-              <div className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center group-hover:bg-[#B35A38] group-hover:text-white transition-all">
-                <ArrowRight size={14} />
+              Read Our Full Story
+              <div className="w-10 h-10 rounded-full border border-gray-600 flex items-center justify-center group-hover:border-[#B35A38] group-hover:bg-[#B35A38] transition-all">
+                <ArrowRight size={16} />
               </div>
             </button>
           </div>
+
         </div>
       </div>
     </section>
