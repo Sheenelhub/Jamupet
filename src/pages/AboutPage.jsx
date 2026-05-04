@@ -246,12 +246,7 @@ export default function AboutPage() {
             </div>
 
             <div className="pt-6">
-              <button 
-                onClick={() => navigate("/about")}
-                className="bg-black text-white px-8 py-4 rounded-xl font-bold hover:bg-[#B35A38] transition-all flex items-center gap-3 text-sm"
-              >
-                Learn More <ArrowRight size={16} />
-              </button>
+          
             </div>
           </div>
 
