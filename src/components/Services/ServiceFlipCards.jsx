@@ -1,6 +1,6 @@
 import React from "react";
 import { HashLink } from 'react-router-hash-link';
-import { Plane, Car, Building2, ShieldCheck, ArrowRight } from "lucide-react";
+import { Plane, Car, Building2, ShieldCheck, ArrowRight, MapPin, HeartHandshake, Camera } from "lucide-react";
 
 const services = [
   {
@@ -21,17 +21,47 @@ const services = [
     backTitle: "Relax, We Drive",
     backPoints: ["Daily KES & USD Rates", "Vetted Security Drivers", "All-Inclusive Pricing"],
     cta: "View Fleet",
-    link: "#chauffeur-pricing" // Updated to local jump for the new pricing section
+    link: "#pricing" 
   },
   {
-    id: "hotels",
-    title: "Hotel Stays",
+    id: "hotel-transfers",
+    title: "Hotel Transfers",
     icon: <Building2 size={32} />,
-    frontText: "Curated luxury stays with integrated logistics.",
-    backTitle: "Partner Stays",
-    backPoints: ["VIP Check-in Support", "Hand-picked Locations", "Seamless Transport"],
-    cta: "Find a Stay",
-    link: "#hotels" 
+    frontText: "Seamless transit direct to your Nairobi accommodation.",
+    backTitle: "Arrive in Style",
+    backPoints: ["Direct Routing", "Luggage Assistance", "Partner Discounts"],
+    cta: "Book Transfer",
+    link: "/booking" 
+  },
+  {
+    id: "intercity",
+    title: "Intercity Rides",
+    icon: <MapPin size={32} />,
+    frontText: "Safe, luxurious long-distance travel across Kenya.",
+    backTitle: "Beyond Nairobi",
+    backPoints: ["Nakuru, Nanyuki, Mombasa", "Rest Stops Included", "Spacious SUVs"],
+    cta: "Request Route",
+    link: "/booking" 
+  },
+  {
+    id: "wedding",
+    title: "Wedding Travel",
+    icon: <HeartHandshake size={32} />,
+    frontText: "Elegant transport for your special day.",
+    backTitle: "The Grand Entrance",
+    backPoints: ["Pristine Executive Fleet", "Chauffeur in Uniform", "Multi-Car Packages"],
+    cta: "Get a Quote",
+    link: "https://wa.me/254705416781?text=I%20need%20a%20custom%20quote%20for%20Wedding%20Travel" 
+  },
+  {
+    id: "safari",
+    title: "Safari Tours",
+    icon: <Camera size={32} />,
+    frontText: "Custom expeditions for locals and tourists.",
+    backTitle: "Into the Wild",
+    backPoints: ["Modified Safari Cruisers", "Expert Driver-Guides", "Multi-Day Packages"],
+    cta: "Plan Safari",
+    link: "/booking" 
   },
   {
     id: "fleet",
@@ -51,7 +81,6 @@ export default function ServiceFlipCards() {
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {services.map((svc) => (
           <div key={svc.id} id={svc.id} className="group h-[450px] [perspective:1000px]">
-            {/* Added [&.is-flipped] to handle the programmatic flip from the Navbar links */}
             <div className="relative h-full w-full transition-all duration-700 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)] [&.is-flipped]:[transform:rotateY(180deg)]">
               
               {/* FRONT SIDE */}

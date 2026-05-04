@@ -20,3 +20,24 @@ body {
 #root {
   width: 100%;
 }
+/* Custom Road Animation for the Preloader */
+.road-animation {
+  background-image: linear-gradient(90deg, #C5A059 50%, transparent 50%);
+  background-size: 50px 100%;
+  animation: drive 0.8s linear infinite;
+}
+
+@keyframes drive {
+  0% { background-position: 50px 0; }
+  100% { background-position: 0px 0; }
+}
+
+/* A smooth fade-out effect for when the site is ready */
+.fade-out {
+  animation: fadeOut 0.5s ease-in-out forwards;
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; visibility: visible; }
+  to { opacity: 0; visibility: hidden; }
+}
