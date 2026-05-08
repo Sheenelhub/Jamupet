@@ -81,32 +81,42 @@ export function useFlightTracking(flightNumber, bookingId) {
 
   // Create or update flight booking
   const trackFlight = async (flightNum) => {
-    try {
-      setError(null)
-      setLoading(true)
+  try {
+    setError(null)
+    setLoading(true)
 
-      const { data, error: err } = await supabase
-        .from('flight_bookings')
-        .upsert({
-          booking_id: bookingId,
-          flight_number: flightNum,
-          tracking_status: 'waiting',
-          updated_at: new Date()
-        }, {
-          onConflict: 'booking_id'
-        })
-        .select()
+    console.log('🛫 trackFlight called with:', { flightNum, bookingId })
 
-      if (err) throw err
-      return data
-    } catch (err) {
-      const message = err.message || 'Failed to track flight'
-      setError(message)
+    const { data, error: err } = await supabase
+      .from('flight_bookings')
+      .upsert({
+        booking_id: bookingId,
+        flight_number: flightNum,
+        tracking_status: 'waiting',
+        updated_at: new Date()
+      }, {
+        onConflict: 'booking_id'
+      })
+      .select()
+
+    console.log('🛫 trackFlight response:', { data, err })
+
+    if (err) {
+      console.error('🛫 trackFlight error:', err)
       throw err
-    } finally {
-      setLoading(false)
     }
+    
+    console.log('✅ trackFlight success')
+    return data
+  } catch (err) {
+    const message = err.message || 'Failed to track flight'
+    console.error('🛫 trackFlight exception:', message)
+    setError(message)
+    throw err
+  } finally {
+    setLoading(false)
   }
+}
 
   // Stop tracking flight
   const stopTracking = async () => {

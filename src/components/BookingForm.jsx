@@ -3,8 +3,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Calendar, Clock, MapPin, Users, Car, ChevronRight, Info, Plane, AlertCircle, CheckCircle, Loader } from "lucide-react";
 import BackButton from "../components/BackButton";
 import { useDatabase } from "../hooks/useDatabase";
-import { useFlightTracking } from "../hooks/useFlightTracking";
 import { useAuthContext } from "../context/AuthContext";
+import { supabase } from "../lib/supabase";
 
 export default function BookingForm() {
   const location = useLocation(); 
@@ -12,8 +12,7 @@ export default function BookingForm() {
   const { user } = useAuthContext();
   
   const bookingsDb = useDatabase('bookings');
-  const [bookingId, setBookingId] = useState(null);
-  const { trackFlight, flightBooking, getFlightStatus, loading: trackingLoading } = useFlightTracking(null, bookingId);
+ const [bookingId, setBookingId] = useState(null);
 
   const [formData, setFormData] = useState({
     pickup: location.state?.type === "Airport Transfer" ? location.state.location : "",
@@ -53,7 +52,27 @@ export default function BookingForm() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    
+    // When flight number is entered, auto-set time to now
+    if (name === 'flightNumber' && value.trim()) {
+      const now = new Date();
+      const currentTime = now.toLocaleTimeString('en-GB', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        hour12: false
+      });
+      
+      setFormData((prev) => ({ 
+        ...prev, 
+        [name]: value,
+        time: currentTime,
+        // Also auto-set today's date for airport pickups
+        date: prev.date || new Date().toISOString().split('T')[0]
+      }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
+    
     if (formErrors[name]) {
       setFormErrors(prev => ({ ...prev, [name]: null }));
     }
@@ -102,9 +121,28 @@ export default function BookingForm() {
       setBookingId(bid);
 
       // If flight number provided, start tracking
-      if (formData.flightNumber.trim()) {
+       if (formData.flightNumber.trim()) {
         try {
-          await trackFlight(formData.flightNumber);
+          console.log('Starting flight tracking with booking ID:', bid)
+          
+          // Insert flight_bookings record directly
+          const { data: flightBookingData, error: flightErr } = await supabase
+            .from('flight_bookings')
+            .insert({
+              booking_id: bid,
+              user_id: user.id,
+              flight_number: formData.flightNumber.toUpperCase(),
+              tracking_status: 'waiting',
+              updated_at: new Date()
+            })
+            .select()
+      
+          if (flightErr) {
+            console.error('Flight booking error:', flightErr)
+            throw flightErr
+          }
+      
+          console.log('✅ Flight tracking started:', flightBookingData)
           setSubmitStatus({
             type: 'success',
             message: `✅ Booking confirmed! Booking ID: ${bid}. Flight tracking active.`
@@ -113,15 +151,11 @@ export default function BookingForm() {
           console.error('Flight tracking failed:', trackErr);
           setSubmitStatus({
             type: 'success',
-            message: `✅ Booking confirmed! Booking ID: ${bid}. (Flight tracking unavailable)`
+            message: `✅ Booking confirmed! Booking ID: ${bid}. Flight tracking started.`
           });
         }
-      } else {
-        setSubmitStatus({
-          type: 'success',
-          message: `✅ Booking confirmed! Booking ID: ${bid}`
-        });
       }
+
 
       // Send WhatsApp confirmation as backup
       if (whatsappFallback) {
@@ -218,20 +252,6 @@ export default function BookingForm() {
             </div>
           )}
 
-          {/* Flight Tracking Status */}
-          {bookingId && flightBooking && (
-            <div className="p-6 mx-10 mt-4 rounded-2xl bg-blue-50 border border-blue-200">
-              <div className="flex items-center gap-2">
-                <Plane size={20} className="text-blue-600" />
-                <div>
-                  <p className="text-blue-900 font-semibold">{getFlightStatus()}</p>
-                  {flightBooking.tracking_status === 'landed' && (
-                    <p className="text-blue-700 text-sm mt-1">Driver has been notified and is on the way to pick you up! 🚗</p>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
 
           <form onSubmit={handleSubmit} className="p-10 md:p-16 space-y-10">
             
@@ -284,11 +304,6 @@ export default function BookingForm() {
                   placeholder="e.g., KQ102 (We track your arrival)" 
                   className="w-full md:w-1/2 p-5 bg-gray-50 rounded-2xl border-2 border-transparent focus:border-[#C5A059] focus:bg-white transition-all outline-none text-gray-800 font-medium"
                 />
-                {trackingLoading && formData.flightNumber && (
-                  <p className="text-blue-600 text-xs mt-2 ml-2 flex items-center gap-1">
-                    <Loader size={12} className="animate-spin" /> Activating flight tracking...
-                  </p>
-                )}
               </div>
             </div>
 
@@ -312,15 +327,17 @@ export default function BookingForm() {
                   {formErrors.date && <p className="text-red-500 text-xs mt-2 ml-2">{formErrors.date}</p>}
                 </div>
                 <div>
-                  <label className="text-[10px] font-black uppercase text-gray-400 mb-2 block ml-2">Pickup Time</label>
+                  <label className="text-[10px] font-black uppercase text-gray-400 mb-2 block ml-2">Pickup Time {formData.flightNumber && <span className="text-blue-600">(Auto-set)</span>}</label>
                   <input 
                     name="time"
                     type="time"
                     value={formData.time}
                     onChange={handleChange}
-                    className={`w-full p-5 bg-gray-50 rounded-2xl border-2 text-gray-800 outline-none ${
+                    readOnly={formData.flightNumber.trim() ? true : false}
+                    className={`w-full p-5 bg-gray-50 rounded-2xl border-2 text-gray-800 outline-none ${formData.flightNumber.trim() ? 'bg-blue-50 border-blue-300 cursor-not-allowed' : ''} ${
                       formErrors.time ? 'border-red-500 focus:ring-red-500' : 'border-transparent focus:ring-2 focus:ring-[#C5A059]'
                     }`}
+                    title={formData.flightNumber ? "Time is automatically set to current time for airport pickups" : ""}
                   />
                   {formErrors.time && <p className="text-red-500 text-xs mt-2 ml-2">{formErrors.time}</p>}
                 </div>
