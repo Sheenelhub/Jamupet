@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { Calendar, Clock, MapPin, Users, Phone, ArrowLeft, AlertCircle, CheckCircle, Loader, Plane, Car, Hotel, Heart, Camera, Truck } from "lucide-react";
-import BackButton from "./BackButton";
 import { useDatabase } from "../hooks/useDatabase";
 import { useAuthContext } from "../context/AuthContext";
 import { supabase } from "../lib/supabase";
 import { sendBookingEmail } from "../lib/emailService";
 
 export default function ServiceBookingForm({ serviceType, onBack }) {
-  const navigate = useNavigate();
   const { user } = useAuthContext();
   const bookingsDb = useDatabase('bookings');
   const [bookingId, setBookingId] = useState(null);
+  const [activeBooking, setActiveBooking] = useState(null);
 
   // Service icons mapping
   const serviceIcons = {
@@ -319,15 +317,21 @@ Thank you for booking with us!
 
       setSubmitStatus({
         type: "success",
-        message: `✅ ${config.label} booking confirmed! Booking ID: ${bid}. Confirmation sent to email & WhatsApp.`
+        message: `${config.label} booking confirmed. Confirmation sent to email and WhatsApp.`
       });
-
-      // Reset form after 3 seconds
-      setTimeout(() => {
-        setFormData({});
-        setPhoneNumber("");
-        navigate("/");
-      }, 3000);
+      setActiveBooking({
+        id: bid,
+        service: config.label,
+        pickupLocation: bookingPayload.pickup_location || "Not specified",
+        destinationLocation: bookingPayload.destination_location || "Not specified",
+        date: bookingPayload.booking_date,
+        time: bookingPayload.pickup_time,
+        passengers: bookingPayload.passengers,
+        vehicleType: bookingPayload.vehicle_type,
+        phoneNumber,
+        status: "Active",
+        flightNumber: bookingPayload.flight_number || null
+      });
     } catch (err) {
       console.error("Booking error:", err);
       setSubmitStatus({
@@ -337,6 +341,19 @@ Thank you for booking with us!
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleBookAnother = () => {
+    const initialData = {};
+    config.fields.forEach(field => {
+      initialData[field.name] = "";
+    });
+    setFormData(initialData);
+    setPhoneNumber("");
+    setFormErrors({});
+    setSubmitStatus(null);
+    setActiveBooking(null);
+    setBookingId(null);
   };
 
   return (
@@ -507,16 +524,123 @@ Thank you for booking with us!
                   </>
                 )}
               </button>
-            </div>
           </form>
         ) : (
-          <div className="bg-white border border-green-400 p-12 text-center">
-            <div className="inline-block p-4 bg-green-100 border border-green-400 mb-6">
-              <CheckCircle size={56} className="text-green-600" />
+          <div className="space-y-6">
+            <div className="bg-white border border-green-400 p-8">
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-green-100 border border-green-400">
+                  <CheckCircle size={32} className="text-green-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-gray-900 mb-1">Booking Confirmed</p>
+                  <p className="text-green-700">{submitStatus?.message || "Your booking has been confirmed."}</p>
+                </div>
+              </div>
             </div>
-            <p className="text-2xl font-bold text-gray-900 mb-2">Booking Confirmed!</p>
-            <p className="text-green-700 mb-4">{submitStatus?.message || "Your booking has been confirmed"}</p>
-            <p className="text-gray-600 text-sm">Redirecting to home page...</p>
+
+            <section className="bg-white border border-gray-300 p-8">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-gray-900">Active Booking</h2>
+                <span className="px-3 py-1 text-sm font-semibold text-green-700 bg-green-100 border border-green-300">
+                  {activeBooking?.status || "Active"}
+                </span>
+              </div>
+
+              <div className="bg-gray-50 border border-gray-200 p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <div className="flex items-start gap-3">
+                    <div className="mt-0.5 text-[#B35A38]"><CheckCircle size={18} /></div>
+                    <div>
+                      <p className="text-gray-500">Booking ID</p>
+                      <p className="font-semibold text-gray-900">{activeBooking?.id || bookingId}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="mt-0.5 text-[#B35A38]"><Truck size={18} /></div>
+                    <div>
+                      <p className="text-gray-500">Service</p>
+                      <p className="font-semibold text-gray-900">{activeBooking?.service}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="mt-0.5 text-[#B35A38]"><MapPin size={18} /></div>
+                    <div>
+                      <p className="text-gray-500">Pickup</p>
+                      <p className="font-semibold text-gray-900">{activeBooking?.pickupLocation}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="mt-0.5 text-[#B35A38]"><MapPin size={18} /></div>
+                    <div>
+                      <p className="text-gray-500">Destination</p>
+                      <p className="font-semibold text-gray-900">{activeBooking?.destinationLocation}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="mt-0.5 text-[#B35A38]"><Calendar size={18} /></div>
+                    <div>
+                      <p className="text-gray-500">Date</p>
+                      <p className="font-semibold text-gray-900">{activeBooking?.date}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="mt-0.5 text-[#B35A38]"><Clock size={18} /></div>
+                    <div>
+                      <p className="text-gray-500">Time</p>
+                      <p className="font-semibold text-gray-900">{activeBooking?.time}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="mt-0.5 text-[#B35A38]"><Users size={18} /></div>
+                    <div>
+                      <p className="text-gray-500">Passengers</p>
+                      <p className="font-semibold text-gray-900">{activeBooking?.passengers}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="mt-0.5 text-[#B35A38]"><Car size={18} /></div>
+                    <div>
+                      <p className="text-gray-500">Vehicle</p>
+                      <p className="font-semibold text-gray-900">{activeBooking?.vehicleType}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="mt-0.5 text-[#B35A38]"><Phone size={18} /></div>
+                    <div>
+                      <p className="text-gray-500">Contact</p>
+                      <p className="font-semibold text-gray-900">{activeBooking?.phoneNumber}</p>
+                    </div>
+                  </div>
+                  {activeBooking?.flightNumber && (
+                    <div className="flex items-start gap-3">
+                      <div className="mt-0.5 text-[#B35A38]"><Plane size={18} /></div>
+                      <div>
+                        <p className="text-gray-500">Flight Number</p>
+                        <p className="font-semibold text-gray-900">{activeBooking.flightNumber}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </section>
+
+            <div className="flex flex-col md:flex-row gap-3">
+              <button
+                type="button"
+                onClick={handleBookAnother}
+                className="px-6 py-3 bg-[#B35A38] hover:bg-[#8B4225] text-white font-semibold transition-colors"
+              >
+                Book Another Ride
+              </button>
+              <button
+                type="button"
+                onClick={onBack}
+                className="px-6 py-3 border border-gray-300 text-gray-900 hover:bg-gray-100 font-semibold transition-colors"
+              >
+                Back to Services
+              </button>
+            </div>
           </div>
         )}
       </div>

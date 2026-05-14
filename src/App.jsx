@@ -17,6 +17,9 @@ import AboutPage from "./pages/AboutPage";
 import Services from './pages/Services';
 import AuthPage from "./pages/AuthPage";
 import BookingPage from "./pages/BookingPage";
+import MyBookingsPage from "./pages/MyBookingsPage";
+import ProfileSettingsPage from "./pages/ProfileSettingsPage";
+import AccountSettingsPage from "./pages/AccountSettingsPage";
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -60,6 +63,9 @@ function App() {
               <Route path="/destinations" element={<Destination />} />
               <Route path="/auth" element={<AuthPage />} />
               <Route path="/booking" element={<BookingPage />} />
+              <Route path="/bookings" element={<MyBookingsPage />} />
+              <Route path="/profile" element={<ProfileSettingsPage />} />
+              <Route path="/settings" element={<AccountSettingsPage />} />
             </Routes>
           </main>
 
