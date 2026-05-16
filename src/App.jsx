@@ -17,7 +17,6 @@ import AuthPage from './pages/AuthPage';
 import Destination from "./pages/Destination";
 import AboutPage from "./pages/AboutPage"; 
 import Services from './pages/Services';
-import AuthPage from "./pages/AuthPage";
 import BookingPage from "./pages/BookingPage";
 import MyBookingsPage from "./pages/MyBookingsPage";
 import ProfileSettingsPage from "./pages/ProfileSettingsPage";
