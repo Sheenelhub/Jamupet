@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { X, LogIn, UserPlus, Ghost, Chrome, Apple, Mail, Lock, User, AlertCircle, Loader, ArrowLeft } from "lucide-react";
+import { X, LogIn, UserPlus, Ghost, Chrome, Facebook, Mail, Lock, User, AlertCircle, Loader, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
 export default function LoginModal({ isOpen, onClose }) {
   const navigate = useNavigate();
-  const { signIn, signUp, signInWithGoogle, signInWithApple, signUpAnonymous, loading, error: authError } = useAuth();
+  const { signIn, signUp, signInWithGoogle, signInWithFacebook, signUpAnonymous, loading, error: authError } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   
@@ -114,19 +114,19 @@ export default function LoginModal({ isOpen, onClose }) {
     }
   };
 
-  const handleAppleLogin = async () => {
+  const handleFacebookLogin = async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const result = await signInWithApple();
+      const result = await signInWithFacebook();
       if (result.success) {
         handleClose();
         navigate("/booking");
       } else {
-        setError(result.error?.message || "Apple login failed");
+        setError(result.error?.message || "Facebook login failed");
       }
     } catch (err) {
-      setError(err.message || "Failed to login with Apple");
+      setError(err.message || "Failed to login with Facebook");
     } finally {
       setIsLoading(false);
     }
@@ -258,13 +258,13 @@ export default function LoginModal({ isOpen, onClose }) {
                 </button>
 
                 <button
-                  onClick={handleAppleLogin}
+                  onClick={handleFacebookLogin}
                   disabled={isLoading}
                   className="w-full rounded-2xl p-3 transition-all duration-300 bg-white/10 hover:bg-white/20 border border-white/20 disabled:opacity-50"
                 >
                   <div className="flex items-center justify-center gap-3">
-                    <Apple size={18} className="text-white" />
-                    <span className="text-white font-semibold text-sm">Continue with Apple</span>
+                    <Facebook size={18} className="text-[#1877F2]" />
+                    <span className="text-white font-semibold text-sm">Continue with Facebook</span>
                   </div>
                 </button>
               </div>
