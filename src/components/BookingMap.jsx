@@ -4,11 +4,15 @@ const MAPBOX_GL_JS_URL = "https://api.mapbox.com/mapbox-gl-js/v3.9.4/mapbox-gl.j
 const MAPBOX_GL_CSS_URL = "https://api.mapbox.com/mapbox-gl-js/v3.9.4/mapbox-gl.css";
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
 
+// Nairobi coordinates (center of Kenya for default view)
 const DEFAULT_CENTER = [36.8219, -1.2921];
+// Kenya bounding box: [west, south, east, north]
 const KENYA_BOUNDS = [
   [33.5, -4.9],
   [42.0, 5.5]
 ];
+// Default zoom level for Kenya
+const DEFAULT_ZOOM = 8;
 const EMPTY_ROUTE = {
   type: "FeatureCollection",
   features: []
@@ -162,18 +166,31 @@ export default function BookingMap({
           container: mapContainerRef.current,
           style: "mapbox://styles/mapbox/streets-v12",
           center: DEFAULT_CENTER,
-          zoom: 11,
-          maxBounds: KENYA_BOUNDS
+          zoom: DEFAULT_ZOOM,
+          maxBounds: KENYA_BOUNDS,
+          maxBoundsNorth: 5.5,
+          maxBoundsSouth: -4.9,
+          maxBoundsEast: 42.0,
+          maxBoundsWest: 33.5,
+          // Prevent zooming in beyond Kenya
+          minZoom: 7,
+          maxZoom: 18,
+          // Disable map rotation for better UX
+          interactive: true,
+          pitch: 0
         });
 
         map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), "bottom-right");
 
         map.on("load", () => {
           if (disposed) return;
+          
+          // Add source and layer for trip route
           map.addSource("trip-route", {
             type: "geojson",
             data: EMPTY_ROUTE
           });
+          
           map.addLayer({
             id: "trip-route-line",
             type: "line",
@@ -189,8 +206,30 @@ export default function BookingMap({
               "line-dasharray": [1.5, 1.2]
             }
           });
+          
           setMapReady(true);
-          requestAnimationFrame(() => map.resize());
+          
+          // Ensure map renders with correct size
+          setTimeout(() => {
+            if (!disposed && mapRef.current) {
+              mapRef.current.resize();
+            }
+          }, 100);
+          
+          console.log("✅ Mapbox map loaded successfully");
+        });
+        
+        // Add error handler
+        map.on("error", (error) => {
+          if (!disposed) {
+            console.error("❌ Mapbox error:", error);
+            setMapError(error?.message || "Map rendering error occurred");
+          }
+        });
+        
+        // Log style loading
+        map.on("style.load", () => {
+          console.log("✅ Map style loaded");
         });
 
         map.on("click", (event) => {
@@ -314,7 +353,8 @@ export default function BookingMap({
 
   return (
     <div className="booking-portal-enter relative w-full h-full min-h-[300px] rounded-xl overflow-hidden border border-gray-200 shadow-[0_12px_34px_rgba(15,23,42,0.08)] bg-gray-900">
-      <div ref={mapContainerRef} className="absolute inset-0" />
+      {/* Map container with guaranteed dimensions */}
+      <div ref={mapContainerRef} className="absolute inset-0 w-full h-full bg-gray-900" style={{ minHeight: "300px" }} />
 
       <div className="absolute top-3 left-3 z-10 flex flex-wrap items-center gap-2">
         <div className="bg-white/95 backdrop-blur-sm rounded-lg px-3 py-1.5 shadow-[0_8px_18px_rgba(15,23,42,0.08)] border border-gray-100 flex items-center gap-2">

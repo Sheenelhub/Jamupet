@@ -70,43 +70,98 @@ export async function geocodeLocation(query) {
 
 export async function searchKenyaLocations(query) {
   if (!query?.trim() || query.trim().length < 3) return [];
-  const params = new URLSearchParams({
-    access_token: getMapboxToken(),
-    autocomplete: "true",
-    bbox: KENYA_BBOX,
-    country: "ke",
-    language: "en",
-    limit: "6",
-    proximity: NAIROBI_PROXIMITY,
-    types: MAPBOX_TYPES
-  });
-  const url = `${MAPBOX_GEOCODING_URL}/${encodeURIComponent(query)}.json?${params.toString()}`;
-  const response = await fetch(url);
-  if (!response.ok) throw new Error("Unable to fetch location suggestions.");
-  const data = await response.json();
-  if (!Array.isArray(data?.features)) return [];
-  return data.features.map(normalizeMapboxFeature);
+  
+  try {
+    const params = new URLSearchParams({
+      access_token: getMapboxToken(),
+      autocomplete: "true",
+      bbox: KENYA_BBOX,
+      country: "ke",
+      language: "en",
+      limit: "8",
+      proximity: NAIROBI_PROXIMITY,
+      // Prioritize specific location types
+      types: "address,place,locality,neighborhood,region",
+      // Fuzzy matching for better results
+      fuzzyMatch: "true"
+    });
+    
+    const url = `${MAPBOX_GEOCODING_URL}/${encodeURIComponent(query)}.json?${params.toString()}`;
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      console.warn("Mapbox API error:", response.status);
+      return [];
+    }
+    
+    const data = await response.json();
+    
+    if (!Array.isArray(data?.features)) {
+      return [];
+    }
+    
+    // Filter results to ensure they're within Kenya
+    const kenyaResults = data.features.filter(feature => {
+      if (!feature.center || feature.center.length < 2) return false;
+      const [lng, lat] = feature.center;
+      // Check if within Kenya bounds
+      return lng >= 33.5 && lng <= 42.0 && lat >= -4.9 && lat <= 5.5;
+    });
+    
+    return kenyaResults.map(normalizeMapboxFeature);
+  } catch (error) {
+    console.error("Location search error:", error);
+    return [];
+  }
 }
 
 export async function reverseGeocodeLocation({ latitude, longitude }) {
-  const params = new URLSearchParams({
-    access_token: getMapboxToken(),
-    country: "ke",
-    language: "en",
-    types: MAPBOX_TYPES
-  });
-  const url = `${MAPBOX_GEOCODING_URL}/${longitude},${latitude}.json?${params.toString()}`;
-  const response = await fetch(url);
-  if (!response.ok) throw new Error("Unable to reverse geocode location.");
-  const data = await response.json();
-  const fallback = `${Number(latitude).toFixed(6)}, ${Number(longitude).toFixed(6)}`;
-  if (!Array.isArray(data?.features) || data.features.length === 0) {
+  if (!latitude || !longitude) {
+    throw new Error("Invalid coordinates provided.");
+  }
+  
+  try {
+    // Check if coordinates are within Kenya
+    if (longitude < 33.5 || longitude > 42.0 || latitude < -4.9 || latitude > 5.5) {
+      console.warn("Coordinates outside Kenya bounds:", { latitude, longitude });
+    }
+    
+    const params = new URLSearchParams({
+      access_token: getMapboxToken(),
+      country: "ke",
+      language: "en",
+      // Include all types for reverse geocoding
+      types: "address,place,locality,neighborhood,region"
+    });
+    
+    const url = `${MAPBOX_GEOCODING_URL}/${longitude},${latitude}.json?${params.toString()}`;
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      console.warn("Mapbox reverse geocoding error:", response.status);
+      throw new Error("Unable to reverse geocode location.");
+    }
+    
+    const data = await response.json();
+    const fallback = `${Number(latitude).toFixed(6)}, ${Number(longitude).toFixed(6)}`;
+    
+    if (!Array.isArray(data?.features) || data.features.length === 0) {
+      // Return coordinates as fallback with a note
+      return {
+        label: fallback,
+        shortLabel: `Location (${fallback})`
+      };
+    }
+    
+    return normalizeMapboxFeature(data.features[0]);
+  } catch (error) {
+    console.error("Reverse geocoding error:", error);
+    const fallback = `${Number(latitude).toFixed(6)}, ${Number(longitude).toFixed(6)}`;
     return {
       label: fallback,
-      shortLabel: fallback
+      shortLabel: `Location (${fallback})`
     };
   }
-  return normalizeMapboxFeature(data.features[0]);
 }
 
 export function calculateDistanceKm(start, end) {
