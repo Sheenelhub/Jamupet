@@ -68,7 +68,14 @@ function loadMapboxGl() {
 
 function toLngLat(coords) {
   if (!coords) return null;
-  return [coords.longitude, coords.latitude];
+  const lng = coords.longitude;
+  const lat = coords.latitude;
+  // Validate coordinates are valid numbers
+  if (typeof lng !== 'number' || typeof lat !== 'number' || isNaN(lng) || isNaN(lat)) {
+    console.warn("Invalid coordinates provided:", coords);
+    return null;
+  }
+  return [lng, lat];
 }
 
 function makeRouteFeature(pickupCoords, destinationCoords) {
@@ -177,7 +184,8 @@ export default function BookingMap({
           maxZoom: 18,
           // Disable map rotation for better UX
           interactive: true,
-          pitch: 0
+          pitch: 0,
+          trackUserInteraction: false
         });
 
         map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), "bottom-right");
@@ -325,7 +333,10 @@ export default function BookingMap({
       routeSource.setData(makeRouteFeature(pickupCoords, hasDestination ? destinationCoords : null));
     }
 
-    const points = [pickupCoords, hasDestination ? destinationCoords : null, gpsCoords].filter(Boolean).map(toLngLat);
+    const points = [pickupCoords, hasDestination ? destinationCoords : null, gpsCoords]
+      .filter(Boolean)
+      .map(toLngLat)
+      .filter(Boolean); // Filter out any null values from toLngLat
     if (points.length >= 2) {
       const bounds = points.reduce((currentBounds, point) => currentBounds.extend(point), new mapboxgl.LngLatBounds(points[0], points[0]));
       map.fitBounds(bounds, { padding: 70, maxZoom: 15, duration: 650 });

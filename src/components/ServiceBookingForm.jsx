@@ -10,10 +10,14 @@ import {
   createPaymentReference,
   formatKesFromCents,
   reverseGeocodeLocation,
-  searchKenyaLocations,
   startPaystackCheckout,
   VEHICLE_MULTIPLIERS
 } from "../lib/paystack";
+import {
+  searchLocationAliases,
+  KENYA_AIRPORTS
+} from "../lib/kenyaLocations";
+import { searchLocationsUnified } from "../lib/locationSearch";
 import { verifyPaymentServerSide } from "../lib/paymentVerification";
 
 export default function ServiceBookingForm({ serviceType, onBack }) {
@@ -158,15 +162,24 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
       clearTimeout(searchDebounceRef.current[fieldName]);
     }
 
-    if (!query || query.length < 3) {
+    if (!query || query.length < 2) {
       setLocationSuggestions((prev) => ({ ...prev, [fieldName]: [] }));
       return;
     }
 
+    // Try local Kenya database first (instant, precise results)
+    const aliasResults = searchLocationAliases(query);
+    if (aliasResults.length > 0) {
+      setLocationSuggestions((prev) => ({ ...prev, [fieldName]: aliasResults }));
+      setLocationLoadingField(null);
+      return;
+    }
+
+    // Use unified search (Local → Nominatim → Mapbox) with debounce
     searchDebounceRef.current[fieldName] = setTimeout(async () => {
       setLocationLoadingField(fieldName);
       try {
-        const suggestions = await searchKenyaLocations(query);
+        const suggestions = await searchLocationsUnified(query);
         setLocationSuggestions((prev) => ({ ...prev, [fieldName]: suggestions }));
       } catch (error) {
         console.error("Location suggestion error:", error);
@@ -178,6 +191,13 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
   };
 
   const handleLocationSelect = (fieldName, suggestion) => {
+    // Validate suggestion has required coordinates
+    if (!suggestion || typeof suggestion.latitude !== 'number' || typeof suggestion.longitude !== 'number') {
+      console.error("Invalid suggestion object:", suggestion);
+      setEstimateError("Invalid location selected. Please try again.");
+      return;
+    }
+    
     if (fieldName === resolvedLocationFields.pickupField) {
       setPickupGps(null);
     }
@@ -784,11 +804,11 @@ Thank you for booking with us!
           </div>
         </div>
 
-        {/* === SPLIT LAYOUT: Form Left + Map Right === */}
-        <div className="flex flex-col lg:flex-row gap-6">
+        {/* === SPLIT LAYOUT: Form Left (Narrower) + Map Right (Larger) === */}
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-5">
 
-        {/* LEFT PANEL — Form */}
-        <div className="flex-1 min-w-0">
+        {/* LEFT PANEL — Form (Narrower on desktop) */}
+        <div className="w-full lg:w-[520px] lg:flex-shrink-0 min-w-0">
         {submitStatus?.type !== "success" ? (
           <form onSubmit={handleSubmit} className="booking-portal-enter bg-white rounded-xl border border-gray-200 shadow-[0_12px_34px_rgba(15,23,42,0.06)] p-4 sm:p-6 md:p-8 space-y-5">
             {/* Dynamic Service Fields */}
@@ -803,7 +823,7 @@ Thank you for booking with us!
                   {/* Select field for vehicle type */}
                   {field.type === "select" ? (
                     field.name === "vehicleType" ? (
-                      <div className="space-y-3 mt-4">
+                      <div className="grid grid-cols-2 gap-2 mt-4">
                         {field.options?.map((option) => {
                           const multiplier = VEHICLE_MULTIPLIERS?.[option] || 1.0;
                           let priceDisplay = "Select locations for price";
@@ -825,36 +845,29 @@ Thank you for booking with us!
                                   setFormErrors(prev => ({ ...prev, [field.name]: null }));
                                 }
                               }}
-                              className={`w-full flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 rounded-lg border transition-all duration-300 ease-out text-left hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(15,23,42,0.06)] ${
+                              className={`flex flex-col p-3 rounded-lg border transition-all duration-300 ease-out text-center hover:-translate-y-0.5 hover:shadow-[0_8px_16px_rgba(15,23,42,0.06)] ${
                                 isSelected
-                                  ? "border-[#B35A38] bg-[#B35A38]/5 shadow-[0_8px_20px_rgba(179,90,56,0.08)]"
+                                  ? "border-[#B35A38] bg-[#B35A38]/5 shadow-[0_6px_16px_rgba(179,90,56,0.08)]"
                                   : "border-gray-200 bg-white hover:border-[#B35A38]/30"
                               }`}
                             >
-                              <div className="flex w-full min-w-0 items-center gap-3 sm:gap-4">
-                                <div className="w-10 sm:w-12 h-8 flex shrink-0 items-center justify-center">
-                                  <Car size={28} className={isSelected ? "text-[#B35A38]" : "text-gray-500"} />
-                                </div>
-                                <div className="min-w-0">
-                                  <h4 className="font-semibold text-gray-900 flex flex-wrap items-center gap-2">
-                                    {option}
-                                    {(option.includes('Executive') || option.includes('Luxury') || option.includes('Limousine') || option.includes('Land Cruiser')) ? (
-                                      <span className="bg-yellow-100 text-yellow-800 text-[10px] px-2 py-0.5 rounded-full font-bold">PREMIUM</span>
-                                    ) : null}
-                                  </h4>
-                                  <p className="text-xs text-gray-500">
-                                    {option.includes('7-seater') ? 'Up to 7 passengers' : option.includes('10-seater') ? 'Up to 10 passengers' : option.includes('14-seater') || option.includes('15-seater') ? 'Up to 15 passengers' : option.includes('Van') ? 'Group travel' : 'Up to 4 passengers'}
-                                  </p>
-                                </div>
+                              <div className="flex items-center justify-center mb-2">
+                                <Car size={24} className={isSelected ? "text-[#B35A38]" : "text-gray-500"} />
                               </div>
-                              <div className="w-full sm:w-auto text-left sm:text-right">
-                                <div className="font-bold text-gray-900">{priceDisplay}</div>
-                                {tripEstimate && (
-                                  <div className={`text-[10px] font-semibold uppercase tracking-wider ${isSelected ? 'text-green-600' : 'text-transparent'}`}>
-                                    Selected
-                                  </div>
-                                )}
-                              </div>
+                              <h4 className="font-semibold text-gray-900 text-sm flex flex-wrap items-center justify-center gap-1.5">
+                                {option.split(' ').slice(0, 2).join(' ')}
+                                {(option.includes('Executive') || option.includes('Luxury') || option.includes('Limousine') || option.includes('Land Cruiser')) ? (
+                                  <span className="bg-yellow-100 text-yellow-800 text-[8px] px-1.5 py-0.5 rounded-full font-bold">PREMIUM</span>
+                                ) : null}
+                              </h4>
+                              <p className="text-[10px] text-gray-500 mt-1">
+                                {option.includes('7-seater') ? '7 pax' : option.includes('10-seater') ? '10 pax' : option.includes('14-seater') || option.includes('15-seater') ? '15 pax' : option.includes('Van') ? 'Group' : '4 pax'}
+                              </p>
+                              {tripEstimate && (
+                                <div className={`font-bold text-sm mt-1.5 ${isSelected ? 'text-[#B35A38]' : 'text-gray-900'}`}>
+                                  {priceDisplay}
+                                </div>
+                              )}
                             </button>
                           );
                         })}
@@ -944,20 +957,32 @@ Thank you for booking with us!
                       )}
                       {activeLocationField === field.name && (locationSuggestions[field.name] || []).length > 0 && (
                         <div className="absolute z-20 mt-1 w-full bg-white rounded-lg border border-gray-200 shadow-[0_16px_34px_rgba(15,23,42,0.10)] max-h-56 overflow-y-auto">
-                          {(locationSuggestions[field.name] || []).map((suggestion) => (
-                            <button
-                              key={`${field.name}-${suggestion.latitude}-${suggestion.longitude}-${suggestion.label}`}
-                              type="button"
-                              onMouseDown={(e) => { e.preventDefault(); handleLocationSelect(field.name, suggestion); }}
-                              className="w-full text-left px-4 py-2.5 hover:bg-[#B35A38]/5 border-b border-gray-50 last:border-b-0 flex items-start gap-3 transition-colors cursor-pointer"
-                            >
-                              <MapPin size={14} className="text-[#B35A38] mt-0.5 flex-shrink-0" />
-                              <div className="min-w-0">
-                                <p className="text-sm font-medium text-gray-900">{suggestion.shortLabel || suggestion.label}</p>
-                                <p className="text-xs text-gray-400 truncate">{suggestion.label}</p>
-                              </div>
-                            </button>
-                          ))}
+                          {(locationSuggestions[field.name] || []).map((suggestion) => {
+                            // Determine icon based on location type
+                            let IconComponent = MapPin;
+                            if (suggestion.type === "airport") {
+                              IconComponent = Plane;
+                            } else if (suggestion.type === "landmark") {
+                              IconComponent = MapPin;
+                            }
+                            
+                            return (
+                              <button
+                                key={`${field.name}-${suggestion.latitude}-${suggestion.longitude}-${suggestion.label}`}
+                                type="button"
+                                onMouseDown={(e) => { e.preventDefault(); handleLocationSelect(field.name, suggestion); }}
+                                className="w-full text-left px-4 py-3 hover:bg-[#B35A38]/5 border-b border-gray-50 last:border-b-0 flex items-start gap-3 transition-colors cursor-pointer"
+                              >
+                                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 flex-shrink-0 mt-0.5">
+                                  <IconComponent size={16} className="text-[#B35A38]" />
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  <p className="text-sm font-semibold text-gray-900">{suggestion.shortLabel || suggestion.label}</p>
+                                  <p className="text-xs text-gray-500 truncate">{suggestion.label}</p>
+                                </div>
+                              </button>
+                            );
+                          })}
                         </div>
                       )}
                     </div>
@@ -1004,7 +1029,7 @@ Thank you for booking with us!
                         <span className="text-[10px] font-bold text-[#B35A38] bg-[#B35A38]/10 px-2 py-0.5 rounded-full uppercase tracking-wider">Live</span>
                       )}
                     </div>
-                    <p className="text-xs text-gray-500">Distance-based at KES 100/km · 30% refundable reservation</p>
+                    <p className="text-xs text-gray-500">30% refundable reservation · Final payment after confirmation</p>
                   </div>
                   {tripEstimate ? (
                     <div className="px-4 pb-4">
@@ -1035,7 +1060,7 @@ Thank you for booking with us!
                     </div>
                   ) : (
                     <div className="px-4 pb-4">
-                      <p className="text-xs text-gray-500">Select both pickup & destination from suggestions to see fare</p>
+                      <p className="text-xs text-gray-500">Select both pickup & destination from suggestions to see fare estimate</p>
                     </div>
                   )}
                   {estimateError && <p className="text-xs text-red-600 px-4 pb-3">{estimateError}</p>}
@@ -1118,6 +1143,24 @@ Thank you for booking with us!
                   </>
                 )}
               </button>
+
+              {/* Booking Action Buttons */}
+              <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:gap-3 pt-4 border-t border-gray-200">
+                <a
+                  href="/bookings"
+                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg px-4 py-3 bg-[#B35A38] hover:bg-[#8B4225] text-white font-semibold transition-all duration-300 ease-out hover:-translate-y-0.5 shadow-[0_8px_16px_rgba(179,90,56,0.10)] text-sm"
+                >
+                  <CheckCircle size={16} />
+                  View My Bookings
+                </a>
+                <a
+                  href="/profile"
+                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg px-4 py-3 border border-[#B35A38] hover:bg-[#B35A38]/5 text-[#B35A38] font-semibold transition-all duration-300 ease-out hover:-translate-y-0.5 text-sm"
+                >
+                  <CreditCard size={16} />
+                  Complete Payment
+                </a>
+              </div>
           </form>
         ) : (
           <div className="space-y-6">
@@ -1308,9 +1351,9 @@ Thank you for booking with us!
         )}
         </div>{/* end left panel */}
 
-        {/* RIGHT PANEL — Map */}
-        <div className="w-full lg:w-[420px] lg:min-w-[360px] flex-shrink-0">
-          <div className="lg:sticky lg:top-28 h-[280px] sm:h-[340px] lg:h-[calc(100vh-140px)]">
+        {/* RIGHT PANEL — Map (Larger) */}
+        <div className="w-full lg:flex-1 flex-shrink-0">
+          <div className="lg:sticky lg:top-28 h-[300px] sm:h-[400px] lg:h-[calc(100vh-140px)]">
             <BookingMap
               pickupCoords={mapPickupCoords}
               destinationCoords={mapDestCoords}
