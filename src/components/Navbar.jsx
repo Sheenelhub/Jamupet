@@ -25,8 +25,12 @@ export default function Navbar() {
 
   // Close mobile menu when route changes
   useEffect(() => {
+  const timer = setTimeout(() => {
     setIsOpen(false);
-  }, [location.pathname, location.hash]);
+  }, 0);
+  
+  return () => clearTimeout(timer);
+}, [location.pathname, location.hash]);
 
   const serviceItems = [
     { name: "Airport Transfers", hash: "/services#transfers" },
