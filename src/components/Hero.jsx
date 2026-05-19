@@ -50,8 +50,8 @@ export default function Hero() {
             </span>
           </h1>
 
-          <div className="flex items-center gap-4 mb-6">
-            <div className="w-10 h-[1px] bg-[#C5A059]" />
+          <div className="flex items-center gap-3 sm:gap-4 mb-6">
+            <div className="w-8 sm:w-10 h-[1px] bg-[#C5A059] shrink-0" />
             <span className="text-[#C5A059] tracking-[0.3em] uppercase text-[10px] md:text-[12px] font-bold">
               Luxury Transit Solutions Kenya
             </span>

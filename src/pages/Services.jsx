@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { CheckCircle2, Building, TrendingUp, ShieldCheck, ArrowRight, Star } from "lucide-react";
+import Navbar from "../components/Navbar";
 import BackButton from "../components/BackButton";
 import ServiceFlipCards from "../components/Services/ServiceFlipCards";
 import ClientReviews from "../components/Services/ClientReviews";
@@ -37,6 +38,8 @@ export default function Services() {
   };
 
   return (
+    <div className="bg-[#050505] min-h-screen text-white selection:bg-[#C5A059] selection:text-black">
+      <Navbar />
     // Base background is the warm pearl-white to match the branding
     <div className="bg-[#FDFCFB] min-h-screen text-gray-900 selection:bg-[#C5A059] selection:text-white">
       <BackButton />
