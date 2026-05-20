@@ -65,54 +65,101 @@ CREATE TABLE IF NOT EXISTS flight_bookings (
   UNIQUE(booking_id)
 );
 
+-- Create admin_users table
+CREATE TABLE IF NOT EXISTS admin_users (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users ON DELETE CASCADE,
+  role TEXT CHECK (role IN ('super_admin', 'booking_agent', 'driver')) NOT NULL,
+  name TEXT,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
 -- Create indexes for better query performance
-CREATE INDEX idx_bookings_user_id ON bookings(user_id);
-CREATE INDEX idx_bookings_status ON bookings(status);
-CREATE INDEX idx_bookings_flight_number ON bookings(flight_number);
-CREATE INDEX idx_flight_bookings_booking_id ON flight_bookings(booking_id);
-CREATE INDEX idx_flight_bookings_user_id ON flight_bookings(user_id);
-CREATE INDEX idx_flight_bookings_tracking_status ON flight_bookings(tracking_status);
-CREATE INDEX idx_flights_flight_number ON flights(flight_number);
+CREATE INDEX IF NOT EXISTS idx_bookings_user_id ON bookings(user_id);
+CREATE INDEX IF NOT EXISTS idx_bookings_status ON bookings(status);
+CREATE INDEX IF NOT EXISTS idx_bookings_flight_number ON bookings(flight_number);
+CREATE INDEX IF NOT EXISTS idx_flight_bookings_booking_id ON flight_bookings(booking_id);
+CREATE INDEX IF NOT EXISTS idx_flight_bookings_user_id ON flight_bookings(user_id);
+CREATE INDEX IF NOT EXISTS idx_flight_bookings_tracking_status ON flight_bookings(tracking_status);
+CREATE INDEX IF NOT EXISTS idx_flights_flight_number ON flights(flight_number);
 
 -- Enable Row Level Security (RLS)
 ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE bookings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE flights ENABLE ROW LEVEL SECURITY;
 ALTER TABLE flight_bookings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE admin_users ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies for user_profiles
+DROP POLICY IF EXISTS "Users can view own profile" ON user_profiles;
 CREATE POLICY "Users can view own profile" ON user_profiles
   FOR SELECT USING (auth.uid() = id);
 
+DROP POLICY IF EXISTS "Users can update own profile" ON user_profiles;
 CREATE POLICY "Users can update own profile" ON user_profiles
   FOR UPDATE USING (auth.uid() = id);
 
+DROP POLICY IF EXISTS "Users can insert own profile" ON user_profiles;
 CREATE POLICY "Users can insert own profile" ON user_profiles
   FOR INSERT WITH CHECK (auth.uid() = id);
 
 -- RLS Policies for bookings
+DROP POLICY IF EXISTS "Users can view own bookings" ON bookings;
 CREATE POLICY "Users can view own bookings" ON bookings
   FOR SELECT USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Admins can view all bookings" ON bookings;
+CREATE POLICY "Admins can view all bookings" ON bookings
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1
+      FROM admin_users
+      WHERE admin_users.user_id = auth.uid()
+        AND admin_users.role IN ('super_admin', 'booking_agent')
+    )
+  );
+
+DROP POLICY IF EXISTS "Users can create bookings" ON bookings;
 CREATE POLICY "Users can create bookings" ON bookings
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can update own bookings" ON bookings;
 CREATE POLICY "Users can update own bookings" ON bookings
   FOR UPDATE USING (auth.uid() = user_id);
 
 -- RLS Policies for flights (public read, admin write)
+DROP POLICY IF EXISTS "Flights are public read" ON flights;
 CREATE POLICY "Flights are public read" ON flights
   FOR SELECT USING (TRUE);
 
 -- RLS Policies for flight_bookings
+DROP POLICY IF EXISTS "Users can view own flight bookings" ON flight_bookings;
 CREATE POLICY "Users can view own flight bookings" ON flight_bookings
   FOR SELECT USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Admins can view all flight bookings" ON flight_bookings;
+CREATE POLICY "Admins can view all flight bookings" ON flight_bookings
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1
+      FROM admin_users
+      WHERE admin_users.user_id = auth.uid()
+        AND admin_users.role IN ('super_admin', 'booking_agent')
+    )
+  );
+
+DROP POLICY IF EXISTS "Users can create flight bookings" ON flight_bookings;
 CREATE POLICY "Users can create flight bookings" ON flight_bookings
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can update own flight bookings" ON flight_bookings;
 CREATE POLICY "Users can update own flight bookings" ON flight_bookings
   FOR UPDATE USING (auth.uid() = user_id);
+
+-- RLS Policies for admin_users
+DROP POLICY IF EXISTS "Admins can view own admin row" ON admin_users;
+CREATE POLICY "Admins can view own admin row" ON admin_users
+  FOR SELECT USING (auth.uid() = user_id);
 
 -- Create function to update 'updated_at' timestamp automatically
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -124,21 +171,25 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Create triggers for automatic timestamp updates
+DROP TRIGGER IF EXISTS update_user_profiles_updated_at ON user_profiles;
 CREATE TRIGGER update_user_profiles_updated_at
   BEFORE UPDATE ON user_profiles
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_bookings_updated_at ON bookings;
 CREATE TRIGGER update_bookings_updated_at
   BEFORE UPDATE ON bookings
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_flights_updated_at ON flights;
 CREATE TRIGGER update_flights_updated_at
   BEFORE UPDATE ON flights
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_flight_bookings_updated_at ON flight_bookings;
 CREATE TRIGGER update_flight_bookings_updated_at
   BEFORE UPDATE ON flight_bookings
   FOR EACH ROW
@@ -149,3 +200,4 @@ GRANT SELECT, INSERT, UPDATE ON bookings TO authenticated;
 GRANT SELECT ON flights TO authenticated;
 GRANT SELECT, INSERT, UPDATE ON flight_bookings TO authenticated;
 GRANT SELECT, INSERT, UPDATE ON user_profiles TO authenticated;
+GRANT SELECT ON admin_users TO authenticated;
