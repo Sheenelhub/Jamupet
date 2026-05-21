@@ -11,7 +11,7 @@ const ROLE_ROUTES = {
 
 export default function AdminLogin() {
   const navigate = useNavigate()
-  const { role, loading: authLoading } = useAdminAuth()
+  const { role, loading: authLoading, error: globalError } = useAdminAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -103,9 +103,9 @@ export default function AdminLogin() {
           </button>
         </form>
 
-        {error && (
+        {(error || globalError) && (
           <p className="mt-4 text-sm text-red-600 text-center">
-            {error}
+            {error || globalError}
           </p>
         )}
       </div>

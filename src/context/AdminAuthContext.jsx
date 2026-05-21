@@ -14,12 +14,30 @@ export function AdminAuthProvider({ children }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
+  const withTimeout = (promise, ms, errorMessage) => {
+    let timeoutId
+    const timeoutPromise = new Promise((_, reject) => {
+      timeoutId = setTimeout(() => {
+        reject(new Error(errorMessage))
+      }, ms)
+    })
+    return Promise.race([promise, timeoutPromise]).finally(() => {
+      clearTimeout(timeoutId)
+    })
+  }
+
   const fetchRole = async (userId) => {
-    const { data, error: roleError } = await supabase
+    const queryPromise = supabase
       .from('admin_users')
       .select('role')
       .eq('user_id', userId)
       .maybeSingle()
+
+    const { data, error: roleError } = await withTimeout(
+      queryPromise,
+      5000,
+      'Database query timed out. This is typically caused by a recursive Row Level Security (RLS) policy in the admin_users table in Supabase. Please ensure your RLS policy is non-recursive.'
+    )
 
     if (roleError) throw roleError
     return data?.role ?? null
