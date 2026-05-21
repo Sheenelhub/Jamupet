@@ -76,7 +76,7 @@ export default function AdminHome() {
       if (normalized === 'assigned' || normalized === 'en_route') activeTrips += 1
       if (normalized === 'completed') {
         const reservationFee = Number(
-          getFirstValue(booking, ['reservation_fee', 'reservationFee', 'total_price', 'total_fare'], 0)
+          getFirstValue(booking, ['price_amount', 'reservation_fee', 'reservationFee', 'total_price', 'total_fare'], 0)
         )
         totalRevenue += Number.isNaN(reservationFee) ? 0 : reservationFee
       }
@@ -140,7 +140,7 @@ export default function AdminHome() {
                       const bookingId = booking.id ? `#${booking.id.slice(0, 6).toUpperCase()}` : '—'
                       const customerName = getFirstValue(
                         booking,
-                        ['customer_name', 'customerName', 'customer.full_name', 'customer.name', 'full_name', 'name'],
+                        ['customer_name', 'customerName', 'customer.full_name', 'customer.name', 'full_name', 'name', 'profiles.full_name', 'user.full_name'],
                         'Unknown'
                       )
                       const pickup = getFirstValue(booking, ['pickup_location', 'pickup', 'pickupLocation'], '—')
@@ -193,7 +193,7 @@ export default function AdminHome() {
         onClose={() => setSelectedBooking(null)}
         onStatusChange={(updated) => {
           if (!updated) return
-          setBookings((prev) => prev.map((item) => (item.id === updated.id ? updated : item)))
+          setBookings((prev) => prev.map((item) => (item.id === updated.id ? { ...item, ...updated } : item)))
         }}
         canAssignDriver
       />

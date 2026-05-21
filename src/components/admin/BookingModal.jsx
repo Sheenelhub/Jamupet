@@ -10,17 +10,23 @@ export default function BookingModal({ booking, isOpen, onClose, onStatusChange,
   const [assignmentOpen, setAssignmentOpen] = useState(false)
 
   const bookingId = booking?.id ? `#${booking.id.slice(0, 6).toUpperCase()}` : '—'
-  const customerName = getFirstValue(booking, ['customer_name', 'customerName', 'customer.full_name', 'customer.name', 'full_name', 'name'], 'Unknown')
-  const customerEmail = getFirstValue(booking, ['customer_email', 'customerEmail', 'email'], '—')
-  const customerPhone = getFirstValue(booking, ['customer_phone', 'customerPhone', 'phone'], '—')
+  const customerName = getFirstValue(booking, ['customer_name', 'customerName', 'customer.full_name', 'customer.name', 'full_name', 'name', 'profiles.full_name', 'user.full_name'], 'Unknown')
+  const customerEmail = getFirstValue(booking, ['customer_email', 'customerEmail', 'email', 'profiles.email', 'user.email'], '—')
+  const customerPhone = getFirstValue(booking, ['customer_phone', 'customerPhone', 'phone', 'profiles.phone', 'user.phone'], '—')
   const pickupLocation = getFirstValue(booking, ['pickup_location', 'pickup', 'pickupLocation', 'pickup_address'], '—')
   const destination = getFirstValue(booking, ['destination_location', 'destination', 'dropoff', 'dropoff_location'], '—')
   const vehicleType = getFirstValue(booking, ['vehicle_type', 'vehicleType'], '—')
   const statusLabel = getStatusLabel(booking?.status)
   const statusClass = getStatusBadgeClass(booking?.status)
-  const totalFare = formatCurrency(getFirstValue(booking, ['total_fare', 'total_price', 'totalFare'], null))
-  const reservationFee = formatCurrency(getFirstValue(booking, ['reservation_fee', 'reservationFee'], null))
-  const finalPayment = formatCurrency(getFirstValue(booking, ['final_payment_due', 'finalPaymentDue'], null))
+  const totalFareCents = getFirstValue(booking, ['total_fare', 'total_price', 'totalFare'], null)
+  const reservationFeeCents = getFirstValue(booking, ['price_amount', 'reservation_fee', 'reservationFee'], null)
+  let finalPaymentCents = null
+  if (totalFareCents !== null && reservationFeeCents !== null) {
+    finalPaymentCents = Number(totalFareCents) - Number(reservationFeeCents)
+  }
+  const totalFare = formatCurrency(totalFareCents)
+  const reservationFee = formatCurrency(reservationFeeCents)
+  const finalPayment = formatCurrency(finalPaymentCents)
   const driverName = getFirstValue(booking, ['driver_name', 'assigned_driver_name', 'driver.full_name', 'driver.name'], 'Unassigned')
   const agentName = getFirstValue(booking, ['agent_name', 'assigned_agent_name', 'agent.full_name', 'agent.name'], 'Unassigned')
 
@@ -35,7 +41,7 @@ export default function BookingModal({ booking, isOpen, onClose, onStatusChange,
     setActionLoading(newStatus)
     try {
       const updated = await updateBookingStatus(booking.id, newStatus)
-      if (onStatusChange) onStatusChange(updated)
+      if (onStatusChange) onStatusChange({ ...booking, ...updated })
     } catch (err) {
       setError(err.message)
     } finally {

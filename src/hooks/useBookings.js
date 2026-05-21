@@ -78,15 +78,16 @@ export const getBookingDateTimeValue = (booking) => {
   return booking.created_at
 }
 
-export const formatCurrency = (value) => {
-  if (value === undefined || value === null || value === '') return '—'
-  const amount = Number(value)
-  if (Number.isNaN(amount)) return value
+export const formatCurrency = (valueInCents) => {
+  if (valueInCents === undefined || valueInCents === null || valueInCents === '') return '—'
+  const amountCents = Number(valueInCents)
+  if (Number.isNaN(amountCents)) return valueInCents
   return new Intl.NumberFormat('en-KE', {
     style: 'currency',
     currency: 'KES',
-    maximumFractionDigits: 0
-  }).format(amount)
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(amountCents / 100)
 }
 
 /**
@@ -120,7 +121,55 @@ export function useBookings() {
 
       const { data, error: queryError } = await query
       if (queryError) throw queryError
-      return data || []
+
+      if (!data || data.length === 0) return []
+
+      // 1. Fetch user profiles for the bookings
+      const userIds = [...new Set(data.map((b) => b.user_id).filter(Boolean))]
+      let profiles = []
+      if (userIds.length > 0) {
+        const { data: pData } = await supabase
+          .from('user_profiles')
+          .select('id, full_name, email, phone')
+          .in('id', userIds)
+        if (pData) profiles = pData
+      }
+
+      // 2. Fetch driver and agent assignments
+      const bookingIds = data.map((b) => b.id)
+      let assignments = []
+      if (bookingIds.length > 0) {
+        const { data: aData } = await supabase
+          .from('booking_assignments')
+          .select('booking_id, drivers(name), admin_users(name)')
+          .in('booking_id', bookingIds)
+        if (aData) assignments = aData
+      }
+
+      const profileMap = profiles.reduce((acc, p) => ({ ...acc, [p.id]: p }), {})
+      const assignMap = assignments.reduce((acc, a) => ({ ...acc, [a.booking_id]: a }), {})
+
+      const enrichedData = data.map((b) => {
+        const profile = profileMap[b.user_id] || {}
+        const assignment = assignMap[b.id] || {}
+        
+        let fallbackPhone = '—'
+        if (b.notes && b.notes.includes('Phone:')) {
+          const match = b.notes.match(/Phone:\s*([^\.]+)/)
+          if (match && match[1]) fallbackPhone = match[1].trim()
+        }
+
+        return {
+          ...b,
+          customer_name: profile.full_name || 'Unknown',
+          customer_email: profile.email || '—',
+          customer_phone: profile.phone || fallbackPhone,
+          driver_name: assignment.drivers?.name || 'Unassigned',
+          agent_name: assignment.admin_users?.name || 'Unassigned'
+        }
+      })
+
+      return enrichedData
     } catch (err) {
       setError(err.message)
       throw err

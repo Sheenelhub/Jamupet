@@ -375,7 +375,12 @@ export default function BookingsManagement() {
                         <td className="px-4 py-3 text-gray-700 font-semibold">{resolveBookingId(booking)}</td>
                         <td className="px-4 py-3">
                           <div className="font-medium text-gray-900">{resolveCustomerName(booking)}</div>
-                          <div className="text-xs text-gray-500">{resolveCustomerPhone(booking) || resolveCustomerEmail(booking)}</div>
+                          {resolveCustomerEmail(booking) && resolveCustomerEmail(booking) !== '—' && (
+                            <div className="text-xs text-gray-500">{resolveCustomerEmail(booking)}</div>
+                          )}
+                          {resolveCustomerPhone(booking) && resolveCustomerPhone(booking) !== '—' && (
+                            <div className="text-xs text-gray-500">{resolveCustomerPhone(booking)}</div>
+                          )}
                         </td>
                         <td className="px-4 py-3 text-gray-700">{resolveServiceType(booking) || '—'}</td>
                         <td className="px-4 py-3 text-gray-700">{formatDateTime(getBookingDateTimeValue(booking))}</td>
@@ -410,8 +415,9 @@ export default function BookingsManagement() {
         onClose={() => setSelectedBooking(null)}
         onStatusChange={(updated) => {
           if (!updated) return
-          setBookings((prev) => prev.map((item) => (item.id === updated.id ? updated : item)))
+          setBookings((prev) => prev.map((item) => (item.id === updated.id ? { ...item, ...updated } : item)))
         }}
+        canAssignDriver
       />
     </AdminLayout>
   )
