@@ -36,6 +36,24 @@ export async function fetchAdminProfile() {
   if (sessionError) throw sessionError
   if (!session?.user) throw new Error('No active session. Please sign in.')
 
+  // Try querying database directly first (much faster and avoids Edge Function timeout/issues)
+  try {
+    const { data, error } = await supabase
+      .from('admin_users')
+      .select('id, user_id, role, name, is_active')
+      .eq('user_id', session.user.id)
+      .maybeSingle()
+
+    if (!error && data) {
+      return data
+    }
+    if (error) {
+      console.warn('Direct database admin check failed, trying edge function:', error)
+    }
+  } catch (dbErr) {
+    console.warn('Direct database admin check error, trying edge function:', dbErr)
+  }
+
   const authToken = session.access_token
   const { data, error } = await withTimeout(
     supabase.functions.invoke('get-admin-role', {
