@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState, useRef } from 'react'
 import { supabaseAuth } from '../lib/supabase'
 import { getAdminProfile, signOutAdmin } from '../lib/adminAuth'
 
@@ -15,33 +15,50 @@ export function AdminAuthProvider({ children }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
+  // Use a ref to track the active fetch user ID to deduplicate parallel requests and prevent race conditions.
+  const activeFetchUserIdRef = useRef(null)
+
   useEffect(() => {
     let isMounted = true
 
-    const initAdminAuth = async () => {
-      try {
-        setError(null)
+    const handleSession = async (session) => {
+      if (!isMounted) return
+
+      const sessionUser = session?.user ?? null
+
+      if (!sessionUser) {
+        setUser(null)
+        setRole(null)
+        setAdminId(null)
+        activeFetchUserIdRef.current = null
+        if (isMounted) setLoading(false)
+        return
+      }
+
+      const userId = sessionUser.id
+      // If we are already fetching or have fetched for this user ID, skip to avoid duplicate requests
+      if (activeFetchUserIdRef.current === userId) {
+        if (isMounted) setLoading(false)
+        return
+      }
+
+      activeFetchUserIdRef.current = userId
+      if (isMounted) {
         setLoading(true)
-        const { data: { session }, error: sessionError } = await supabaseAuth.getSession()
-        if (sessionError) throw sessionError
-        if (!isMounted) return
-        if (!session?.user) {
-          setUser(null)
-          setRole(null)
-          setAdminId(null)
-          return
-        }
-        setUser(session.user)
+        setError(null)
+      }
+
+      try {
         const { adminUser, role: resolvedRole } = await getAdminProfile()
         if (!isMounted) return
+
+        setUser(sessionUser)
         setRole(resolvedRole)
         setAdminId(adminUser?.id ?? null)
       } catch (err) {
         if (!isMounted) return
-        // Don't surface DB/timeout/RLS errors to the UI as fatal authentication errors.
-        // Fallback to showing the login screen and let the sign-in flow handle clearer errors.
-        console.warn('Admin profile check failed:', err)
-        setError(null)
+        console.warn('Admin profile verification failed:', err)
+        activeFetchUserIdRef.current = null
         setUser(null)
         setRole(null)
         setAdminId(null)
@@ -50,31 +67,17 @@ export function AdminAuthProvider({ children }) {
       }
     }
 
-    initAdminAuth()
+    // Check initial session
+    supabaseAuth.getSession().then(({ data: { session } }) => {
+      handleSession(session)
+    }).catch(err => {
+      console.warn('Initial session check failed:', err)
+      if (isMounted) setLoading(false)
+    })
 
+    // Subscribe to auth changes
     const { data: { subscription } } = supabaseAuth.onAuthStateChange(async (_event, session) => {
-      if (!isMounted) return
-      try {
-        setError(null)
-        if (!session?.user) {
-          setUser(null)
-          setRole(null)
-          setAdminId(null)
-          return
-        }
-        setUser(session.user)
-        const { adminUser, role: resolvedRole } = await getAdminProfile()
-        if (!isMounted) return
-        setRole(resolvedRole)
-        setAdminId(adminUser?.id ?? null)
-      } catch (err) {
-        if (!isMounted) return
-        console.warn('Admin profile refresh failed:', err)
-        setError(null)
-        setUser(null)
-        setRole(null)
-        setAdminId(null)
-      }
+      handleSession(session)
     })
 
     return () => {
@@ -84,15 +87,19 @@ export function AdminAuthProvider({ children }) {
   }, [])
 
   const signOut = async () => {
+    // Optimistically clear all local React states and active fetch refs instantly
+    setUser(null)
+    setRole(null)
+    setAdminId(null)
+    setError(null)
+    activeFetchUserIdRef.current = null
+    setLoading(false)
+
+    // Execute background network sign-out so that the user session is successfully ended on Supabase without blocking the UI
     try {
-      setError(null)
       await signOutAdmin()
-      setUser(null)
-      setRole(null)
-      setAdminId(null)
     } catch (err) {
-      setError(err.message)
-      throw err
+      console.warn('Supabase signout failed in background:', err)
     }
   }
 
