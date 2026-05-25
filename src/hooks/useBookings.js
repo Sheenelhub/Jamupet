@@ -195,7 +195,7 @@ export function useBookings() {
     }
   }, [])
 
-  const updateBookingStatus = useCallback(async (bookingId, newStatus) => {
+	  const updateBookingStatus = useCallback(async (bookingId, newStatus) => {
     try {
       setError(null)
       setLoading(true)
@@ -237,22 +237,25 @@ export function useBookings() {
             .update({ status: 'available' })
             .eq('id', assignment.driver_id)
 
-          // 3. Update driver performance metrics
+          // 3. Update driver performance metrics (with upsert to guarantee creation if missing)
           const { data: perf } = await supabase
             .from('driver_performance')
             .select('*')
             .eq('driver_id', assignment.driver_id)
             .maybeSingle()
             
-          if (perf) {
-            const fare = Number(currentBooking.total_fare ?? currentBooking.total_price ?? 0)
-            await supabase.from('driver_performance')
-              .update({
-                trips_completed: (perf.trips_completed || 0) + 1,
-                earnings_total: Number(perf.earnings_total || 0) + (Number.isNaN(fare) ? 0 : fare)
-              })
-              .eq('driver_id', assignment.driver_id)
-          }
+          const currentTrips = perf?.trips_completed || 0
+          const currentEarnings = Number(perf?.earnings_total || 0)
+          const fare = Number(currentBooking.total_fare ?? currentBooking.total_price ?? 0)
+          const addedFare = Number.isNaN(fare) ? 0 : fare
+
+          await supabase.from('driver_performance')
+            .upsert({
+              driver_id: assignment.driver_id,
+              trips_completed: currentTrips + 1,
+              earnings_total: currentEarnings + addedFare,
+              updated_at: new Date().toISOString()
+            }, { onConflict: 'driver_id' })
         }
       }
 
@@ -263,7 +266,40 @@ export function useBookings() {
     } finally {
       setLoading(false)
     }
-  }, [])
+	  }, [])
+
+	  const updateBookingQuote = useCallback(async (bookingId, totalPriceCents) => {
+	    try {
+	      setError(null)
+	      setLoading(true)
+
+	      const quoteAmount = Number(totalPriceCents)
+	      if (!Number.isFinite(quoteAmount) || quoteAmount <= 0) {
+	        throw new Error('Enter a valid quote amount.')
+	      }
+
+	      const reservationFeeCents = Math.round(quoteAmount * 0.3)
+	      const { data, error: updateError } = await supabase
+	        .from('bookings')
+	        .update({
+	          total_price: quoteAmount,
+	          price_amount: reservationFeeCents,
+	          payment_status: 'quote_ready',
+	          updated_at: new Date().toISOString()
+	        })
+	        .eq('id', bookingId)
+	        .select()
+	        .maybeSingle()
+
+	      if (updateError) throw updateError
+	      return data
+	    } catch (err) {
+	      setError(err.message)
+	      throw err
+	    } finally {
+	      setLoading(false)
+	    }
+	  }, [])
 
   const subscribeToBookings = useCallback((callback) => {
     const channel = supabase
@@ -284,9 +320,10 @@ export function useBookings() {
 
   return {
     loading,
-    error,
-    fetchBookings,
-    updateBookingStatus,
-    subscribeToBookings
-  }
+	    error,
+	    fetchBookings,
+	    updateBookingStatus,
+	    updateBookingQuote,
+	    subscribeToBookings
+	  }
 }

@@ -24,8 +24,44 @@ const normalizeAdminRole = (adminUser) => {
   return role
 }
 
+const withTimeout = (promise, ms = 10000) => {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error('Request timed out')), ms))
+  ])
+}
+
 export async function fetchAdminProfile() {
-  const { data, error } = await supabase.functions.invoke('get-admin-role', { body: {} })
+  const { data: { session }, error: sessionError } = await supabaseAuth.getSession()
+  if (sessionError) throw sessionError
+  if (!session?.user) throw new Error('No active session. Please sign in.')
+
+  // Try querying database directly first (much faster and avoids Edge Function timeout/issues)
+  try {
+    const { data, error } = await supabase
+      .from('admin_users')
+      .select('id, user_id, role, name, is_active')
+      .eq('user_id', session.user.id)
+      .maybeSingle()
+
+    if (!error && data) {
+      return data
+    }
+    if (error) {
+      console.warn('Direct database admin check failed, trying edge function:', error)
+    }
+  } catch (dbErr) {
+    console.warn('Direct database admin check error, trying edge function:', dbErr)
+  }
+
+  const authToken = session.access_token
+  const { data, error } = await withTimeout(
+    supabase.functions.invoke('get-admin-role', {
+      headers: {
+        Authorization: `Bearer ${authToken}`
+      }
+    })
+  )
   if (error) {
     throw new Error(error.message || 'Unable to verify admin access.')
   }

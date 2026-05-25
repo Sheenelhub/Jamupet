@@ -95,20 +95,22 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
         { name: "specialRequests", label: "Special Requests", placeholder: "e.g., flowers, decorations", required: false }
       ]
     },
-    "safari-tour": {
-      label: "Safari Tour",
-      fields: [
-        { name: "tourType", label: "Tour Type", placeholder: "e.g., Nairobi National Park, Amboseli", required: true },
-        { name: "startDate", label: "Start Date", type: "date", required: true },
-        { name: "startTime", label: "Start Time", type: "time", required: true },
-        { name: "vehicleType", label: "Vehicle Type", type: "select", options: vehicleOptions["safari-tour"], required: true },
+	    "safari-tour": {
+	      label: "Safari Tour",
+	      fields: [
+	        { name: "pickup", label: "Start Location", placeholder: "e.g., Nairobi, JKIA, or your hotel", required: true },
+	        { name: "destination", label: "Safari Destination", placeholder: "e.g., Maasai Mara, Amboseli, Ol Pejeta", required: true },
+	        { name: "startDate", label: "Start Date", type: "date", required: true },
+	        { name: "startTime", label: "Start Time", type: "time", required: true },
+	        { name: "vehicleType", label: "Vehicle Type", type: "select", options: vehicleOptions["safari-tour"], required: true },
         { name: "duration", label: "Duration (Days)", type: "number", min: 1, max: 7, required: true },
         { name: "guestCount", label: "Guests", type: "number", min: 1, max: 20, required: true }
       ]
     }
   };
 
-  const config = serviceFields[serviceType] || serviceFields["airport-transfer"];
+	  const config = serviceFields[serviceType] || serviceFields["airport-transfer"];
+	  const isQuoteOnlyService = serviceType === "safari-tour";
   const [formData, setFormData] = useState({});
   const [formErrors, setFormErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -122,6 +124,18 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
   const [estimateError, setEstimateError] = useState(null);
   const searchDebounceRef = useRef({});
 
+	  // Function to get vehicle capacity based on vehicle type
+	  const getVehicleCapacity = (vehicleType) => {
+	    if (!vehicleType) return 10; // Default fallback
+	    if (vehicleType.includes('7-seater')) return 7;
+	    if (vehicleType.includes('10-seater')) return 10;
+	    if (vehicleType.includes('14-seater') || vehicleType.includes('15-seater')) return 15;
+	    if (vehicleType.includes('Land Cruiser')) return 4;
+	    if (vehicleType.includes('Luxury') || vehicleType.includes('Executive')) return 4;
+	    if (vehicleType.includes('Limousine')) return 6;
+	    return 10; // Default for other types
+	  };
+
   const locationFieldPriority = ["pickup", "airport", "location", "destination", "hotelName", "eventVenue", "tourType"];
   const fieldNames = config.fields.map((field) => field.name);
   const resolvedLocationFields = (() => {
@@ -133,6 +147,28 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
 
   const isLocationField = (name) => name === resolvedLocationFields.pickupField || name === resolvedLocationFields.dropoffField;
 
+  const getFieldLayoutClass = (field) => {
+    if (field.type === "date" || field.type === "time") {
+      return "min-w-0";
+    }
+
+    return "min-w-0 sm:col-span-2";
+  };
+
+  const getSearchProximity = (fieldName) => {
+    if (fieldName !== resolvedLocationFields.pickupField) {
+      return pickupGps || locationCoords[resolvedLocationFields.pickupField] || null;
+    }
+
+    return pickupGps || locationCoords[resolvedLocationFields.dropoffField] || null;
+  };
+
+  const normalizeSuggestionForDisplay = (suggestion) => ({
+    ...suggestion,
+    label: suggestion.label || suggestion.fullLabel || suggestion.name || suggestion.shortLabel || "Kenya location",
+    shortLabel: suggestion.shortLabel || suggestion.name || suggestion.label || suggestion.fullLabel || "Kenya location"
+  });
+
   const queueLocationSearch = (fieldName, value) => {
     const query = value?.trim();
     if (searchDebounceRef.current[fieldName]) {
@@ -141,30 +177,49 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
 
     if (!query || query.length < 2) {
       setLocationSuggestions((prev) => ({ ...prev, [fieldName]: [] }));
+      setLocationLoadingField((current) => (current === fieldName ? null : current));
       return;
     }
 
-    // Try local Kenya database first (instant, precise results)
-    const aliasResults = searchLocationAliases(query);
+    const requestId = Date.now();
+    searchDebounceRef.current[fieldName + '_id'] = requestId;
+
+    const aliasResults = searchLocationAliases(query).map(normalizeSuggestionForDisplay);
     if (aliasResults.length > 0) {
       setLocationSuggestions((prev) => ({ ...prev, [fieldName]: aliasResults }));
-      setLocationLoadingField(null);
-      return;
+      setLocationLoadingField((current) => (current === fieldName ? null : current));
     }
 
     // Use unified search (Local → Nominatim → Mapbox) with debounce
     searchDebounceRef.current[fieldName] = setTimeout(async () => {
+      // Double check if this is still the active request
+      if (searchDebounceRef.current[fieldName + '_id'] !== requestId) return;
+
       setLocationLoadingField(fieldName);
       try {
-        const suggestions = await searchLocationsUnified(query);
-        setLocationSuggestions((prev) => ({ ...prev, [fieldName]: suggestions }));
+        const suggestions = await searchLocationsUnified(query, {
+          proximity: getSearchProximity(fieldName)
+        });
+        if (searchDebounceRef.current[fieldName + '_id'] === requestId) {
+          setLocationSuggestions((prev) => ({
+            ...prev,
+            [fieldName]: suggestions.map(normalizeSuggestionForDisplay)
+          }));
+        }
       } catch (error) {
-        console.error("Location suggestion error:", error);
-        setLocationSuggestions((prev) => ({ ...prev, [fieldName]: [] }));
+        // Ignore AbortError as it was cancelled intentionally by a subsequent request
+        if (error.name !== 'AbortError') {
+          console.error("Location suggestion error:", error);
+          if (searchDebounceRef.current[fieldName + '_id'] === requestId && aliasResults.length === 0) {
+            setLocationSuggestions((prev) => ({ ...prev, [fieldName]: [] }));
+          }
+        }
       } finally {
-        setLocationLoadingField((current) => (current === fieldName ? null : current));
+        if (searchDebounceRef.current[fieldName + '_id'] === requestId) {
+          setLocationLoadingField((current) => (current === fieldName ? null : current));
+        }
       }
-    }, 250);
+    }, 220);
   };
 
   const handleLocationSelect = (fieldName, suggestion) => {
@@ -175,6 +230,9 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
       return;
     }
     
+    // Invalidate any ongoing searches
+    searchDebounceRef.current[fieldName + '_id'] = Date.now();
+
     if (fieldName === resolvedLocationFields.pickupField) {
       setPickupGps(null);
     }
@@ -195,6 +253,9 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
 
   const handleMapLocationPick = async (fieldName, coordinates) => {
     if (!fieldName || !coordinates) return;
+
+    // Invalidate any ongoing searches
+    searchDebounceRef.current[fieldName + '_id'] = Date.now();
 
     const fallbackLabel = `${coordinates.latitude.toFixed(6)}, ${coordinates.longitude.toFixed(6)}`;
 
@@ -252,12 +313,18 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
     []
   );
 
-  useEffect(() => {
-    const pickupField = resolvedLocationFields.pickupField;
-    const dropoffField = resolvedLocationFields.dropoffField;
+	  useEffect(() => {
+	    const pickupField = resolvedLocationFields.pickupField;
+	    const dropoffField = resolvedLocationFields.dropoffField;
 
-    if (!pickupField || !dropoffField) {
-      setTripEstimate(null);
+	    if (isQuoteOnlyService) {
+	      setTripEstimate(null);
+	      setEstimateError(null);
+	      return;
+	    }
+
+	    if (!pickupField || !dropoffField) {
+	      setTripEstimate(null);
       setEstimateError(null);
       return;
     }
@@ -289,7 +356,7 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
     }, 350);
 
     return () => clearTimeout(timer);
-  }, [formData, locationCoords, pickupGps, resolvedLocationFields.pickupField, resolvedLocationFields.dropoffField]);
+	  }, [formData, locationCoords, pickupGps, resolvedLocationFields.pickupField, resolvedLocationFields.dropoffField, isQuoteOnlyService]);
 
   const validateForm = () => {
     const errors = {};
@@ -410,17 +477,32 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
         formData.tourType ||
         pickupLocationValue;
 
-      if (!pickupLocationValue || !destinationLocationValue) {
-        throw new Error("Pickup and destination are required for distance-based pricing.");
-      }
+	      if (!pickupLocationValue || !destinationLocationValue) {
+	        throw new Error(
+	          isQuoteOnlyService
+	            ? "Start location and safari destination are required."
+	            : "Pickup and destination are required for distance-based pricing."
+	        );
+	      }
+	
+	      const pricing = isQuoteOnlyService
+	        ? null
+	        : await calculateTripPricing({
+	            startQuery: pickupLocationValue,
+	            endQuery: destinationLocationValue,
+	            startCoords: pickupGps || locationCoords[resolvedLocationFields.pickupField],
+	            endCoords: locationCoords[resolvedLocationFields.dropoffField],
+	            vehicleType: formData.vehicleType || "Economy Sedan"
+	          });
 
-      const pricing = await calculateTripPricing({
-        startQuery: pickupLocationValue,
-        endQuery: destinationLocationValue,
-        startCoords: pickupGps || locationCoords[resolvedLocationFields.pickupField],
-        endCoords: locationCoords[resolvedLocationFields.dropoffField],
-        vehicleType: formData.vehicleType || "Economy Sedan"
-      });
+	      const durationLabel = formData.duration
+	        ? `${formData.duration} Day${Number(formData.duration) === 1 ? "" : "s"}`
+	        : formData.rentalPeriod || "Full Day";
+	      const notes = [
+	        formData.specialRequests,
+	        isQuoteOnlyService ? "Quote requested by customer" : null,
+	        `Phone: ${phoneNumber}`
+	      ].filter(Boolean).join(". ");
 
       // Prepare booking payload with minimal required fields
       const bookingPayload = {
@@ -430,15 +512,15 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
         flight_number: formData.flightNumber || null,
         booking_date: formData.date || formData.startDate || formData.checkInDate || formData.eventDate || new Date().toISOString().split("T")[0],
         pickup_time: formData.time || formData.startTime || formData.checkInTime || formData.eventTime || "09:00", // Use selected time or default
-        duration: formData.rentalPeriod || formData.duration || "Full Day",
-        passengers: parseInt(formData.passengers || formData.guestCount || "1"),
-        vehicle_type: formData.vehicleType || "Standard", // Now from user selection
-        service_category: config.label,
-        status: "pending",
-        payment_status: "unpaid",
-        price_amount: pricing.reservationFeeCents,
-        total_price: pricing.totalPriceCents,
-        notes: `${formData.specialRequests || ""} Phone: ${phoneNumber}. Distance: ${pricing.distanceKm} km`,
+	        duration: durationLabel,
+	        passengers: parseInt(formData.passengers || formData.guestCount || "1"),
+	        vehicle_type: formData.vehicleType || "Standard", // Now from user selection
+	        service_category: config.label,
+	        status: "pending",
+	        payment_status: isQuoteOnlyService ? "awaiting_quote" : "unpaid",
+	        price_amount: pricing?.reservationFeeCents ?? null,
+	        total_price: pricing?.totalPriceCents ?? null,
+	        notes,
         created_at: new Date(),
         updated_at: new Date()
       };
@@ -526,32 +608,36 @@ Thank you for booking with us!
         console.error("WhatsApp sending error:", whatsappErr);
       }
 
-      const reservationAmount = pricing.reservationFeeCents;
-      setSubmitStatus({
-        type: "success",
-        message: `${config.label} booking confirmed. Proceed to payment to reserve this booking.`
-      });
-      setActiveBooking({
+	      const reservationAmount = pricing?.reservationFeeCents ?? null;
+	      setSubmitStatus({
+	        type: "success",
+	        message: isQuoteOnlyService
+	          ? "Booking confirmed. Please wait for a quote to be processed."
+	          : `${config.label} booking confirmed. Proceed to payment to reserve this booking.`
+	      });
+	      setActiveBooking({
         id: bid,
         service: config.label,
         pickupLocation: bookingPayload.pickup_location || "Not specified",
         destinationLocation: bookingPayload.destination_location || "Not specified",
-        date: bookingPayload.booking_date,
-        time: bookingPayload.pickup_time,
-        passengers: bookingPayload.passengers,
+	        date: bookingPayload.booking_date,
+	        time: bookingPayload.pickup_time,
+	        duration: bookingPayload.duration,
+	        passengers: bookingPayload.passengers,
         vehicleType: bookingPayload.vehicle_type,
         phoneNumber,
-        status: "Active",
-        flightNumber: bookingPayload.flight_number || null,
-        paymentStatus: "unpaid",
-        reservationAmount,
-        totalPriceAmount: pricing.totalPriceCents,
-        finalPaymentAmount: pricing.finalPaymentCents,
-        distanceKm: pricing.distanceKm,
-        pricingStart: pricing.startPoint,
-        pricingEnd: pricing.endPoint,
-        paymentReference: null
-      });
+	        status: isQuoteOnlyService ? "Quote Pending" : "Active",
+	        flightNumber: bookingPayload.flight_number || null,
+	        paymentStatus: bookingPayload.payment_status,
+	        reservationAmount,
+	        totalPriceAmount: pricing?.totalPriceCents ?? null,
+	        finalPaymentAmount: pricing?.finalPaymentCents ?? null,
+	        distanceKm: pricing?.distanceKm ?? null,
+	        pricingStart: pricing?.startPoint ?? null,
+	        pricingEnd: pricing?.endPoint ?? null,
+	        quoteOnly: isQuoteOnlyService,
+	        paymentReference: null
+	      });
     } catch (err) {
       console.error("Booking error:", err);
       setSubmitStatus({
@@ -811,9 +897,9 @@ Thank you for booking with us!
         {submitStatus?.type !== "success" ? (
           <form onSubmit={handleSubmit} className="booking-portal-enter bg-white rounded-xl border border-gray-200 shadow-[0_12px_34px_rgba(15,23,42,0.06)] p-4 sm:p-6 md:p-8 space-y-5">
             {/* Dynamic Service Fields */}
-            <div className="space-y-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               {config.fields.map((field) => (
-                <div key={field.name}>
+                <div key={field.name} className={getFieldLayoutClass(field)}>
                   <label className="block text-sm font-semibold text-gray-900 mb-2.5">
                     {field.label}
                     {field.required && <span className="text-red-600 ml-1">*</span>}
@@ -961,13 +1047,15 @@ Thank you for booking with us!
                             let IconComponent = MapPin;
                             if (suggestion.type === "airport") {
                               IconComponent = Plane;
-                            } else if (suggestion.type === "landmark") {
-                              IconComponent = MapPin;
+                            } else if (suggestion.type === "hotel") {
+                              IconComponent = Hotel;
                             }
+                            const title = suggestion.shortLabel || suggestion.label || suggestion.fullLabel || suggestion.name || "Kenya location";
+                            const subtitle = suggestion.label || suggestion.fullLabel || "Kenya";
                             
                             return (
                               <button
-                                key={`${field.name}-${suggestion.latitude}-${suggestion.longitude}-${suggestion.label}`}
+                                key={`${field.name}-${suggestion.latitude}-${suggestion.longitude}-${subtitle}`}
                                 type="button"
                                 onMouseDown={(e) => { e.preventDefault(); handleLocationSelect(field.name, suggestion); }}
                                 className="group w-full text-left px-4 py-3 hover:bg-[#1A1A1A] border-b border-gray-50 last:border-b-0 flex items-start gap-3 transition-colors cursor-pointer"
@@ -976,8 +1064,8 @@ Thank you for booking with us!
                                   <IconComponent size={16} className="text-[#C5A059] group-hover:text-white transition-colors" />
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                  <p className="text-sm font-semibold text-gray-900 group-hover:text-white transition-colors">{suggestion.shortLabel || suggestion.label}</p>
-                                  <p className="text-xs text-gray-500 truncate group-hover:text-white/70 transition-colors">{suggestion.label}</p>
+                                  <p className="text-sm font-semibold text-gray-900 group-hover:text-white transition-colors">{title}</p>
+                                  <p className="text-xs text-gray-500 truncate group-hover:text-white/70 transition-colors">{subtitle}</p>
                                 </div>
                               </button>
                             );
@@ -994,7 +1082,11 @@ Thank you for booking with us!
                       onChange={handleChange}
                       placeholder={field.placeholder}
                       min={field.min}
-                      max={field.max}
+                      max={
+                        field.name === "passengers" || field.name === "guestCount"
+                          ? getVehicleCapacity(formData.vehicleType)
+                          : field.max
+                      }
                       className={`w-full rounded-lg px-4 py-3 border transition-all duration-300 ${
                         formErrors[field.name]
                           ? "border-red-500 bg-red-50"
@@ -1014,7 +1106,7 @@ Thank you for booking with us!
               </div>
 
               {/* === UBER-STYLE FARE ESTIMATION CARD === */}
-              {(resolvedLocationFields.pickupField || resolvedLocationFields.dropoffField) && (
+	              {!isQuoteOnlyService && (resolvedLocationFields.pickupField || resolvedLocationFields.dropoffField) && (
                 <div className={`rounded-xl border overflow-hidden transition-all duration-500 ${
                   tripEstimate ? "border-[#C5A059]/30 bg-gradient-to-br from-white to-[#C5A059]/10 shadow-[0_10px_28px_rgba(197,160,89,0.10)]" : "border-gray-200 bg-gray-50 shadow-[0_8px_22px_rgba(15,23,42,0.03)]"
                 }`}>
@@ -1037,17 +1129,7 @@ Thank you for booking with us!
                   </div>
                   {tripEstimate ? (
                     <div className="px-4 pb-4">
-                      <div className={`grid gap-2 text-center ${tripEstimate.durationMin ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-1 sm:grid-cols-3'}`}>
-                         <div className="bg-white rounded-lg border border-gray-100 p-3 shadow-[0_6px_16px_rgba(15,23,42,0.04)]">
-                           <p className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Road Dist.</p>
-                           <p className="text-lg font-black text-gray-900 mt-0.5">{tripEstimate.distanceKm}<span className="text-xs font-medium text-gray-400 ml-0.5">km</span></p>
-                         </div>
-                         {tripEstimate.durationMin && (
-                           <div className="bg-white rounded-lg border border-gray-100 p-3 shadow-[0_6px_16px_rgba(15,23,42,0.04)]">
-                             <p className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Drive Time</p>
-                             <p className="text-lg font-black text-gray-900 mt-0.5">{tripEstimate.durationMin}<span className="text-xs font-medium text-gray-400 ml-0.5">min</span></p>
-                           </div>
-                         )}
+                      <div className="grid gap-2 text-center grid-cols-1 sm:grid-cols-2">
                         <div className="bg-white rounded-lg border border-gray-100 p-3 shadow-[0_6px_16px_rgba(15,23,42,0.04)]">
                           <p className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Total Fare</p>
                           <p className="text-lg font-black text-gray-900 mt-0.5">{formatKesFromCents(tripEstimate.totalPriceCents)}</p>
@@ -1168,7 +1250,23 @@ Thank you for booking with us!
               </div>
             </div>
 
-            <section className="bg-white rounded-xl border border-gray-200 p-5 sm:p-8 shadow-[0_10px_28px_rgba(15,23,42,0.05)]">
+	            {activeBooking?.quoteOnly && (
+	              <section className="bg-white rounded-xl border border-[#C5A059]/30 p-5 sm:p-8 shadow-[0_10px_28px_rgba(197,160,89,0.08)]">
+	                <div className="flex items-start gap-3">
+	                  <div className="mt-0.5 text-[#C5A059]"><Info size={20} /></div>
+	                  <div>
+	                    <h2 className="text-xl font-bold text-gray-900">Quote Pending</h2>
+	                    <p className="text-sm text-gray-600 mt-1">
+	                      Booking confirmed. Please wait for a quote to be processed.
+	                    </p>
+	                  </div>
+	                </div>
+	              </section>
+	            )}
+
+	            {!activeBooking?.quoteOnly && (
+	              <>
+	            <section className="bg-white rounded-xl border border-gray-200 p-5 sm:p-8 shadow-[0_10px_28px_rgba(15,23,42,0.05)]">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
                 <h2 className="text-xl font-bold text-gray-900">Active Booking</h2>
                 <span className="px-3 py-1 text-sm font-semibold text-green-700 bg-green-100 border border-green-300">
@@ -1213,14 +1311,23 @@ Thank you for booking with us!
                       <p className="font-semibold text-gray-900">{activeBooking?.date}</p>
                     </div>
                   </div>
-                  <div className="flex items-start gap-3">
-                    <div className="mt-0.5 text-[#C5A059]"><Clock size={18} /></div>
-                    <div>
-                      <p className="text-gray-500">Time</p>
-                      <p className="font-semibold text-gray-900">{activeBooking?.time}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
+	                  <div className="flex items-start gap-3">
+	                    <div className="mt-0.5 text-[#C5A059]"><Clock size={18} /></div>
+	                    <div>
+	                      <p className="text-gray-500">Time</p>
+	                      <p className="font-semibold text-gray-900">{activeBooking?.time}</p>
+	                    </div>
+	                  </div>
+	                  {activeBooking?.duration && (
+		                    <div className="flex items-start gap-3">
+		                      <div className="mt-0.5 text-[#C5A059]"><Calendar size={18} /></div>
+		                      <div>
+		                        <p className="text-gray-500">Duration</p>
+		                        <p className="font-semibold text-gray-900">{activeBooking.duration}</p>
+		                      </div>
+		                    </div>
+			            )}
+	                  <div className="flex items-start gap-3">
                     <div className="mt-0.5 text-[#C5A059]"><Users size={18} /></div>
                     <div>
                       <p className="text-gray-500">Passengers</p>
@@ -1267,10 +1374,6 @@ Thank you for booking with us!
                   <p className="text-xl font-bold text-gray-900">{formatKesFromCents(activeBooking?.totalPriceAmount || 0)}</p>
                 </div>
                 <div className="flex flex-col min-[380px]:flex-row min-[380px]:items-center justify-between gap-1">
-                  <p className="text-gray-600">Distance</p>
-                  <p className="font-semibold text-gray-900">{activeBooking?.distanceKm || 0} km</p>
-                </div>
-                <div className="flex flex-col min-[380px]:flex-row min-[380px]:items-center justify-between gap-1">
                   <p className="text-gray-600">Reservation Fee</p>
                   <p className="text-xl font-bold text-gray-900">{formatKesFromCents(activeBooking?.reservationAmount || 0)}</p>
                 </div>
@@ -1310,20 +1413,22 @@ Thank you for booking with us!
                 </div>
               )}
 
-              <button
-                type="button"
-                disabled={isPaying || activeBooking?.paymentStatus === "reservation_paid" || activeBooking?.paymentStatus === "paid"}
-                onClick={handleReserveBookingPayment}
+	              <button
+	                type="button"
+	                disabled={activeBooking?.quoteOnly || isPaying || activeBooking?.paymentStatus === "reservation_paid" || activeBooking?.paymentStatus === "paid"}
+	                onClick={handleReserveBookingPayment}
                 className="mt-5 inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-lg px-6 py-3 bg-[#C5A059] hover:bg-[#1A1A1A] text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 ease-out hover:-translate-y-0.5 shadow-[0_10px_24px_rgba(197,160,89,0.18)]"
               >
                 {isPaying ? <Loader size={18} className="animate-spin" /> : <CreditCard size={18} />}
-                {activeBooking?.paymentStatus === "reservation_paid" || activeBooking?.paymentStatus === "paid"
-                  ? "Reservation Paid"
-                  : "Pay 30% Reservation"}
-              </button>
-            </section>
+	                {activeBooking?.paymentStatus === "reservation_paid" || activeBooking?.paymentStatus === "paid"
+	                  ? "Reservation Paid"
+	                  : "Pay 30% Reservation"}
+	              </button>
+		            </section>
+		            </>
+		            )}
 
-            {/* Booking Action Buttons - Show after reservation */}
+	            {/* Booking Action Buttons - Show after reservation */}
             <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:gap-3">
               <a
                 href="/bookings"
@@ -1332,17 +1437,19 @@ Thank you for booking with us!
                 <CheckCircle size={16} />
                 View My Bookings
               </a>
-              <button
-                type="button"
-                disabled={isPaying || activeBooking?.paymentStatus === "reservation_paid" || activeBooking?.paymentStatus === "paid"}
-                onClick={handleReserveBookingPayment}
-                className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg px-4 py-3 border border-[#C5A059] hover:border-[#1A1A1A] hover:bg-[#1A1A1A] text-[#C5A059] hover:text-white font-semibold transition-all duration-300 ease-out hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-              >
-                {isPaying ? <Loader size={16} className="animate-spin" /> : <CreditCard size={16} />}
-                {activeBooking?.paymentStatus === "reservation_paid" || activeBooking?.paymentStatus === "paid"
-                  ? "Payment Complete"
-                  : "Complete Payment"}
-              </button>
+	              {!activeBooking?.quoteOnly && (
+	                <button
+	                  type="button"
+	                  disabled={isPaying || activeBooking?.paymentStatus === "reservation_paid" || activeBooking?.paymentStatus === "paid"}
+	                  onClick={handleReserveBookingPayment}
+	                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg px-4 py-3 border border-[#C5A059] hover:border-[#1A1A1A] hover:bg-[#1A1A1A] text-[#C5A059] hover:text-white font-semibold transition-all duration-300 ease-out hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+	                >
+	                  {isPaying ? <Loader size={16} className="animate-spin" /> : <CreditCard size={16} />}
+	                  {activeBooking?.paymentStatus === "reservation_paid" || activeBooking?.paymentStatus === "paid"
+	                    ? "Payment Complete"
+	                    : "Complete Payment"}
+	                </button>
+	              )}
             </div>
 
             <div className="flex flex-col md:flex-row gap-3 mt-4">

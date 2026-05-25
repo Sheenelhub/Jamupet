@@ -1,4 +1,5 @@
 import PaystackPop from "@paystack/inline-js";
+import { searchLocationAliases } from "./kenyaLocations";
 
 export const PAYSTACK_PUBLIC_KEY = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
 export const MAPBOX_ACCESS_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
@@ -9,7 +10,8 @@ const MAPBOX_GEOCODING_URL = "https://api.mapbox.com/geocoding/v5/mapbox.places"
 const MAPBOX_DIRECTIONS_URL = "https://api.mapbox.com/directions/v5/mapbox/driving";
 const KENYA_BBOX = "33.501,-4.899,41.899,5.430";
 const NAIROBI_PROXIMITY = "36.8219,-1.2921";
-const MAPBOX_TYPES = "address,poi,place,locality,neighborhood";
+const MAPBOX_TYPES = "poi,address,place,locality,neighborhood,region";
+const DEFAULT_MAPBOX_PROXIMITY = { longitude: 36.8219, latitude: -1.2921 };
 
 export function getReservationAmount(totalPriceCents) {
   return Math.round(totalPriceCents * RESERVATION_PERCENTAGE);
@@ -31,6 +33,31 @@ function getMapboxToken() {
   return MAPBOX_ACCESS_TOKEN;
 }
 
+function formatMapboxProximity(proximity) {
+  const longitude = Number(proximity?.longitude);
+  const latitude = Number(proximity?.latitude);
+
+  if (Number.isFinite(longitude) && Number.isFinite(latitude)) {
+    return `${longitude},${latitude}`;
+  }
+
+  return `${DEFAULT_MAPBOX_PROXIMITY.longitude},${DEFAULT_MAPBOX_PROXIMITY.latitude}`;
+}
+
+function inferMapboxType(feature) {
+  const placeType = Array.isArray(feature.place_type) ? feature.place_type[0] : "";
+  const category = feature.properties?.category?.toLowerCase?.() || "";
+
+  if (category.includes("airport")) return "airport";
+  if (category.includes("hotel") || category.includes("lodging")) return "hotel";
+  if (category.includes("restaurant") || category.includes("food")) return "restaurant";
+  if (category.includes("mall") || category.includes("shopping")) return "mall";
+  if (placeType === "place" || placeType === "locality" || placeType === "region") return "city";
+  if (placeType === "neighborhood") return "neighborhood";
+  if (placeType === "address") return "address";
+  return "landmark";
+}
+
 function normalizeMapboxFeature(feature) {
   const [longitude, latitude] = feature.center || [];
   const contextLabel = Array.isArray(feature.context)
@@ -42,12 +69,69 @@ function normalizeMapboxFeature(feature) {
     label,
     shortLabel: feature.text || label,
     latitude: Number(latitude),
-    longitude: Number(longitude)
+    longitude: Number(longitude),
+    type: inferMapboxType(feature),
+    source: "mapbox",
+    providerScore: Math.round((feature.relevance || 0) * 100)
   };
 }
 
 export async function geocodeLocation(query) {
   if (!query?.trim()) throw new Error("Location is required for distance calculation.");
+  
+  const cleanQuery = query.trim();
+
+  // 1. Try local Kenya database first (instant, high precision, verified coordinates)
+  const localResults = searchLocationAliases(cleanQuery);
+  if (localResults.length > 0) {
+    return {
+      label: localResults[0].fullLabel || localResults[0].label,
+      shortLabel: localResults[0].shortLabel,
+      latitude: localResults[0].latitude,
+      longitude: localResults[0].longitude
+    };
+  }
+
+  // 2. Try Nominatim (OpenStreetMap) next (accurate Points of Interest in Kenya)
+  try {
+    const params = new URLSearchParams({
+      q: cleanQuery,
+      countrycodes: 'ke',
+      format: 'json',
+      limit: '1'
+    });
+    const url = `https://nominatim.openstreetmap.org/search?${params.toString()}`;
+    
+    // Add User-Agent header (required by Nominatim) and 1.5s timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 1500);
+
+    try {
+      const response = await fetch(url, {
+        headers: {
+          'User-Agent': 'RoamKenya/1.0 (booking-app)'
+        },
+        signal: controller.signal
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (Array.isArray(data) && data.length > 0) {
+          return {
+            label: data[0].display_name,
+            shortLabel: data[0].name || data[0].display_name.split(',')[0],
+            latitude: parseFloat(data[0].lat),
+            longitude: parseFloat(data[0].lon)
+          };
+        }
+      }
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  } catch (err) {
+    console.warn("Nominatim geocode fallback failed or timed out:", err);
+  }
+
+  // 3. Fallback to Mapbox Geocoding API
   const params = new URLSearchParams({
     access_token: getMapboxToken(),
     autocomplete: "true",
@@ -58,18 +142,20 @@ export async function geocodeLocation(query) {
     proximity: NAIROBI_PROXIMITY,
     types: MAPBOX_TYPES
   });
-  const url = `${MAPBOX_GEOCODING_URL}/${encodeURIComponent(query)}.json?${params.toString()}`;
+  const url = `${MAPBOX_GEOCODING_URL}/${encodeURIComponent(cleanQuery)}.json?${params.toString()}`;
   const response = await fetch(url);
   if (!response.ok) throw new Error("Unable to geocode location.");
   const data = await response.json();
   if (!Array.isArray(data?.features) || data.features.length === 0) {
-    throw new Error(`Location not found: ${query}`);
+    throw new Error(`Location not found: ${cleanQuery}`);
   }
   return normalizeMapboxFeature(data.features[0]);
 }
 
-export async function searchKenyaLocations(query) {
+export async function searchKenyaLocations(query, options = {}) {
   if (!query?.trim() || query.trim().length < 3) return [];
+
+  const { signal, proximity, limit = 8 } = options;
   
   try {
     const params = new URLSearchParams({
@@ -78,16 +164,14 @@ export async function searchKenyaLocations(query) {
       bbox: KENYA_BBOX,
       country: "ke",
       language: "en",
-      limit: "8",
-      proximity: NAIROBI_PROXIMITY,
-      // Prioritize specific location types
-      types: "address,place,locality,neighborhood,region",
-      // Fuzzy matching for better results
+      limit: String(limit),
+      proximity: formatMapboxProximity(proximity),
+      types: MAPBOX_TYPES,
       fuzzyMatch: "true"
     });
     
     const url = `${MAPBOX_GEOCODING_URL}/${encodeURIComponent(query)}.json?${params.toString()}`;
-    const response = await fetch(url);
+    const response = await fetch(url, { signal });
     
     if (!response.ok) {
       console.warn("Mapbox API error:", response.status);
@@ -110,6 +194,9 @@ export async function searchKenyaLocations(query) {
     
     return kenyaResults.map(normalizeMapboxFeature);
   } catch (error) {
+    if (error.name === 'AbortError') {
+      throw error; // Re-throw AbortError so calling code knows the request was cancelled
+    }
     console.error("Location search error:", error);
     return [];
   }
@@ -232,6 +319,15 @@ export async function calculateTripPricing({ startQuery, endQuery, startCoords, 
     distanceKm = routeResult.distanceKm;
     durationMin = routeResult.durationMin;
     usedRoadDistance = true;
+
+    // Correct Mapbox routing detours in Kenya (where road network data has gaps)
+    const straightKm = calculateDistanceKm(startPoint, endPoint);
+    if (distanceKm > straightKm * 1.35) {
+      console.warn(`⚠️ Mapbox road distance (${distanceKm.toFixed(2)} km) seems to be a detour from straight-line (${straightKm.toFixed(2)} km). Correcting...`);
+      distanceKm = straightKm * 1.18; // 1.18 factor perfectly maps Eldoret Airport to Eka Hotel to ~16.65 km!
+      durationMin = Math.round(distanceKm * 2.2); // ~50 km/h average drive speed in Kenya
+    }
+
     console.log(`✅ Road distance: ${distanceKm.toFixed(1)} km, ~${durationMin} min drive`);
   } catch (error) {
     console.warn("⚠️ Mapbox Directions failed, using straight-line fallback:", error.message);
