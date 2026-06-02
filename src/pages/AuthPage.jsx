@@ -6,12 +6,15 @@ import { useAuth } from '../hooks/useAuth'
 export default function AuthPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const { signUp, signIn, loading, error: authError, signInWithGoogle, signInWithFacebook } = useAuth()
+  const { signUp, signIn, resetPassword, loading, error: authError, signInWithGoogle, signInWithFacebook } = useAuth()
   
   const modeParam = searchParams.get('mode')
   const [isSignUp, setIsSignUp] = useState(modeParam === 'signup' ? true : false)
   const [oauthLoading, setOauthLoading] = useState(false)
   const [oauthError, setOauthError] = useState(null)
+  const [resetMessage, setResetMessage] = useState(null)
+  const [resetError, setResetError] = useState(null)
+  const [isResetting, setIsResetting] = useState(false)
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -54,6 +57,9 @@ export default function AuthPage() {
     setFormData(prev => ({ ...prev, [name]: value }))
     if (formErrors[name]) {
       setFormErrors(prev => ({ ...prev, [name]: null }))
+    }
+    if (resetError) {
+      setResetError(null)
     }
   }
 
@@ -107,6 +113,25 @@ export default function AuthPage() {
       console.error('Auth error:', err)
     } finally {
       setIsSubmitting(false)
+    }
+  }
+
+  const handleResetPassword = async () => {
+    if (!formData.email.trim()) {
+      setResetError('Enter your email to receive a reset link')
+      return
+    }
+
+    setIsResetting(true)
+    setResetMessage(null)
+    setResetError(null)
+    try {
+      await resetPassword(formData.email)
+      setResetMessage('Password reset link sent. Check your inbox to continue.')
+    } catch (err) {
+      setResetError(err.message || 'Failed to send reset link')
+    } finally {
+      setIsResetting(false)
     }
   }
 
@@ -185,6 +210,18 @@ export default function AuthPage() {
               </div>
             )}
 
+            {resetMessage && (
+              <div className="p-3 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-100 text-sm">
+                {resetMessage}
+              </div>
+            )}
+
+            {resetError && (
+              <div className="p-3 rounded-lg bg-red-500/20 border border-red-500/30 text-red-200 text-sm">
+                {resetError}
+              </div>
+            )}
+
             {/* Full Name (Sign Up Only) */}
             {isSignUp && (
               <div>
@@ -245,6 +282,18 @@ export default function AuthPage() {
               {formErrors.password && (
                 <p className="text-red-300 text-xs mt-2 ml-1">{formErrors.password}</p>
               )}
+              {!isSignUp && (
+                <div className="flex justify-end mt-2">
+                  <button
+                    type="button"
+                    onClick={handleResetPassword}
+                    disabled={isResetting || isSubmitting || loading}
+                    className="text-xs font-semibold text-[#C5A059] hover:underline disabled:opacity-60"
+                  >
+                    {isResetting ? 'Sending reset link...' : 'Forgot password?'}
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Confirm Password (Sign Up Only) */}
@@ -295,6 +344,8 @@ export default function AuthPage() {
                     setIsSignUp(!isSignUp)
                     setFormData({ email: '', password: '', fullName: '', confirmPassword: '' })
                     setFormErrors({})
+                    setResetMessage(null)
+                    setResetError(null)
                   }}
                   className="text-[#C5A059] font-bold hover:underline"
                 >
