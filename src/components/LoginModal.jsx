@@ -6,11 +6,14 @@ import { useAuth } from "../hooks/useAuth";
 
 export default function LoginModal({ isOpen, onClose }) {
   const navigate = useNavigate();
-  const { signIn, signUp, signInWithGoogle, signInWithFacebook, signUpAnonymous, loading, error: authError } = useAuth();
+  const { signIn, signUp, resetPassword, signInWithGoogle, signInWithFacebook, signUpAnonymous, loading, error: authError } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [resetMessage, setResetMessage] = useState(null);
+  const [resetError, setResetError] = useState(null);
+  const [isResetting, setIsResetting] = useState(false);
   
-  // View: "options" | "signin" | "signup"
+  // View: "options" | "signin" | "signup" | "forgot"
   const [view, setView] = useState("options");
   const [formData, setFormData] = useState({
     email: "",
@@ -26,6 +29,8 @@ export default function LoginModal({ isOpen, onClose }) {
     setFormData({ email: "", password: "", fullName: "", confirmPassword: "" });
     setFormErrors({});
     setError(null);
+    setResetMessage(null);
+    setResetError(null);
   };
 
   const goToView = (v) => {
@@ -43,6 +48,7 @@ export default function LoginModal({ isOpen, onClose }) {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     if (formErrors[name]) setFormErrors(prev => ({ ...prev, [name]: null }));
+    if (resetError) setResetError(null);
   };
 
   const validateForm = () => {
@@ -130,6 +136,26 @@ export default function LoginModal({ isOpen, onClose }) {
       setError(err.message || "Failed to login with Facebook");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (event) => {
+    event.preventDefault();
+    if (!formData.email.trim()) {
+      setResetError("Enter your email to receive a reset link");
+      return;
+    }
+
+    setIsResetting(true);
+    setResetMessage(null);
+    setResetError(null);
+    try {
+      await resetPassword(formData.email);
+      setResetMessage("Password reset link sent. Check your inbox to continue.");
+    } catch (err) {
+      setResetError(err.message || "Failed to send reset link");
+    } finally {
+      setIsResetting(false);
     }
   };
 
@@ -351,6 +377,17 @@ export default function LoginModal({ isOpen, onClose }) {
                   className={inputClass("password")}
                 />
                 {formErrors.password && <p className="text-red-300 text-xs mt-1 ml-1">{formErrors.password}</p>}
+                {view === "signin" && (
+                  <div className="flex justify-end mt-2">
+                    <button
+                      type="button"
+                      onClick={() => goToView("forgot")}
+                      className="text-xs font-semibold text-[#C5A059] hover:underline"
+                    >
+                      Forgot password?
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Confirm Password (signup only) */}
@@ -369,6 +406,59 @@ export default function LoginModal({ isOpen, onClose }) {
                   />
                   {formErrors.confirmPassword && <p className="text-red-300 text-xs mt-1 ml-1">{formErrors.confirmPassword}</p>}
                 </div>
+              )}
+
+              {view === "forgot" && (
+                <form onSubmit={handleResetPassword} className="space-y-4">
+                  <div>
+                    <label className="flex items-center gap-1.5 text-[11px] font-bold uppercase text-white/50 mb-1.5 ml-1">
+                      <Mail size={12} /> Email
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="you@example.com"
+                      className={inputClass("email")}
+                    />
+                    {formErrors.email && <p className="text-red-300 text-xs mt-1 ml-1">{formErrors.email}</p>}
+                  </div>
+
+                  {resetMessage && (
+                    <div className="p-3 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-100 text-sm">
+                      {resetMessage}
+                    </div>
+                  )}
+
+                  {resetError && (
+                    <div className="p-3 rounded-lg bg-red-500/20 border border-red-500/30 text-red-200 text-sm">
+                      {resetError}
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={isResetting || loading}
+                    className="w-full bg-[#B35A38] hover:bg-[#a04a2a] text-white font-bold py-3.5 px-6 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 mt-2 shadow-lg shadow-[#B35A38]/20"
+                  >
+                    {isResetting ? (
+                      <><Loader size={16} className="animate-spin" /> Sending...</>
+                    ) : (
+                      "Send reset link"
+                    )}
+                  </button>
+
+                  <div className="text-center pt-2">
+                    <button
+                      type="button"
+                      onClick={() => goToView("signin")}
+                      className="text-xs font-semibold text-[#C5A059] hover:underline"
+                    >
+                      Back to sign in
+                    </button>
+                  </div>
+                </form>
               )}
 
               {/* Submit */}

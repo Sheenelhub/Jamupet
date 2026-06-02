@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { MapPin } from "lucide-react";
 
 const MAPBOX_GL_JS_URL = "https://api.mapbox.com/mapbox-gl-js/v3.9.4/mapbox-gl.js";
 const MAPBOX_GL_CSS_URL = "https://api.mapbox.com/mapbox-gl-js/v3.9.4/mapbox-gl.css";
@@ -135,7 +136,9 @@ export default function BookingMap({
   destinationField,
   activeField,
   onActiveFieldChange,
-  onLocationPick
+  onLocationPick,
+  dropPinMode,
+  onCancelDropPin
 }) {
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
@@ -361,7 +364,7 @@ export default function BookingMap({
   return (
     <div className="booking-portal-enter relative w-full h-full min-h-[300px] rounded-xl overflow-hidden border border-gray-200 shadow-[0_12px_34px_rgba(15,23,42,0.08)] bg-gray-900">
       {/* Map canvas */}
-      <div ref={mapContainerRef} className="absolute inset-0 w-full h-full bg-gray-900" style={{ minHeight: "300px" }} />
+      <div ref={mapContainerRef} className={`absolute inset-0 w-full h-full bg-gray-900 transition-opacity ${dropPinMode ? 'cursor-crosshair' : ''}`} style={{ minHeight: "300px" }} />
 
       {/* Top-left controls */}
       <div className="absolute top-3 left-3 z-10 flex flex-wrap items-center gap-2">
@@ -393,6 +396,28 @@ export default function BookingMap({
           )}
         </div>
       </div>
+
+      {/* Drop Pin Mode Overlay */}
+      {dropPinMode && (
+        <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-white rounded-xl shadow-2xl p-6 text-center max-w-sm">
+            <div className="mb-4 flex justify-center">
+              <div className="p-3 bg-[#C5A059]/10 rounded-full">
+                <MapPin size={32} className="text-[#C5A059]" />
+              </div>
+            </div>
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Drop Pin on Map</h3>
+            <p className="text-gray-600 text-sm mb-4">Click anywhere on the map to select your location</p>
+            <button
+              type="button"
+              onClick={onCancelDropPin}
+              className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 font-semibold text-sm transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Map error overlay */}
       {mapError && (

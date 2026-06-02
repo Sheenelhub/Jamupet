@@ -150,6 +150,7 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
   const [mpesaReference, setMpesaReference] = useState(null);
   const [mpesaReceiptInput, setMpesaReceiptInput] = useState("");
   const [mpesaReceiptLoading, setMpesaReceiptLoading] = useState(false);
+  const [dropPinMode, setDropPinMode] = useState(null);
 
 	  // Function to get vehicle capacity based on vehicle type
 	  const getVehicleCapacity = (vehicleType) => {
@@ -278,6 +279,16 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
     }
   };
 
+  const handleEnableDropPin = (fieldName) => {
+    setDropPinMode(fieldName);
+    setActiveLocationField(null);
+    setLocationSuggestions((prev) => ({ ...prev, [fieldName]: [] }));
+  };
+
+  const handleCancelDropPin = () => {
+    setDropPinMode(null);
+  };
+
   const handleMapLocationPick = async (fieldName, coordinates) => {
     if (!fieldName || !coordinates) return;
 
@@ -316,6 +327,7 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
       }));
     } finally {
       setLocationLoadingField((current) => (current === fieldName ? null : current));
+      setDropPinMode(null);
     }
   };
 
@@ -1496,6 +1508,22 @@ Thank you for booking with us!
                           })}
                         </div>
                       )}
+                      {activeLocationField === field.name && formData[field.name] && formData[field.name].length >= 2 && (locationSuggestions[field.name] || []).length === 0 && locationLoadingField !== field.name && (
+                        <div className="absolute z-20 mt-1 w-full bg-white rounded-lg border border-gray-200 shadow-[0_16px_34px_rgba(15,23,42,0.10)] overflow-hidden">
+                          <div className="px-4 py-4 text-center">
+                            <p className="text-sm text-gray-600 mb-3">No locations found for "{formData[field.name]}"</p>
+                            <button
+                              type="button"
+                              onClick={() => handleEnableDropPin(field.name)}
+                              className="w-full px-4 py-2.5 bg-gradient-to-r from-[#C5A059] to-[#a68442] hover:from-[#b8933f] hover:to-[#8f7538] text-white rounded-lg font-semibold text-sm flex items-center justify-center gap-2 transition-all duration-300 shadow-[0_4px_12px_rgba(197,160,89,0.25)]"
+                            >
+                              <MapPin size={16} />
+                              Drop Pin on Map
+                            </button>
+                            <p className="text-xs text-gray-400 mt-3">Click to select your location directly from the map</p>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ) : (
                     // Standard input field
@@ -2078,9 +2106,11 @@ Thank you for booking with us!
               gpsCoords={pickupGps}
               pickupField={resolvedLocationFields.pickupField}
               destinationField={resolvedLocationFields.dropoffField}
-              activeField={activeLocationField}
+              activeField={dropPinMode || activeLocationField}
               onActiveFieldChange={setActiveLocationField}
               onLocationPick={handleMapLocationPick}
+              dropPinMode={dropPinMode}
+              onCancelDropPin={handleCancelDropPin}
             />
           </div>
         </div>
