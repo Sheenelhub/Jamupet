@@ -42,8 +42,8 @@ export default function Navbar() {
 
   return (
     <>
-      {/* Permanently Dark Header so the Logo Pops */}
-      <nav className="absolute top-0 left-0 w-full z-[3000] bg-[#050505] py-4 border-b border-white/10 shadow-2xl">
+      {/* Fixed Header - stays at top when scrolling */}
+      <nav className="fixed top-0 left-0 w-full z-[3000] bg-[#050505]/95 backdrop-blur-md py-4 border-b border-white/10 shadow-2xl">
         <div className="max-w-[1440px] mx-auto px-6 md:px-12 flex justify-between items-center">
           
           <Link to="/" className="flex items-center group">
@@ -62,21 +62,23 @@ export default function Navbar() {
               <Link to="/" className={getLinkClass("/")}>Home</Link>
               <Link to="/about" className={getLinkClass("/about")}>About</Link>
               
+              {/* Services Dropdown */}
               <div className="group relative">
-                <HashLink to="/services" className={`flex items-center gap-1 ${getLinkClass("/services")}`}>
-                  Services <ChevronDown size={12} className="group-hover:rotate-180 transition-transform duration-300" />
+                <HashLink to="/services" className={`flex items-center gap-1.5 ${getLinkClass("/services")}`}>
+                  Services 
+                  <ChevronDown size={14} className="group-hover:rotate-180 transition-transform duration-300" />
                 </HashLink>
                 
                 <div className="absolute top-full left-0 w-full h-6" />
                 
-                <div className="absolute hidden group-hover:block w-56 top-full left-0 pt-4 z-50">
-                  <div className="flex flex-col rounded-xl overflow-hidden shadow-2xl border bg-[#111] border-white/10">
-                    {serviceItems.map((item) => (
+                <div className="absolute hidden group-hover:block w-64 top-full left-0 pt-4 z-50">
+                  <div className="flex flex-col rounded-lg overflow-hidden shadow-xl border bg-[#111]/95 backdrop-blur-sm border-white/10">
+                    {serviceItems.map((item, idx) => (
                       <HashLink 
                         key={item.name} 
                         smooth 
                         to={item.hash} 
-                        className="p-4 text-[10px] uppercase tracking-widest transition-colors text-gray-400 hover:text-[#C5A059] hover:bg-white/5 border-b border-white/5"
+                        className={`px-5 py-3 text-[11px] uppercase tracking-widest transition-all text-gray-300 hover:text-[#C5A059] hover:bg-white/5 ${idx !== serviceItems.length - 1 ? 'border-b border-white/5' : ''}`}
                       >
                         {item.name}
                       </HashLink>
