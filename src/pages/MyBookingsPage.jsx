@@ -813,6 +813,14 @@ export default function MyBookingsPage() {
                         {booking.total_price ? formatKesFromCents(Number(booking.total_price)) : "Pending"}
                       </p>
                     </div>
+                    {Number(booking.waiting_charge) > 0 && (
+                      <div>
+                        <p className="text-gray-500">Waiting Charge</p>
+                        <p className="font-semibold text-amber-700">
+                          {formatKesFromCents(Number(booking.waiting_charge))}
+                        </p>
+                      </div>
+                    )}
                     <div>
                       <p className="text-gray-500">Outstanding Balance</p>
                       <p className="font-semibold text-gray-900">

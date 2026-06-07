@@ -28,6 +28,8 @@ export default function BookingModal({ booking, isOpen, onClose, onStatusChange,
   const totalFare = formatCurrency(totalFareCents)
   const reservationFee = formatCurrency(reservationFeeCents)
   const finalPayment = formatCurrency(finalPaymentCents)
+  const waitingChargeCents = getFirstValue(booking, ['waiting_charge', 'waitingCharge'], null)
+  const waitingCharge = formatCurrency(waitingChargeCents)
   const serviceLabel = getFirstValue(booking, ['service_category', 'service_type', 'serviceCategory', 'serviceType'], '')
   const paymentStatus = getFirstValue(booking, ['payment_status', 'paymentStatus'], '')
   const paymentMethod = getFirstValue(booking, ['payment_method', 'paymentMethod'], '')
@@ -165,13 +167,19 @@ export default function BookingModal({ booking, isOpen, onClose, onStatusChange,
                 <span>{totalFare}</span>
 	              </div>
 	              <div className="flex items-center justify-between">
-	                <span>Reservation Fee (20%)</span>
-	                <span>{reservationFee}</span>
-	              </div>
+                <span>Reservation Fee (20%)</span>
+                <span>{reservationFee}</span>
+              </div>
+              {Number(waitingChargeCents) > 0 && (
+                <div className="flex items-center justify-between text-amber-700 font-semibold">
+                  <span>Waiting Fee</span>
+                  <span>{waitingCharge}</span>
+                </div>
+              )}
               <div className="flex items-center justify-between">
                 <span>Final Payment Due</span>
                 <span>{finalPayment}</span>
-	            </div>
+              </div>
 	              <div className="flex items-center justify-between">
 	                <span>Payment Method</span>
 	                <span>{paymentMethod || '—'}</span>
