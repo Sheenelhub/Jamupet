@@ -423,6 +423,22 @@ export default function DriverTrips() {
                       <p className="text-xs text-gray-500 font-medium mb-1">FARE</p>
                       <p className="text-gray-900 font-bold text-lg">{formatCurrency(activeAssignment.bookings.total_fare ?? activeAssignment.bookings.total_price)}</p>
                     </div>
+                    <div>
+                      <p className="text-xs text-gray-500 font-medium mb-1">PAYMENT STATUS</p>
+                      <span className={`px-2.5 py-1 text-xs font-semibold border uppercase inline-block mt-0.5 ${
+                        activeBooking.payment_status === "paid"
+                          ? "bg-green-100 text-green-700 border-green-200"
+                          : activeBooking.payment_status === "reservation_paid"
+                            ? "bg-blue-100 text-blue-700 border-blue-200"
+                            : "bg-yellow-100 text-yellow-700 border-yellow-200"
+                      }`}>
+                        {activeBooking.payment_status === "paid"
+                          ? "Fully Paid"
+                          : activeBooking.payment_status === "reservation_paid"
+                            ? "Deposit Paid Only"
+                            : activeBooking.payment_status?.replace('_', ' ') || "Unpaid"}
+                      </span>
+                    </div>
 
                     {activeBooking && (
                       <div className="border-t border-gray-200 pt-3">

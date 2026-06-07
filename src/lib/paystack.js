@@ -21,13 +21,45 @@ export function getReservationAmount(totalPriceCents) {
   return Math.round(totalPriceCents * RESERVATION_PERCENTAGE);
 }
 
+let usdToKesRate = 130;
+if (typeof window !== 'undefined') {
+  if (window.__usdToKesRate) {
+    usdToKesRate = window.__usdToKesRate;
+  } else {
+    try {
+      const cached = localStorage.getItem('usd_to_kes_rate');
+      if (cached) {
+        const parsed = parseFloat(cached);
+        if (parsed > 0) {
+          usdToKesRate = parsed;
+          window.__usdToKesRate = parsed;
+        }
+      }
+    } catch (e) {}
+    
+    fetch('https://open.er-api.com/v6/latest/USD')
+      .then(res => res.json())
+      .then(data => {
+        const rate = data?.rates?.KES;
+        if (rate && rate > 0) {
+          window.__usdToKesRate = rate;
+          try {
+            localStorage.setItem('usd_to_kes_rate', rate.toString());
+          } catch (e) {}
+        }
+      })
+      .catch(err => console.warn("Failed to fetch live USD/KES rate:", err));
+  }
+}
+
 export function formatKesFromCents(amountCents) {
   if (amountCents === undefined || amountCents === null || amountCents === '') return '—';
   const cents = Number(amountCents);
   if (Number.isNaN(cents)) return amountCents;
   
+  const currentRate = typeof window !== 'undefined' && window.__usdToKesRate ? window.__usdToKesRate : usdToKesRate;
   const amountKes = cents / 100;
-  const amountUsd = amountKes / 130; // 130 KES = 1 USD
+  const amountUsd = amountKes / currentRate;
   
   const formattedUsd = `$${amountUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   const formattedKes = `KES ${amountKes.toLocaleString()}`;

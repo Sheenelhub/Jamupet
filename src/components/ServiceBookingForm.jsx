@@ -568,7 +568,7 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
 
 	      const durationLabel = formData.duration
 	        ? `${formData.duration} Day${Number(formData.duration) === 1 ? "" : "s"}`
-	        : formData.rentalPeriod || "Full Day";
+	        : formData.rentalPeriod || null;
 	      const notes = [
 	        formData.specialRequests,
 	        isQuoteOnlyService ? "Quote requested by customer" : null,
