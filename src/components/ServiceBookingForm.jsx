@@ -1577,7 +1577,7 @@ Thank you for booking with us!
                          </div>
                        )}
                     </div>
-                    <p className="text-xs text-gray-500">30% refundable reservation · Final payment after confirmation</p>
+                    <p className="text-xs text-gray-500">20% refundable reservation · Final payment after confirmation</p>
                   </div>
                   {tripEstimate ? (
                     <div className="px-4 pb-4">
@@ -1587,14 +1587,14 @@ Thank you for booking with us!
                           <p className="text-lg font-black text-gray-900 mt-0.5">{formatKesFromCents(tripEstimate.totalPriceCents)}</p>
                         </div>
                         <div className="bg-[#C5A059]/10 rounded-lg border border-[#C5A059]/20 p-3">
-                          <p className="text-[10px] text-[#C5A059] uppercase tracking-wider font-semibold">Reserve (30%)</p>
+                          <p className="text-[10px] text-[#C5A059] uppercase tracking-wider font-semibold">Reserve (20%)</p>
                           <p className="text-lg font-black text-[#C5A059] mt-0.5">{formatKesFromCents(tripEstimate.reservationFeeCents)}</p>
                         </div>
                       </div>
                       <div className="mt-3 flex items-center gap-2 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
                         <Shield size={14} className="text-green-600 flex-shrink-0" />
                         <p className="text-[11px] text-green-700 font-medium">
-                          30% deposit is <span className="font-bold">fully refundable</span> if cancelled within 24 hours
+                          20% deposit is <span className="font-bold">fully refundable</span> if cancelled within 24 hours
                         </p>
                       </div>
                       <div className="mt-2 flex items-center gap-2 text-xs text-gray-400">
@@ -2011,7 +2011,7 @@ Thank you for booking with us!
 	                {isPaying ? <Loader size={18} className="animate-spin" /> : <CreditCard size={18} />}
 	                {paymentStatusValue === "reservation_paid" || paymentStatusValue === "paid"
 	                  ? "Reservation Paid"
-	                  : "Pay 30% Reservation"}
+	                  : "Pay 20% Reservation"}
 	              </button>
 		            </section>
 		            </>

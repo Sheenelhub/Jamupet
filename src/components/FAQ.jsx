@@ -13,7 +13,7 @@ const faqs = [
   },
   {
     question: "What is your cancellation and refund policy?",
-    answer: "We offer a highly flexible and transparent cancellation policy. Your 30% reservation deposit is fully refundable if you cancel your booking within 24 hours of making the payment. Refunds are automatically processed back to your original payment method within 5 business days."
+    answer: "We offer a highly flexible and transparent cancellation policy. Your 20% reservation deposit is fully refundable if you cancel your booking within 24 hours of making the payment. Refunds are automatically processed back to your original payment method within 5 business days."
   },
   {
     question: "Do you provide services outside of Nairobi?",

@@ -4,8 +4,11 @@ import { searchLocationAliases } from "./kenyaLocations";
 export const PAYSTACK_PUBLIC_KEY = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
 export const MAPBOX_ACCESS_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
 
-export const KES_CENTS_PER_KM = 43 * 100;
-const RESERVATION_PERCENTAGE = 0.3;
+export const KES_CENTS_PER_KM = 130 * 100;
+export const KES_CENTS_PER_MINUTE = 20 * 100;
+export const BASE_FARE_CENTS = 1000 * 100;
+export const BASE_DISTANCE_KM = 3.0;
+const RESERVATION_PERCENTAGE = 0.2;
 const MAPBOX_GEOCODING_URL = "https://api.mapbox.com/geocoding/v5/mapbox.places";
 const MAPBOX_DIRECTIONS_URL = "https://api.mapbox.com/directions/v5/mapbox/driving";
 const KENYA_BBOX = "33.501,-4.899,41.899,5.430";
@@ -334,12 +337,16 @@ export async function calculateTripPricing({ startQuery, endQuery, startCoords, 
     // Multiply straight-line by 1.35 to better approximate road distance
     const straightKm = calculateDistanceKm(startPoint, endPoint);
     distanceKm = straightKm * 1.35;
+    durationMin = Math.round(distanceKm * 2.2); // ~50 km/h average drive speed in Kenya
   }
   
   const multiplier = VEHICLE_MULTIPLIERS[vehicleType] || 1.0;
   
-  // Base price: KES 43/km, minimum KES 100 (10000 cents)
-  const basePriceCents = Math.max(10000, Math.round(distanceKm * KES_CENTS_PER_KM));
+  // Base price: KES 1000 base fare (includes up to 3 km), plus KES 130/km for distance > 3 km, plus KES 20/minute
+  const extraKm = Math.max(0, distanceKm - BASE_DISTANCE_KM);
+  const distanceChargeCents = Math.round(extraKm * KES_CENTS_PER_KM);
+  const timeChargeCents = (durationMin || 0) * KES_CENTS_PER_MINUTE;
+  const basePriceCents = BASE_FARE_CENTS + distanceChargeCents + timeChargeCents;
   const totalPriceCents = Math.round(basePriceCents * multiplier);
   
   const reservationFeeCents = getReservationAmount(totalPriceCents);

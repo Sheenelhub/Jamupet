@@ -165,7 +165,7 @@ export default function BookingModal({ booking, isOpen, onClose, onStatusChange,
                 <span>{totalFare}</span>
 	              </div>
 	              <div className="flex items-center justify-between">
-	                <span>Reservation Fee (30%)</span>
+	                <span>Reservation Fee (20%)</span>
 	                <span>{reservationFee}</span>
 	              </div>
               <div className="flex items-center justify-between">
@@ -208,7 +208,7 @@ export default function BookingModal({ booking, isOpen, onClose, onStatusChange,
 	                </button>
 	              </div>
 	              <p className="mt-2 text-xs text-gray-600">
-	                The client can pay the 30% reservation after this quote is saved.
+	                The client can pay the 20% reservation after this quote is saved.
 	              </p>
 	            </form>
 	          )}

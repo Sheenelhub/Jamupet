@@ -950,7 +950,7 @@ export default function MyBookingsPage() {
 	                          ) : (
 	                            <Car size={14} />
 	                          )}
-	                          Pay 30% Reservation
+	                          Pay 20% Reservation
 	                        </button>
 	                      )}
 	                      {booking.payment_status === "awaiting_quote" && booking.status !== "cancelled" && (
