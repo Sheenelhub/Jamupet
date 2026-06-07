@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Calendar, Clock, Car, MapPin, Loader, Pencil, Save, X, Ban, RotateCcw } from "lucide-react";
+import { Calendar, Clock, Car, MapPin, Loader, Pencil, Save, X, Ban, RotateCcw, AlertCircle, CheckCircle, Users } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import { useAuthContext } from "../context/AuthContext";
 import {
@@ -606,15 +606,17 @@ export default function MyBookingsPage() {
       setProcessingFinalPaymentBookingId(null);
     }
   };
-
   if (!user) {
     return (
-      <div className="min-h-screen bg-white pt-32 pb-20 px-6">
-        <div className="max-w-5xl mx-auto border border-gray-300 p-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-3">My Bookings</h1>
-          <p className="text-gray-600 mb-6">Sign in to view your active and past bookings.</p>
-          <Link to="/auth" className="inline-block px-6 py-3 bg-[#B35A38] text-white font-semibold hover:bg-[#8B4225] transition-colors">
-            Sign In
+      <div className="min-h-screen bg-[#FAFAFA] pt-32 pb-20 px-4 sm:px-6">
+        <div className="max-w-3xl mx-auto bg-white rounded-xl border border-gray-200 shadow-[0_12px_34px_rgba(15,23,42,0.06)] p-8 text-center flex flex-col items-center justify-center">
+          <div className="w-16 h-16 bg-[#C5A059]/10 rounded-full flex items-center justify-center mb-6">
+            <Car size={32} className="text-[#C5A059]" />
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">My Bookings</h1>
+          <p className="text-gray-600 mb-6 max-w-sm">Sign in to track, update, or cancel your active and past bookings.</p>
+          <Link to="/auth" className="inline-flex items-center gap-2 px-6 py-3 bg-[#C5A059] hover:bg-[#1A1A1A] text-white font-semibold rounded-lg transition-all duration-300 ease-out hover:-translate-y-0.5 shadow-[0_8px_16px_rgba(197,160,89,0.18)]">
+            Sign In to Account
           </Link>
         </div>
       </div>
@@ -622,450 +624,498 @@ export default function MyBookingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white pt-32 pb-20 px-6">
+    <div className="min-h-screen bg-[#FAFAFA] pt-32 pb-20 px-4 sm:px-6">
       <div className="max-w-5xl mx-auto">
-        <div className="border border-gray-300 p-8 mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">My Bookings</h1>
-          <p className="text-gray-600">Track all your confirmed, pending, and completed rides.</p>
+        
+        {/* Page Header */}
+        <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 leading-tight">My Bookings</h1>
+            <p className="text-gray-500 text-sm mt-1">Track all your confirmed, pending, and completed rides.</p>
+          </div>
           {cancellableBookings.length > 0 && (
-            <p className="text-sm text-[#B35A38] mt-2">
+            <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-2 text-xs font-medium text-amber-700 flex items-center gap-2 max-w-xs md:max-w-none shadow-sm">
+              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
               You can cancel paid reservations within 24 hours of payment.
-            </p>
+            </div>
           )}
         </div>
 
         {actionMessage && (
           <div
-            className={`border p-4 mb-4 ${
+            className={`rounded-xl p-4 mb-6 flex items-start gap-3 border shadow-[0_8px_20px_rgba(15,23,42,0.04)] ${
               actionMessage.type === "success"
-                ? "border-green-400 bg-green-50 text-green-700"
-                : "border-red-400 bg-red-50 text-red-700"
+                ? "bg-green-50 border-green-200 text-green-700"
+                : "bg-red-50 border-red-200 text-red-700"
             }`}
           >
-            {actionMessage.message}
+            {actionMessage.type === "success" ? (
+              <CheckCircle size={20} className="mt-0.5 shrink-0" />
+            ) : (
+              <AlertCircle size={20} className="mt-0.5 shrink-0" />
+            )}
+            <p className="text-sm font-medium">{actionMessage.message}</p>
           </div>
         )}
 
         {loading ? (
-          <div className="border border-gray-300 p-8 flex items-center gap-3 text-gray-700">
-            <Loader size={18} className="animate-spin" />
-            Loading bookings...
+          <div className="bg-white rounded-xl border border-gray-200 shadow-[0_12px_34px_rgba(15,23,42,0.06)] p-12 flex flex-col items-center justify-center text-gray-500 gap-3">
+            <Loader size={24} className="animate-spin text-[#C5A059]" />
+            <p className="text-sm font-semibold">Loading bookings...</p>
           </div>
         ) : error ? (
-          <div className="border border-red-400 bg-red-50 p-8 text-red-700">
-            Failed to load bookings: {error}
+          <div className="bg-red-50 border border-red-200 rounded-xl p-8 text-center text-red-700 shadow-sm max-w-2xl mx-auto">
+            <AlertCircle size={32} className="mx-auto mb-3 text-red-600" />
+            <h3 className="font-bold text-lg">Failed to Load Bookings</h3>
+            <p className="text-sm mt-1">{error}</p>
           </div>
         ) : bookings.length === 0 ? (
-          <div className="border border-gray-300 p-8">
-            <p className="text-gray-700 mb-4">No bookings yet.</p>
-            <Link to="/booking" className="inline-block px-6 py-3 bg-[#B35A38] text-white font-semibold hover:bg-[#8B4225] transition-colors">
+          <div className="bg-white rounded-xl border border-gray-200 shadow-[0_12px_34px_rgba(15,23,42,0.06)] p-12 text-center flex flex-col items-center justify-center">
+            <div className="w-14 h-14 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+              <Calendar size={28} className="text-gray-400" />
+            </div>
+            <h3 className="text-lg font-bold text-gray-900 mb-1">No bookings yet</h3>
+            <p className="text-gray-500 text-sm mb-6 max-w-sm">Ready to travel in style? Book your first premium transfer now.</p>
+            <Link to="/booking" className="inline-flex items-center gap-2 px-6 py-3 bg-[#C5A059] hover:bg-[#1A1A1A] text-white font-semibold rounded-lg transition-all duration-300 ease-out hover:-translate-y-0.5 shadow-[0_8px_16px_rgba(197,160,89,0.18)]">
               Create a Booking
             </Link>
           </div>
         ) : (
-          <div className="space-y-4">
-            {bookings.map((booking) => (
-              <article key={booking.id} className="border border-gray-300 p-6">
-                <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-                  <h2 className="text-xl font-bold text-gray-900">{booking.service_category || "Ride Booking"}</h2>
-                  <div className="flex gap-2">
-                    <span className="px-3 py-1 text-sm font-semibold border border-gray-300 bg-gray-100 text-gray-800 uppercase">
-                      {booking.status || "pending"}
-                    </span>
-	                    <span
-	                      className={`px-3 py-1 text-sm font-semibold border uppercase ${
-	                        booking.payment_status === "paid"
-	                          ? "border-green-300 bg-green-100 text-green-700"
-	                          : booking.payment_status === "reservation_paid"
-	                            ? "border-blue-300 bg-blue-100 text-blue-700"
-	                            : booking.payment_status === "quote_ready"
-	                              ? "border-green-300 bg-green-50 text-green-700"
-	                              : booking.payment_status === "awaiting_quote"
-	                                ? "border-[#C5A059]/40 bg-[#C5A059]/10 text-[#8B6B2E]"
-	                          : "border-yellow-300 bg-yellow-100 text-yellow-700"
-	                      }`}
-                    >
-                      {booking.payment_status || "unpaid"}
-                    </span>
-                  </div>
-                </div>
+          <div className="space-y-6">
+            {bookings.map((booking) => {
+              const statusClass =
+                booking.status === "completed"
+                  ? "bg-green-50 text-green-700 border-green-200"
+                  : booking.status === "cancelled"
+                    ? "bg-red-50 text-red-700 border-red-200"
+                    : "bg-[#C5A059]/10 text-[#8B6B2E] border-[#C5A059]/20"
 
-                {editingBookingId === booking.id ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <label className="text-gray-500 text-xs">Pickup</label>
-                      <input
-                        type="text"
-                        value={editForm.pickup_location}
-                        onChange={(e) => setEditForm((prev) => ({ ...prev, pickup_location: e.target.value }))}
-                        className="w-full border border-gray-300 px-3 py-2 text-gray-900"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-gray-500 text-xs">Destination</label>
-                      <input
-                        type="text"
-                        value={editForm.destination_location}
-                        onChange={(e) =>
-                          setEditForm((prev) => ({ ...prev, destination_location: e.target.value }))
-                        }
-                        className="w-full border border-gray-300 px-3 py-2 text-gray-900"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-gray-500 text-xs">Date</label>
-                      <input
-                        type="date"
-                        value={editForm.booking_date}
-                        onChange={(e) => setEditForm((prev) => ({ ...prev, booking_date: e.target.value }))}
-                        className="w-full border border-gray-300 px-3 py-2 text-gray-900"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-gray-500 text-xs">Time</label>
-                      <input
-                        type="time"
-                        value={editForm.pickup_time}
-                        onChange={(e) => setEditForm((prev) => ({ ...prev, pickup_time: e.target.value }))}
-                        className="w-full border border-gray-300 px-3 py-2 text-gray-900"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-gray-500 text-xs">Vehicle</label>
-                      <input
-                        type="text"
-                        value={editForm.vehicle_type}
-                        onChange={(e) => setEditForm((prev) => ({ ...prev, vehicle_type: e.target.value }))}
-                        className="w-full border border-gray-300 px-3 py-2 text-gray-900"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-gray-500 text-xs">Passengers</label>
-                      <input
-                        type="number"
-                        min={1}
-                        value={editForm.passengers}
-                        onChange={(e) =>
-                          setEditForm((prev) => ({ ...prev, passengers: Number(e.target.value) || 1 }))
-                        }
-                        className="w-full border border-gray-300 px-3 py-2 text-gray-900"
-                      />
-                    </div>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                    <div className="flex items-start gap-3">
-                      <MapPin size={17} className="text-[#B35A38] mt-0.5" />
-                      <div>
-                        <p className="text-gray-500">Pickup</p>
-                        <p className="font-semibold text-gray-900">{booking.pickup_location}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <MapPin size={17} className="text-[#B35A38] mt-0.5" />
-                      <div>
-                        <p className="text-gray-500">Destination</p>
-                        <p className="font-semibold text-gray-900">{booking.destination_location}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <Calendar size={17} className="text-[#B35A38] mt-0.5" />
-                      <div>
-                        <p className="text-gray-500">Date</p>
-                        <p className="font-semibold text-gray-900">{booking.booking_date}</p>
-                      </div>
-                    </div>
-	                    <div className="flex items-start gap-3">
-	                      <Clock size={17} className="text-[#B35A38] mt-0.5" />
-	                      <div>
-	                        <p className="text-gray-500">Time</p>
-	                        <p className="font-semibold text-gray-900">{booking.pickup_time}</p>
-	                      </div>
-	                    </div>
-	                    <div>
-	                      <p className="text-gray-500">Duration</p>
-	                      <p className="font-semibold text-gray-900">{booking.duration || "Not specified"}</p>
-	                    </div>
-	                    <div className="flex items-start gap-3">
-                      <Car size={17} className="text-[#B35A38] mt-0.5" />
-                      <div>
-                        <p className="text-gray-500">Vehicle</p>
-                        <p className="font-semibold text-gray-900">{booking.vehicle_type || "Not specified"}</p>
-                      </div>
-                    </div>
-                    <div>
-                      <p className="text-gray-500">Booking ID</p>
-                      <p className="font-semibold text-gray-900 break-all">{booking.id}</p>
-                    </div>
-	                    <div>
-	                      <p className="text-gray-500">Reserved Amount</p>
-	                      <p className="font-semibold text-gray-900">
-	                        {booking.payment_status === "awaiting_quote"
-	                          ? "Quote pending"
-	                          : booking.price_amount
-	                            ? formatKesFromCents(booking.price_amount)
-	                            : "Not paid"}
-	                      </p>
-	                    </div>
-                    <div>
-                      <p className="text-gray-500">Total Trip Price</p>
-                      <p className="font-semibold text-gray-900">
-                        {booking.total_price ? formatKesFromCents(Number(booking.total_price)) : "Pending"}
-                      </p>
-                    </div>
-                    {Number(booking.waiting_charge) > 0 && (
-                      <div>
-                        <p className="text-gray-500">Waiting Charge</p>
-                        <p className="font-semibold text-amber-700">
-                          {formatKesFromCents(Number(booking.waiting_charge))}
-                        </p>
-                      </div>
-                    )}
-                    <div>
-                      <p className="text-gray-500">Outstanding Balance</p>
-                      <p className="font-semibold text-gray-900">
-                        {booking.total_price && booking.price_amount
-                          ? formatKesFromCents(Math.max(Number(booking.total_price) - Number(booking.price_amount), 0))
-                          : "Pending"}
-                      </p>
-                    </div>
-                    {booking.reservation_reference && (
-                      <div>
-                        <p className="text-gray-500">Payment Reference</p>
-                        <p className="font-semibold text-gray-900 break-all">{booking.reservation_reference}</p>
-                      </div>
-                    )}
-                    {booking.status === "cancelled" &&
-                      (booking.payment_status === "reservation_paid" || booking.payment_status === "paid") && (
-                      <>
-                        <div>
-                          <p className="text-gray-500">Refund Status</p>
-                          <p className="font-semibold text-gray-900 uppercase">
-                            {booking.refund_status || "pending"}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-gray-500">Refund Eligible After</p>
-                          <p className="font-semibold text-gray-900">
-                            {formatDateTime(booking.refund_eligible_at)}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-gray-500">Refund Due By (5 business days)</p>
-                          <p className="font-semibold text-gray-900">
-                            {formatDateTime(booking.refund_due_at)}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-gray-500">Refund Processed At</p>
-                          <p className="font-semibold text-gray-900">
-                            {formatDateTime(booking.refund_processed_at)}
-                          </p>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                )}
+              const paymentStatusClass =
+                booking.payment_status === "paid"
+                  ? "bg-green-50 text-green-700 border-green-200"
+                  : booking.payment_status === "reservation_paid"
+                    ? "bg-blue-50 text-blue-700 border-blue-200"
+                    : booking.payment_status === "quote_ready"
+                      ? "bg-green-50 text-green-700 border-green-200"
+                      : booking.payment_status === "awaiting_quote"
+                        ? "bg-[#C5A059]/10 text-[#8B6B2E] border-[#C5A059]/20"
+                        : "bg-yellow-50 text-yellow-700 border-yellow-200"
 
-                <div className="mt-5 flex flex-wrap gap-2">
+              return (
+                <article key={booking.id} className="bg-white rounded-xl border border-gray-200 shadow-[0_12px_34px_rgba(15,23,42,0.06)] p-5 sm:p-6 md:p-8 hover:shadow-[0_16px_40px_rgba(15,23,42,0.08)] transition-all duration-300 animate-fade-in">
+                  <div className="flex flex-wrap items-center justify-between gap-3 mb-5 pb-4 border-b border-gray-100">
+                    <div>
+                      <h2 className="text-xl font-bold text-gray-900">{booking.service_category || "Ride Booking"}</h2>
+                      <p className="text-[10px] text-gray-400 font-mono mt-0.5 uppercase tracking-wider">ID: {booking.id}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className={`px-2.5 py-0.5 text-xs font-semibold rounded border uppercase tracking-wider ${statusClass}`}>
+                        {booking.status || "pending"}
+                      </span>
+                      <span className={`px-2.5 py-0.5 text-xs font-semibold rounded border uppercase tracking-wider ${paymentStatusClass}`}>
+                        {booking.payment_status || "unpaid"}
+                      </span>
+                    </div>
+                  </div>
+
                   {editingBookingId === booking.id ? (
-                    <>
-                      <button
-                        type="button"
-                        disabled={savingBookingId === booking.id}
-                        onClick={() => saveBookingUpdate(booking.id)}
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-[#B35A38] text-white text-sm font-semibold hover:bg-[#8B4225] disabled:opacity-50"
-                      >
-                        {savingBookingId === booking.id ? <Loader size={14} className="animate-spin" /> : <Save size={14} />}
-                        Save changes
-                      </button>
-                      <button
-                        type="button"
-                        onClick={cancelEdit}
-                        className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 text-sm font-semibold text-gray-900 hover:bg-gray-100"
-                      >
-                        <X size={14} />
-                        Cancel edit
-                      </button>
-                    </>
+                    <div className="bg-gray-50 rounded-xl border border-gray-200 p-5 space-y-4">
+                      <h3 className="text-sm font-bold text-gray-900 mb-2">Revise Trip Details</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-500 mb-1">Pickup Location</label>
+                          <input
+                            type="text"
+                            value={editForm.pickup_location}
+                            onChange={(e) => setEditForm((prev) => ({ ...prev, pickup_location: e.target.value }))}
+                            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 bg-white focus:outline-none focus:border-[#C5A059]"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-500 mb-1">Destination Location</label>
+                          <input
+                            type="text"
+                            value={editForm.destination_location}
+                            onChange={(e) =>
+                              setEditForm((prev) => ({ ...prev, destination_location: e.target.value }))
+                            }
+                            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 bg-white focus:outline-none focus:border-[#C5A059]"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-500 mb-1">Date</label>
+                          <input
+                            type="date"
+                            value={editForm.booking_date}
+                            onChange={(e) => setEditForm((prev) => ({ ...prev, booking_date: e.target.value }))}
+                            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 bg-white focus:outline-none focus:border-[#C5A059]"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-500 mb-1">Time</label>
+                          <input
+                            type="time"
+                            value={editForm.pickup_time}
+                            onChange={(e) => setEditForm((prev) => ({ ...prev, pickup_time: e.target.value }))}
+                            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 bg-white focus:outline-none focus:border-[#C5A059]"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-500 mb-1">Vehicle Type</label>
+                          <input
+                            type="text"
+                            value={editForm.vehicle_type}
+                            onChange={(e) => setEditForm((prev) => ({ ...prev, vehicle_type: e.target.value }))}
+                            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 bg-white focus:outline-none focus:border-[#C5A059]"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-500 mb-1">Passengers</label>
+                          <input
+                            type="number"
+                            min={1}
+                            value={editForm.passengers}
+                            onChange={(e) =>
+                              setEditForm((prev) => ({ ...prev, passengers: Number(e.target.value) || 1 }))
+                            }
+                            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 bg-white focus:outline-none focus:border-[#C5A059]"
+                          />
+                        </div>
+                      </div>
+                    </div>
                   ) : (
-                    <>
-                      {booking.status !== "cancelled" && (
-                        <button
-                          type="button"
-                          onClick={() => beginEdit(booking)}
-                          className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 text-sm font-semibold text-gray-900 hover:bg-gray-100"
-                        >
-                          <Pencil size={14} />
-                          Revise booking
-                        </button>
-                      )}
-	                      {booking.payment_status === "reservation_paid" && booking.status !== "cancelled" && (
-	                        <div className="flex flex-wrap items-center gap-2 w-full">
-	                          <select
-	                            value={finalPaymentMethods[booking.id] || "paystack"}
-	                            onChange={(event) =>
-	                              setFinalPaymentMethods((prev) => ({
-	                                ...prev,
-	                                [booking.id]: event.target.value
-	                              }))
-	                            }
-	                            className="border border-gray-300 px-3 py-2 text-sm"
-	                          >
-	                            <option value="paystack">Paystack (Card/Bank)</option>
-	                            <option value="mpesa">M-Pesa (STK Push)</option>
-	                          </select>
-	                          {finalPaymentMethods[booking.id] === "mpesa" && (
-	                            <input
-	                              type="tel"
-	                              value={finalMpesaPhones[booking.id] || ""}
-	                              onChange={(event) =>
-	                                setFinalMpesaPhones((prev) => ({
-	                                  ...prev,
-	                                  [booking.id]: event.target.value
-	                                }))
-	                              }
-	                              placeholder="M-Pesa phone number"
-	                              className="border border-gray-300 px-3 py-2 text-sm min-w-[200px] flex-1"
-	                            />
-	                          )}
-	                          <button
-	                            type="button"
-	                            disabled={processingFinalPaymentBookingId === booking.id}
-	                            onClick={() => processFinalPayment(booking, finalPaymentMethods[booking.id] || "paystack")}
-	                            className="inline-flex items-center gap-2 px-4 py-2 border border-green-500 text-sm font-semibold text-green-700 hover:bg-green-50 disabled:opacity-50"
-	                          >
-	                            {processingFinalPaymentBookingId === booking.id ? (
-	                              <Loader size={14} className="animate-spin" />
-	                            ) : (
-	                              <Car size={14} />
-	                            )}
-	                            Confirm Trip & Pay Balance
-	                          </button>
-	                        </div>
-	                      )}
-	                      {booking.payment_status === "quote_ready" &&
-	                        booking.status !== "cancelled" &&
-	                        Number(booking.price_amount || 0) > 0 && (
-	                        <button
-	                          type="button"
-	                          disabled={processingReservationBookingId === booking.id}
-	                          onClick={() => startReservationPayment(booking)}
-	                          className="inline-flex items-center gap-2 px-4 py-2 border border-green-500 text-sm font-semibold text-green-700 hover:bg-green-50 disabled:opacity-50"
-	                        >
-	                          {processingReservationBookingId === booking.id ? (
-	                            <Loader size={14} className="animate-spin" />
-	                          ) : (
-	                            <Car size={14} />
-	                          )}
-	                          Pay 20% Reservation
-	                        </button>
-	                      )}
-	                      {booking.payment_status === "awaiting_quote" && booking.status !== "cancelled" && (
-	                        <span className="inline-flex items-center px-4 py-2 border border-[#C5A059]/40 bg-[#C5A059]/10 text-sm font-semibold text-[#8B6B2E]">
-	                          Waiting for admin quote
-	                        </span>
-	                      )}
-	                      {booking.payment_status === "unpaid" && booking.reservation_reference && booking.status !== "cancelled" && (
-                        <button
-                          type="button"
-                          disabled={retryingVerificationBookingId === booking.id}
-                          onClick={() => retryReservationVerification(booking)}
-                          className="inline-flex items-center gap-2 px-4 py-2 border border-[#B35A38] text-sm font-semibold text-[#B35A38] hover:bg-[#B35A38]/10 disabled:opacity-50"
-                        >
-                          {retryingVerificationBookingId === booking.id ? (
-                            <Loader size={14} className="animate-spin" />
-                          ) : (
-                            <RotateCcw size={14} />
+                    <div className="space-y-5">
+                      
+                      {/* Trip details grid */}
+                      <div className="bg-gray-50 rounded-xl border border-gray-100 p-4 sm:p-5">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 text-sm">
+                          <div className="flex items-start gap-3">
+                            <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
+                              <MapPin size={16} className="text-blue-500" />
+                            </div>
+                            <div>
+                              <p className="text-xs text-gray-400 font-medium uppercase">Pickup</p>
+                              <p className="font-semibold text-gray-900 mt-0.5">{booking.pickup_location}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-3">
+                            <div className="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center shrink-0">
+                              <MapPin size={16} className="text-red-500" />
+                            </div>
+                            <div>
+                              <p className="text-xs text-gray-400 font-medium uppercase">Destination</p>
+                              <p className="font-semibold text-gray-900 mt-0.5">{booking.destination_location}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-3">
+                            <div className="w-8 h-8 rounded-full bg-amber-50 flex items-center justify-center shrink-0">
+                              <Calendar size={16} className="text-[#C5A059]" />
+                            </div>
+                            <div>
+                              <p className="text-xs text-gray-400 font-medium uppercase">Date & Time</p>
+                              <p className="font-semibold text-gray-900 mt-0.5">{booking.booking_date} at {booking.pickup_time}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-3">
+                            <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
+                              <Car size={16} className="text-gray-500" />
+                            </div>
+                            <div>
+                              <p className="text-xs text-gray-400 font-medium uppercase">Vehicle Type</p>
+                              <p className="font-semibold text-gray-900 mt-0.5">{booking.vehicle_type || "Not specified"}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-3">
+                            <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
+                              <Users size={16} className="text-gray-500" />
+                            </div>
+                            <div>
+                              <p className="text-xs text-gray-400 font-medium uppercase">Passengers</p>
+                              <p className="font-semibold text-gray-900 mt-0.5">{booking.passengers || 1} pax</p>
+                            </div>
+                          </div>
+                          {booking.duration && (
+                            <div className="flex items-start gap-3">
+                              <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
+                                <Clock size={16} className="text-gray-500" />
+                              </div>
+                              <div>
+                                <p className="text-xs text-gray-400 font-medium uppercase">Duration</p>
+                                <p className="font-semibold text-gray-900 mt-0.5">{booking.duration}</p>
+                              </div>
+                            </div>
                           )}
-                          Retry Verification
-                        </button>
+                        </div>
+                      </div>
+
+                      {/* Payment Summary sub-card */}
+                      <div className="border-t border-gray-100 pt-5 mt-4">
+                        <h3 className="text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-3">Fare Breakdown</h3>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-gray-50/50 rounded-xl p-4 border border-gray-100">
+                          <div>
+                            <p className="text-xs text-gray-500">Reserved (20%)</p>
+                            <div className="mt-1 font-bold text-gray-900">
+                              {booking.payment_status === "awaiting_quote"
+                                ? <span className="text-xs text-amber-600 font-semibold">Quote pending</span>
+                                : booking.price_amount
+                                  ? formatKesFromCents(booking.price_amount)
+                                  : <span className="text-xs text-red-500 font-semibold">Not paid</span>}
+                            </div>
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-500">Total Price</p>
+                            <div className="mt-1 font-bold text-gray-900">
+                              {booking.total_price ? formatKesFromCents(Number(booking.total_price)) : <span className="text-xs text-gray-400 font-normal">Pending</span>}
+                            </div>
+                          </div>
+                          {Number(booking.waiting_charge) > 0 && (
+                            <div>
+                              <p className="text-xs text-amber-700 font-medium">Waiting Charge</p>
+                              <div className="mt-1 font-bold text-amber-700">
+                                {formatKesFromCents(Number(booking.waiting_charge))}
+                              </div>
+                            </div>
+                          )}
+                          <div>
+                            <p className="text-xs text-gray-500">Outstanding Balance</p>
+                            <div className="mt-1 font-bold text-gray-900">
+                              {booking.total_price && booking.price_amount
+                                ? formatKesFromCents(Math.max(Number(booking.total_price) - Number(booking.price_amount), 0))
+                                : <span className="text-xs text-gray-400 font-normal">Pending</span>}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Cancellation & Refund Detail Panel */}
+                      {booking.status === "cancelled" &&
+                        (booking.payment_status === "reservation_paid" || booking.payment_status === "paid") && (
+                        <div className="bg-red-50/50 rounded-xl border border-red-100 p-4 mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                          <div>
+                            <p className="text-gray-500 font-semibold">Refund Status</p>
+                            <p className="font-bold text-red-700 uppercase mt-0.5">{booking.refund_status || "pending"}</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-500 font-semibold">Refund Due By (5 business days)</p>
+                            <p className="font-semibold text-gray-900 mt-0.5">{formatDateTime(booking.refund_due_at)}</p>
+                          </div>
+                          {booking.refund_processed_at && (
+                            <div className="col-span-2">
+                              <p className="text-gray-500 font-semibold">Refund Processed At</p>
+                              <p className="font-semibold text-gray-900 mt-0.5">{formatDateTime(booking.refund_processed_at)}</p>
+                            </div>
+                          )}
+                        </div>
                       )}
-                      {booking.payment_method === "mpesa" &&
-                        ["reservation_pending", "final_pending"].includes(booking.payment_status) && (
-                        <div className="w-full border border-gray-200 bg-gray-50 p-3">
-                          <p className="text-xs font-semibold text-gray-700">
-                            Enter your M-Pesa receipt code to confirm instantly.
-                          </p>
-                          <div className="mt-2 flex flex-col gap-2 sm:flex-row">
-                            <input
-                              type="text"
-                              value={mpesaReceiptInputs[booking.id] || ""}
-                              onChange={(event) =>
-                                setMpesaReceiptInputs((prev) => ({
-                                  ...prev,
-                                  [booking.id]: event.target.value
-                                }))
-                              }
-                              placeholder="e.g., QAY6F3P9XY"
-                              className="flex-1 border border-gray-300 px-3 py-2 text-sm"
-                            />
+                    </div>
+                  )}
+
+                  {/* Action Panel Footer */}
+                  <div className="mt-6 pt-4 border-t border-gray-100 flex flex-wrap items-center justify-between gap-4">
+                    <div className="text-xs text-gray-400">
+                      {booking.reservation_reference && (
+                        <p className="truncate max-w-[250px] sm:max-w-none">Ref: <span className="font-mono">{booking.reservation_reference}</span></p>
+                      )}
+                    </div>
+
+                    <div className="flex flex-wrap gap-2.5">
+                      {editingBookingId === booking.id ? (
+                        <>
+                          <button
+                            type="button"
+                            disabled={savingBookingId === booking.id}
+                            onClick={() => saveBookingUpdate(booking.id)}
+                            className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#C5A059] hover:bg-[#1A1A1A] text-white text-xs font-semibold rounded-lg transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50"
+                          >
+                            {savingBookingId === booking.id ? <Loader size={14} className="animate-spin" /> : <Save size={14} />}
+                            Save Changes
+                          </button>
+                          <button
+                            type="button"
+                            onClick={cancelEdit}
+                            className="inline-flex items-center gap-1.5 px-4 py-2 border border-gray-300 text-xs font-semibold text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                          >
+                            <X size={14} />
+                            Cancel Edit
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          {booking.status !== "cancelled" && (
                             <button
                               type="button"
-                              onClick={() => confirmMpesaReceipt(booking)}
-                              disabled={mpesaReceiptBookingId === booking.id}
-                              className="inline-flex items-center gap-2 px-4 py-2 bg-[#1A1A1A] text-white text-sm font-semibold hover:opacity-90 disabled:opacity-60"
+                              onClick={() => beginEdit(booking)}
+                              className="inline-flex items-center gap-1.5 px-4 py-2 border border-gray-300 text-xs font-semibold text-gray-700 hover:border-gray-950 rounded-lg transition-colors"
                             >
-                              {mpesaReceiptBookingId === booking.id ? (
-                                <Loader size={14} className="animate-spin" />
-                              ) : null}
-                              Confirm Receipt
+                              <Pencil size={14} />
+                              Revise Booking
                             </button>
+                          )}
+                          {booking.payment_status === "reservation_paid" && booking.status !== "cancelled" && (
+                            <div className="flex flex-wrap items-center gap-2">
+                              <select
+                                value={finalPaymentMethods[booking.id] || "paystack"}
+                                onChange={(event) =>
+                                  setFinalPaymentMethods((prev) => ({
+                                    ...prev,
+                                    [booking.id]: event.target.value
+                                  }))
+                                }
+                                className="border border-gray-300 bg-white rounded-lg px-2.5 py-1.5 text-xs text-gray-700 focus:outline-none focus:border-[#C5A059]"
+                              >
+                                <option value="paystack">Paystack (Card/Bank)</option>
+                                <option value="mpesa">M-Pesa (STK Push)</option>
+                              </select>
+                              {finalPaymentMethods[booking.id] === "mpesa" && (
+                                <input
+                                  type="tel"
+                                  value={finalMpesaPhones[booking.id] || ""}
+                                  onChange={(event) =>
+                                    setFinalMpesaPhones((prev) => ({
+                                      ...prev,
+                                      [booking.id]: event.target.value
+                                    }))
+                                  }
+                                  placeholder="M-Pesa phone number"
+                                  className="border border-gray-300 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-[#C5A059]"
+                                />
+                              )}
+                              <button
+                                type="button"
+                                disabled={processingFinalPaymentBookingId === booking.id}
+                                onClick={() => processFinalPayment(booking, finalPaymentMethods[booking.id] || "paystack")}
+                                className="inline-flex items-center gap-1.5 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold rounded-lg shadow-sm hover:-translate-y-0.5 transition-all disabled:opacity-50"
+                              >
+                                {processingFinalPaymentBookingId === booking.id ? (
+                                  <Loader size={14} className="animate-spin" />
+                                ) : (
+                                  <Car size={14} />
+                                )}
+                                Pay Balance
+                              </button>
+                            </div>
+                          )}
+                          {booking.payment_status === "quote_ready" &&
+                            booking.status !== "cancelled" &&
+                            Number(booking.price_amount || 0) > 0 && (
                             <button
                               type="button"
-                              onClick={() => startReservationPayment(booking)}
                               disabled={processingReservationBookingId === booking.id}
-                              className="inline-flex items-center gap-2 px-4 py-2 border border-[#B35A38] text-sm font-semibold text-[#B35A38] hover:bg-[#B35A38]/10 disabled:opacity-50"
+                              onClick={() => startReservationPayment(booking)}
+                              className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-[#C5A059] hover:bg-[#1A1A1A] text-white text-xs font-semibold rounded-lg shadow-md hover:-translate-y-0.5 transition-all disabled:opacity-50"
                             >
                               {processingReservationBookingId === booking.id ? (
                                 <Loader size={14} className="animate-spin" />
                               ) : (
+                                <Car size={14} />
+                              )}
+                              Pay 20% Deposit
+                            </button>
+                          )}
+                          {booking.payment_status === "awaiting_quote" && booking.status !== "cancelled" && (
+                            <span className="inline-flex items-center px-4 py-2 bg-amber-50 text-xs font-semibold text-amber-700 rounded-lg border border-amber-200">
+                              Waiting for Admin Quote
+                            </span>
+                          )}
+                          {booking.payment_status === "unpaid" && booking.reservation_reference && booking.status !== "cancelled" && (
+                            <button
+                              type="button"
+                              disabled={retryingVerificationBookingId === booking.id}
+                              onClick={() => retryReservationVerification(booking)}
+                              className="inline-flex items-center gap-1.5 px-4 py-2 border border-amber-500 text-xs font-semibold text-amber-700 hover:bg-amber-50 rounded-lg transition-colors disabled:opacity-50"
+                            >
+                              {retryingVerificationBookingId === booking.id ? (
+                                <Loader size={14} className="animate-spin" />
+                              ) : (
                                 <RotateCcw size={14} />
                               )}
-                              Retry payment
+                              Retry Verification
                             </button>
-                          </div>
-                          <p className="text-[11px] text-gray-500 mt-2">
-                            If you have not paid yet, you can retry payment.
-                          </p>
-                        </div>
-                      )}
-                      {booking.payment_status === "reservation_paid" &&
-                        booking.status !== "cancelled" && (
-                        <button
-                          type="button"
-                          disabled={savingBookingId === booking.id}
-                          onClick={() => cancelReservation(booking)}
-                          className="inline-flex items-center gap-2 px-4 py-2 border border-red-400 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:opacity-50"
-                        >
-                          {savingBookingId === booking.id ? (
-                            <Loader size={14} className="animate-spin" />
-                          ) : (
-                            <Ban size={14} />
                           )}
-                          Cancel reservation (24h)
-                        </button>
-                      )}
-                      {booking.payment_status === "paid" && booking.status === "cancelled" && (
-                        <button
-                          type="button"
-                          disabled={processingRefundBookingId === booking.id || !canProcessRefund(booking)}
-                          onClick={() => processRefund(booking)}
-                          className="inline-flex items-center gap-2 px-4 py-2 border border-[#B35A38] text-sm font-semibold text-[#B35A38] hover:bg-[#B35A38]/10 disabled:opacity-50"
-                        >
-                          {processingRefundBookingId === booking.id ? (
-                            <Loader size={14} className="animate-spin" />
-                          ) : (
-                            <RotateCcw size={14} />
+                          {booking.payment_method === "mpesa" &&
+                            ["reservation_pending", "final_pending"].includes(booking.payment_status) && (
+                            <div className="w-full border border-amber-200 bg-amber-50/50 rounded-xl p-4 mt-3">
+                              <p className="text-xs font-semibold text-amber-800">
+                                Enter your M-Pesa receipt code to confirm instantly:
+                              </p>
+                              <div className="mt-2.5 flex flex-col gap-2 sm:flex-row">
+                                <input
+                                  type="text"
+                                  value={mpesaReceiptInputs[booking.id] || ""}
+                                  onChange={(event) =>
+                                    setMpesaReceiptInputs((prev) => ({
+                                      ...prev,
+                                      [booking.id]: event.target.value
+                                    }))
+                                  }
+                                  placeholder="e.g., QAY6F3P9XY"
+                                  className="flex-1 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs focus:outline-none focus:border-[#C5A059]"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => confirmMpesaReceipt(booking)}
+                                  disabled={mpesaReceiptBookingId === booking.id}
+                                  className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-[#1A1A1A] text-white text-xs font-semibold rounded-lg hover:opacity-90 transition-opacity disabled:opacity-60"
+                                >
+                                  {mpesaReceiptBookingId === booking.id && (
+                                    <Loader size={12} className="animate-spin" />
+                                  )}
+                                  Confirm Receipt
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => startReservationPayment(booking)}
+                                  disabled={processingReservationBookingId === booking.id}
+                                  className="inline-flex items-center gap-1.5 px-4 py-1.5 border border-red-500 text-xs font-semibold text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                                >
+                                  {processingReservationBookingId === booking.id ? (
+                                    <Loader size={12} className="animate-spin" />
+                                  ) : (
+                                    <RotateCcw size={12} />
+                                  )}
+                                  Retry Payment
+                                </button>
+                              </div>
+                            </div>
                           )}
-                          {canProcessRefund(booking) ? "Process refund" : "Refund available after 24h"}
-                        </button>
+                          {booking.payment_status === "reservation_paid" &&
+                            booking.status !== "cancelled" && (
+                            <button
+                              type="button"
+                              disabled={savingBookingId === booking.id}
+                              onClick={() => cancelReservation(booking)}
+                              className="inline-flex items-center gap-1.5 px-4 py-2 border border-red-400 text-xs font-semibold text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                            >
+                              {savingBookingId === booking.id ? (
+                                <Loader size={14} className="animate-spin" />
+                              ) : (
+                                <Ban size={14} />
+                              )}
+                              Cancel Reservation (24h)
+                            </button>
+                          )}
+                          {booking.payment_status === "paid" && booking.status === "cancelled" && (
+                            <button
+                              type="button"
+                              disabled={processingRefundBookingId === booking.id || !canProcessRefund(booking)}
+                              onClick={() => processRefund(booking)}
+                              className="inline-flex items-center gap-1.5 px-4 py-2 border border-[#C5A059] text-xs font-semibold text-[#8B6B2E] hover:bg-[#C5A059]/10 rounded-lg transition-colors disabled:opacity-50"
+                            >
+                              {processingRefundBookingId === booking.id ? (
+                                <Loader size={14} className="animate-spin" />
+                              ) : (
+                                <RotateCcw size={14} />
+                              )}
+                              {canProcessRefund(booking) ? "Process Refund" : "Refund Available After 24h"}
+                            </button>
+                          )}
+                        </>
                       )}
-                    </>
-                  )}
-                </div>
-              </article>
-            ))}
+                    </div>
+                  </div>
+                </article>
+              )
+            })}
           </div>
         )}
       </div>
