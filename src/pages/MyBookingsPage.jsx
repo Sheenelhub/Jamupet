@@ -834,7 +834,7 @@ export default function MyBookingsPage() {
                               <p className="font-semibold text-gray-900 mt-0.5">{booking.passengers || 1} pax</p>
                             </div>
                           </div>
-                          {booking.duration && (
+                          {booking.duration && booking.duration !== "Full Day" && (
                             <div className="flex items-start gap-3">
                               <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
                                 <Clock size={16} className="text-gray-500" />
