@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { supabase } from '../lib/supabase'
 
 const STATUS_NORMALIZATION = {
@@ -114,16 +114,66 @@ export const getBookingDateTimeValue = (booking) => {
   return booking.created_at
 }
 
+let usdToKesRate = 130;
+if (typeof window !== 'undefined') {
+  if (window.__usdToKesRate) {
+    usdToKesRate = window.__usdToKesRate;
+  } else {
+    try {
+      const cached = localStorage.getItem('usd_to_kes_rate');
+      if (cached) {
+        const parsed = parseFloat(cached);
+        if (parsed > 0) {
+          usdToKesRate = parsed;
+          window.__usdToKesRate = parsed;
+        }
+      }
+    } catch (e) {}
+    
+    fetch('https://open.er-api.com/v6/latest/USD')
+      .then(res => res.json())
+      .then(data => {
+        const rate = data?.rates?.KES;
+        if (rate && rate > 0) {
+          window.__usdToKesRate = rate;
+          try {
+            localStorage.setItem('usd_to_kes_rate', rate.toString());
+          } catch (e) {}
+        }
+      })
+      .catch(err => console.warn("Failed to fetch live USD/KES rate:", err));
+  }
+}
+
 export const formatCurrency = (valueInCents) => {
   if (valueInCents === undefined || valueInCents === null || valueInCents === '') return '—'
   const amountCents = Number(valueInCents)
   if (Number.isNaN(amountCents)) return valueInCents
-  return new Intl.NumberFormat('en-KE', {
+  
+  const currentRate = typeof window !== 'undefined' && window.__usdToKesRate ? window.__usdToKesRate : usdToKesRate;
+  const amountKes = amountCents / 100
+  const amountUsd = amountKes / currentRate
+  
+  const formattedUsd = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(amountUsd)
+
+  const formattedKes = new Intl.NumberFormat('en-KE', {
     style: 'currency',
     currency: 'KES',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
-  }).format(amountCents / 100)
+  }).format(amountKes)
+
+  return React.createElement(
+    'span',
+    { className: 'inline-flex flex-col leading-tight' },
+    React.createElement('span', { className: 'font-bold text-gray-900 group-hover:text-white transition-colors' }, formattedUsd),
+    React.createElement('span', { className: 'text-xs text-gray-400 font-normal group-hover:text-white/70 transition-colors' }, formattedKes)
+  );
 }
 
 /**

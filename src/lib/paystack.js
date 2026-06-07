@@ -1,3 +1,4 @@
+import React from "react";
 import PaystackPop from "@paystack/inline-js";
 import { searchLocationAliases } from "./kenyaLocations";
 
@@ -21,7 +22,22 @@ export function getReservationAmount(totalPriceCents) {
 }
 
 export function formatKesFromCents(amountCents) {
-  return `KES ${(amountCents / 100).toLocaleString()}`;
+  if (amountCents === undefined || amountCents === null || amountCents === '') return '—';
+  const cents = Number(amountCents);
+  if (Number.isNaN(cents)) return amountCents;
+  
+  const amountKes = cents / 100;
+  const amountUsd = amountKes / 130; // 130 KES = 1 USD
+  
+  const formattedUsd = `$${amountUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const formattedKes = `KES ${amountKes.toLocaleString()}`;
+  
+  return React.createElement(
+    'span',
+    { className: 'inline-flex flex-col leading-tight' },
+    React.createElement('span', { className: 'font-bold text-gray-900 group-hover:text-white transition-colors' }, formattedUsd),
+    React.createElement('span', { className: 'text-xs text-gray-400 font-normal group-hover:text-white/70 transition-colors' }, formattedKes)
+  );
 }
 
 export function createPaymentReference(bookingId) {
