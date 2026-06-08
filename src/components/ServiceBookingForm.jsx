@@ -588,7 +588,8 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
 	        vehicle_type: formData.vehicleType || "Standard", // Now from user selection
 	        service_category: config.label,
 	        status: "pending",
-	        payment_status: isQuoteOnlyService ? "awaiting_quote" : "unpaid",
+	        payment_status: reservationPaymentMethod === "cash" ? "unpaid" : "unpaid",
+	        payment_method: reservationPaymentMethod || "paystack",
 	        price_amount: pricing?.reservationFeeCents ?? null,
 	        total_price: pricing?.totalPriceCents ?? null,
 	        notes,
@@ -700,7 +701,7 @@ Thank you for booking with us!
 	        status: isQuoteOnlyService ? "Quote Pending" : "Active",
 	        flightNumber: bookingPayload.flight_number || null,
 	        paymentStatus: bookingPayload.payment_status,
-	        paymentMethod: bookingPayload.payment_method || null,
+	        paymentMethod: bookingPayload.payment_method || reservationPaymentMethod || "paystack",
 	        paymentStage: bookingPayload.payment_stage || null,
 	        reservationAmount,
 	        totalPriceAmount: pricing?.totalPriceCents ?? null,
@@ -1670,6 +1671,42 @@ Thank you for booking with us!
                 </div>
               )}
 
+              {/* Payment Method Selection (Pre-Booking) */}
+              {!isQuoteOnlyService && (
+                <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 mt-6">
+                  <label className="block text-sm font-semibold text-gray-900 mb-3">
+                    How would you like to pay? <span className="text-red-600">*</span>
+                  </label>
+                  <div className="grid gap-2 sm:grid-cols-3">
+                    {paymentMethodOptions.map((method) => {
+                      const Icon = paymentMethodIcons[method.value] || CreditCard;
+                      const isMpesa = method.value === "mpesa";
+                      const isSelected = reservationPaymentMethod === method.value;
+                      return (
+                        <button
+                          key={`pre-booking-${method.value}`}
+                          type="button"
+                          onClick={() => setReservationPaymentMethod(method.value)}
+                          aria-pressed={isSelected}
+                          className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold transition-all ${
+                            isSelected
+                              ? "border-[#C5A059] bg-[#C5A059]/10 text-[#1A1A1A]"
+                              : "border-gray-300 bg-white text-gray-700 hover:border-[#1A1A1A]"
+                          }`}
+                        >
+                          {isMpesa ? (
+                            <img src={mpesaIconSrc} alt="M-Pesa" className="h-4 w-4" />
+                          ) : (
+                            <Icon size={16} />
+                          )}
+                          <span>{method.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               {/* Submit Button */}
               <button
                 type="submit"
@@ -1683,7 +1720,7 @@ Thank you for booking with us!
                   </>
                 ) : (
                   <>
-                    Reserve/Book
+                    {reservationPaymentMethod === "cash" ? "Book Now" : "Continue to Payment"}
                   </>
                 )}
               </button>
@@ -1716,7 +1753,24 @@ Thank you for booking with us!
 	              </section>
 	            )}
 
-	            {!activeBooking?.quoteOnly && (
+	            {!activeBooking?.quoteOnly && activeBooking?.paymentMethod === "cash" && (
+	              <section className="bg-white rounded-xl border border-[#C5A059]/30 p-5 sm:p-8 shadow-[0_10px_28px_rgba(197,160,89,0.08)]">
+	                <div className="flex items-start gap-3">
+	                  <div className="mt-0.5 text-[#C5A059]"><Banknote size={20} /></div>
+	                  <div>
+	                    <h2 className="text-xl font-bold text-gray-900">Cash Payment</h2>
+	                    <p className="text-sm text-gray-600 mt-1">
+	                      Your booking is confirmed. You can pay <strong>{formatKesFromCents(activeBooking?.totalPriceAmount || 0)}</strong> in cash when the driver arrives.
+	                    </p>
+	                    <p className="text-xs text-gray-500 mt-2">
+	                      No deposit is required upfront.
+	                    </p>
+	                  </div>
+	                </div>
+	              </section>
+	            )}
+
+	            {!activeBooking?.quoteOnly && activeBooking?.paymentMethod !== "cash" && (
 	              <>
 	            <section className="bg-white rounded-xl border border-gray-200 p-5 sm:p-8 shadow-[0_10px_28px_rgba(15,23,42,0.05)]">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
