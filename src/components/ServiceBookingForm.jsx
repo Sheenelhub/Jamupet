@@ -1581,6 +1581,17 @@ Thank you for booking with us!
                   </div>
                   {tripEstimate ? (
                     <div className="px-4 pb-4">
+                      {/* Google Maps-style distance and time estimate */}
+                      <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2.5">
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs font-semibold text-blue-700 uppercase tracking-wider">Route Estimate</p>
+                        </div>
+                        <p className="text-lg font-bold text-blue-900 mt-1">
+                          {tripEstimate.durationMin}m <span className="text-gray-600">({tripEstimate.distanceKm} km)</span>
+                        </p>
+                        <p className="text-[10px] text-blue-600 mt-1 font-medium">Average driving time at 50 km/h</p>
+                      </div>
+
                       <div className="grid gap-2 text-center grid-cols-1 sm:grid-cols-2">
                         <div className="bg-white rounded-lg border border-gray-100 p-3 shadow-[0_6px_16px_rgba(15,23,42,0.04)]">
                           <p className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Total Fare</p>
