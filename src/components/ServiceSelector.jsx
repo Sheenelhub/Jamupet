@@ -1,38 +1,52 @@
-import { Plane, Hotel, MapPin, Heart, Camera } from "lucide-react";
+import { Plane, Hotel, MapPin, Heart, Camera, Clock, ShoppingBag } from "lucide-react";
 
 const SERVICES = [
   {
     id: "airport-transfer",
     name: "Airport Transfers",
-    description: "Punctual, stress-free arrivals at JKIA & Wilson.",
+    description: "Punctual, stress-free arrivals at JKIA & Wilson. Flat Rate: KES 5,000.",
     icon: Plane,
     iconColor: "#C5A059"
   },
   {
     id: "hotel-transfer",
     name: "Hotel Transfers",
-    description: "Seamless transit direct to your Nairobi accommodation.",
+    description: "Seamless transit direct to your Nairobi accommodation. Flat Rate: KES 5,000.",
     icon: Hotel,
+    iconColor: "#C5A059"
+  },
+  {
+    id: "full-day",
+    name: "Full Day Nairobi",
+    description: "8 hours of chauffeur-driven SUV service in Nairobi (up to 100km). Flat Rate: KES 12,000.",
+    icon: Clock,
+    iconColor: "#C5A059"
+  },
+  {
+    id: "excursion",
+    name: "Excursion",
+    description: "Errands, meetings, lunch, dinner, or shopping (max 3 hours). Flat Rate: KES 5,000.",
+    icon: ShoppingBag,
     iconColor: "#C5A059"
   },
   {
     id: "intercity-ride",
     name: "Intercity Rides",
-    description: "Safe, luxurious long-distance travel across Kenya.",
+    description: "Safe, luxurious long-distance travel across Kenya. (Custom Quote).",
     icon: MapPin,
     iconColor: "#C5A059"
   },
   {
     id: "wedding-travel",
     name: "Wedding Travel",
-    description: "Elegant transport for your special day.",
+    description: "Elegant transport for your special day. (Custom Quote).",
     icon: Heart,
     iconColor: "#C5A059"
   },
   {
     id: "safari-tour",
     name: "Safari Tours",
-    description: "Custom expeditions for locals and tourists.",
+    description: "Custom expeditions for locals and tourists. (Custom Quote).",
     icon: Camera,
     iconColor: "#C5A059"
   }
@@ -53,7 +67,7 @@ export default function ServiceSelector({ onSelectService }) {
         </div>
 
         {/* Service Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
           {SERVICES.map((service) => {
             const IconComponent = service.icon;
             return (

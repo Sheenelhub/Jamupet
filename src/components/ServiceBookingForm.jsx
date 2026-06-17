@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Calendar, Clock, MapPin, Users, Phone, ArrowLeft, AlertCircle, CheckCircle, Loader, Plane, Car, Hotel, Heart, Camera, CreditCard, Navigation, Crosshair, Shield, Info, Truck, Banknote } from "lucide-react";
+import { Calendar, Clock, MapPin, Users, Phone, ArrowLeft, ArrowRight, AlertCircle, CheckCircle, Loader, Plane, Car, Hotel, Heart, Camera, CreditCard, Navigation, Crosshair, Shield, Info, Truck, Banknote, ShoppingBag } from "lucide-react";
 import BookingMap from "./BookingMap";
 import { useDatabase } from "../hooks/useDatabase";
 import { useAuthContext } from "../context/AuthContext";
@@ -43,22 +43,15 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
   const [reservationPaymentMethod, setReservationPaymentMethod] = useState("paystack");
   const [finalPaymentMethod, setFinalPaymentMethod] = useState("paystack");
 
-    // Service icons mapping
+  // Service icons mapping
   const serviceIcons = {
     "airport-transfer": Plane,
     "hotel-transfer": Hotel,
     "intercity-ride": MapPin,
     "wedding-travel": Heart,
     "safari-tour": Camera,
-  };
-
-    // Vehicle type options for each service
-  const vehicleOptions = {
-    "airport-transfer": ["Economy Sedan", "Executive Sedan", "SUV (7-seater)", "Luxury Car"],
-    "hotel-transfer": ["Economy Sedan", "Executive Sedan", "SUV (7-seater)"],
-    "intercity-ride": ["Economy Sedan", "Executive Sedan", "SUV (7-seater)", "Van (14-seater)"],
-    "wedding-travel": ["Executive Sedan", "Luxury Car", "SUV (7-seater)", "Limousine"],
-    "safari-tour": ["SUV (7-seater)", "Land Cruiser", "Safari Van (15-seater)"],
+    "full-day": Clock,
+    "excursion": ShoppingBag,
   };
 
   // Service-specific field configurations
@@ -70,9 +63,7 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
         { name: "destination", label: "Destination", placeholder: "Your destination", required: true },
         { name: "flightNumber", label: "Flight Number (Optional)", placeholder: "e.g., KQ101", required: false },
         { name: "date", label: "Arrival Date", type: "date", required: true },
-        { name: "time", label: "Pickup Time", type: "time", required: true },
-        { name: "vehicleType", label: "Vehicle Type", type: "select", options: vehicleOptions["airport-transfer"], required: true },
-        { name: "passengers", label: "Passengers", type: "number", min: 1, max: 10, required: true }
+        { name: "time", label: "Pickup Time", type: "time", required: true }
       ]
     },
     "hotel-transfer": {
@@ -81,9 +72,7 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
         { name: "hotelName", label: "Hotel Name", placeholder: "Name of your hotel", required: true },
         { name: "destination", label: "Destination", placeholder: "Where are you arriving from?", required: true },
         { name: "checkInDate", label: "Check-in Date", type: "date", required: true },
-        { name: "checkInTime", label: "Check-in Time", type: "time", required: true },
-        { name: "vehicleType", label: "Vehicle Type", type: "select", options: vehicleOptions["hotel-transfer"], required: true },
-        { name: "passengers", label: "Passengers", type: "number", min: 1, max: 6, required: true }
+        { name: "checkInTime", label: "Check-in Time", type: "time", required: true }
       ]
     },
     "intercity-ride": {
@@ -92,40 +81,49 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
         { name: "pickup", label: "From", placeholder: "Starting location", required: true },
         { name: "destination", label: "To", placeholder: "Destination city", required: true },
         { name: "date", label: "Travel Date", type: "date", required: true },
-        { name: "time", label: "Departure Time", type: "time", required: true },
-        { name: "vehicleType", label: "Vehicle Type", type: "select", options: vehicleOptions["intercity-ride"], required: true },
-        { name: "passengers", label: "Passengers", type: "number", min: 1, max: 8, required: true }
+        { name: "time", label: "Departure Time", type: "time", required: true }
       ]
     },
     "wedding-travel": {
       label: "Wedding Travel",
       fields: [
-        { name: "pickup", label: "Pickup Location", placeholder: "Where should we pick you up?", required: true },
-        { name: "destination", label: "Destination / Venue", placeholder: "Wedding venue or drop-off location", required: true },
+        { name: "eventVenue", label: "Event Venue", placeholder: "Main venue location", required: true },
         { name: "eventDate", label: "Event Date", type: "date", required: true },
-        { name: "eventTime", label: "Event Time", type: "time", required: true },
-        { name: "vehicleType", label: "Vehicle Type", type: "select", options: vehicleOptions["wedding-travel"], required: true },
-        { name: "guestCount", label: "Guest Count", type: "number", min: 1, max: 20, required: true },
-        { name: "specialRequests", label: "Special Requests", placeholder: "e.g., flowers, decorations", required: false }
+        { name: "eventTime", label: "Start Time", type: "time", required: true }
       ]
     },
-	    "safari-tour": {
-	      label: "Safari Tour",
-	      fields: [
-	        { name: "pickup", label: "Start Location", placeholder: "e.g., Nairobi, JKIA, or your hotel", required: true },
-	        { name: "destination", label: "Safari Destination", placeholder: "e.g., Maasai Mara, Amboseli, Ol Pejeta", required: true },
-	        { name: "startDate", label: "Start Date", type: "date", required: true },
-	        { name: "startTime", label: "Start Time", type: "time", required: true },
-	        { name: "vehicleType", label: "Vehicle Type", type: "select", options: vehicleOptions["safari-tour"], required: true },
-        { name: "duration", label: "Duration (Days)", type: "number", min: 1, max: 7, required: true },
-        { name: "guestCount", label: "Guests", type: "number", min: 1, max: 20, required: true }
+    "safari-tour": {
+      label: "Safari Tours",
+      fields: [
+        { name: "pickup", label: "Pickup Location", placeholder: "Hotel or Airport", required: true },
+        { name: "destination", label: "Safari Destination", placeholder: "e.g., Maasai Mara", required: true },
+        { name: "startDate", label: "Start Date", type: "date", required: true },
+        { name: "duration", label: "Duration (Days)", type: "number", min: 1, max: 14, required: true }
+      ]
+    },
+    "full-day": {
+      label: "Full Day Nairobi",
+      fields: [
+        { name: "pickup", label: "Pickup Location", placeholder: "Where in Nairobi?", required: true },
+        { name: "date", label: "Date", type: "date", required: true },
+        { name: "time", label: "Start Time", type: "time", required: true }
+      ]
+    },
+    "excursion": {
+      label: "Excursion",
+      fields: [
+        { name: "pickup", label: "Pickup Location", placeholder: "Start Location", required: true },
+        { name: "destination", label: "Destination / Errands", placeholder: "e.g., Shopping Mall, Restaurant", required: true },
+        { name: "date", label: "Date", type: "date", required: true },
+        { name: "time", label: "Start Time", type: "time", required: true }
       ]
     }
   };
 
-	  const config = serviceFields[serviceType] || serviceFields["airport-transfer"];
-	  const isQuoteOnlyService = serviceType === "safari-tour";
+  const config = serviceFields[serviceType] || serviceFields["airport-transfer"];
+  const isQuoteOnlyService = ["safari-tour", "wedding-travel", "intercity-ride"].includes(serviceType);
   const [formData, setFormData] = useState({});
+  const [bookingStep, setBookingStep] = useState(1);
   const [formErrors, setFormErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null);
@@ -151,19 +149,6 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
   const [mpesaReceiptInput, setMpesaReceiptInput] = useState("");
   const [mpesaReceiptLoading, setMpesaReceiptLoading] = useState(false);
   const [dropPinMode, setDropPinMode] = useState(null);
-
-	  // Function to get vehicle capacity based on vehicle type
-	  const getVehicleCapacity = (vehicleType) => {
-	    if (!vehicleType) return 10; // Default fallback
-	    if (vehicleType.includes('7-seater')) return 7;
-	    if (vehicleType.includes('10-seater')) return 10;
-	    if (vehicleType.includes('14-seater') || vehicleType.includes('15-seater')) return 15;
-	    if (vehicleType.includes('Land Cruiser')) return 4;
-	    if (vehicleType.includes('Luxury') || vehicleType.includes('Executive')) return 4;
-	    if (vehicleType.includes('Limousine')) return 6;
-	    return 10; // Default for other types
-	  };
-
   const locationFieldPriority = ["pickup", "airport", "location", "destination", "hotelName", "eventVenue", "tourType"];
   const fieldNames = config.fields.map((field) => field.name);
   const resolvedLocationFields = (() => {
@@ -481,25 +466,7 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
   const handleChange = (e) => {
     const { name, value } = e.target;
     
-    // Auto-set time when flight number is entered (for airport transfers)
-    if (serviceType === "airport-transfer" && name === "flightNumber" && value.trim()) {
-      const now = new Date();
-      const currentTime = now.toLocaleTimeString('en-GB', { 
-        hour: '2-digit', 
-        minute: '2-digit',
-        hour12: false
-      });
-      
-      setFormData(prev => ({ 
-        ...prev, 
-        [name]: value,
-        time: currentTime,
-        // Also auto-set today's date for airport pickups
-        date: prev.date || new Date().toISOString().split('T')[0]
-      }));
-    } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
-    }
+    setFormData(prev => ({ ...prev, [name]: value }));
 
     if (isLocationField(name)) {
       if (name === resolvedLocationFields.pickupField) {
@@ -563,7 +530,7 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
 	            endQuery: destinationLocationValue,
 	            startCoords: pickupGps || locationCoords[resolvedLocationFields.pickupField],
 	            endCoords: locationCoords[resolvedLocationFields.dropoffField],
-	            vehicleType: formData.vehicleType || "Economy Sedan"
+	            serviceId: serviceType
 	          });
 
 	      const durationLabel = formData.duration
@@ -585,7 +552,7 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
         pickup_time: formData.time || formData.startTime || formData.checkInTime || formData.eventTime || "09:00", // Use selected time or default
 	        duration: durationLabel,
 	        passengers: parseInt(formData.passengers || formData.guestCount || "1"),
-	        vehicle_type: formData.vehicleType || "Standard", // Now from user selection
+	        vehicle_type: "SUV", // Fixed to SUV for flat rates
 	        service_category: config.label,
 	        status: "pending",
 	        payment_status: reservationPaymentMethod === "cash" ? "unpaid" : "unpaid",
@@ -685,8 +652,9 @@ Thank you for booking with us!
 	        type: "success",
 	        message: isQuoteOnlyService
 	          ? "Booking confirmed. Please wait for a quote to be processed."
-	          : `${config.label} booking confirmed. Proceed to payment to reserve this booking.`
+	          : "Booking confirmed. Proceed to payment to reserve this booking."
 	      });
+          setBookingStep(2); // Advance to Payment Step
 	      setActiveBooking({
         id: bid,
         service: config.label,
@@ -735,7 +703,7 @@ Thank you for booking with us!
     setActiveBooking(null);
     setBookingId(null);
     setPaymentFeedback(null);
-    setIsPaying(false);
+    setBookingStep(1);
     setPickupGps(null);
     setTripEstimate(null);
     setEstimateError(null);
@@ -1167,6 +1135,7 @@ Thank you for booking with us!
                 verifyResult?.message ||
                 `Payment verified successfully. Reference: ${reference}.`
             });
+            setBookingStep(3);
 
             if (paymentStage === "reservation") {
               try {
@@ -1234,7 +1203,6 @@ Thank you for booking with us!
         message: err.message
       });
      delete paymentProcessingRef.current[paymentKey];
-     setIsPaying(false);
     }
   };
 
@@ -1278,6 +1246,7 @@ Thank you for booking with us!
       setMpesaProcessing(false);
       setMpesaModalVisible(false);
       setMpesaRetryAvailable(false);
+      setBookingStep(3);
     } catch (err) {
       setPaymentFeedback({
         type: "error",
@@ -1296,10 +1265,9 @@ Thank you for booking with us!
   const paymentStatusValue = activeBooking?.paymentStatus || "unpaid";
   const paymentStatusIsPaid = ["reservation_paid", "paid"].includes(paymentStatusValue);
   const reservationPaymentDisabled =
-    isPaying ||
     ["reservation_paid", "paid", "reservation_pending"].includes(paymentStatusValue);
   const finalPaymentReady = ["reservation_paid", "final_pending"].includes(paymentStatusValue);
-  const finalPaymentDisabled = isPaying || paymentStatusValue === "paid" || !finalPaymentReady;
+  const finalPaymentDisabled = paymentStatusValue === "paid" || !finalPaymentReady;
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] pt-24 sm:pt-28 pb-14 sm:pb-20">
@@ -1315,13 +1283,40 @@ Thank you for booking with us!
 
         {/* Header with Icon */}
         <div className="mb-6 sm:mb-8">
-          <div className="booking-portal-enter flex items-start sm:items-center gap-3 sm:gap-4 mb-3">
+          <div className="booking-portal-enter flex items-start sm:items-center gap-3 sm:gap-4 mb-5">
             <div className="w-11 h-11 sm:w-12 sm:h-12 shrink-0 bg-[#C5A059] rounded-lg flex items-center justify-center shadow-[0_8px_20px_rgba(197,160,89,0.18)]">
               {React.createElement(serviceIcons[serviceType] || Plane, { size: 24, color: "white" })}
             </div>
             <div className="min-w-0">
               <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 leading-tight">{config.label}</h1>
               <p className="text-gray-500 text-sm">Complete your booking details below</p>
+            </div>
+          </div>
+
+          {/* Progress Step Indicator */}
+          <div className="flex items-center justify-center gap-0 mb-6 max-w-[240px] mx-auto">
+            {/* Step 1 */}
+            <div className="flex flex-col items-center gap-0.5">
+              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold border-2 transition-all duration-500 ${bookingStep >= 1 ? 'bg-green-500 border-green-500 text-white' : 'bg-white border-gray-300 text-gray-400'}`}>
+                {bookingStep > 1 ? <CheckCircle size={12} /> : '1'}
+              </div>
+              <span className={`text-[8px] font-semibold uppercase tracking-wide ${bookingStep === 1 ? 'text-green-600' : 'text-gray-400'}`}>Details</span>
+            </div>
+            <div className={`flex-1 h-[2px] mb-3 transition-colors duration-500 ${bookingStep >= 2 ? 'bg-green-400' : 'bg-gray-200'}`}></div>
+            {/* Step 2 */}
+            <div className="flex flex-col items-center gap-0.5">
+              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold border-2 transition-all duration-500 ${bookingStep >= 2 ? 'bg-green-500 border-green-500 text-white' : 'bg-white border-gray-300 text-gray-400'}`}>
+                {bookingStep > 2 ? <CheckCircle size={12} /> : '2'}
+              </div>
+              <span className={`text-[8px] font-semibold uppercase tracking-wide ${bookingStep === 2 ? 'text-green-600' : 'text-gray-400'}`}>Reserve</span>
+            </div>
+            <div className={`flex-1 h-[2px] mb-3 transition-colors duration-500 ${bookingStep >= 3 ? 'bg-green-400' : 'bg-gray-200'}`}></div>
+            {/* Step 3 */}
+            <div className="flex flex-col items-center gap-0.5">
+              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold border-2 transition-all duration-500 ${bookingStep >= 3 ? 'bg-green-500 border-green-500 text-white' : 'bg-white border-gray-300 text-gray-400'}`}>
+                {bookingStep >= 3 ? <CheckCircle size={12} /> : '3'}
+              </div>
+              <span className={`text-[8px] font-semibold uppercase tracking-wide ${bookingStep === 3 ? 'text-green-600' : 'text-gray-400'}`}>Confirmed</span>
             </div>
           </div>
         </div>
@@ -1331,7 +1326,7 @@ Thank you for booking with us!
 
         {/* LEFT PANEL — Form (Narrower on desktop) */}
         <div className="w-full lg:w-[520px] lg:flex-shrink-0 min-w-0">
-        {submitStatus?.type !== "success" ? (
+        {bookingStep === 1 ? (
           <form onSubmit={handleSubmit} className="booking-portal-enter bg-white rounded-xl border border-gray-200 shadow-[0_12px_34px_rgba(15,23,42,0.06)] p-4 sm:p-6 md:p-8 space-y-5">
             {/* Dynamic Service Fields */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -1651,6 +1646,16 @@ Thank you for booking with us!
                 />
               </div>
 
+              {/* Static Passenger Information */}
+              <div className="flex items-start gap-3 bg-gray-50 border border-gray-200 rounded-lg p-4 mt-2">
+                <Car size={20} className="text-[#C5A059] flex-shrink-0 mt-0.5" />
+                <div className="text-sm text-gray-700">
+                  <p className="font-semibold text-gray-900 mb-1">Luxury SUV</p>
+                  <p>Up to <span className="font-bold">7 pax</span> with light luggage</p>
+                  <p>Up to <span className="font-bold">4 pax</span> with large luggage</p>
+                </div>
+              </div>
+
               {/* Status Messages */}
               {submitStatus && (
                 <div
@@ -1671,42 +1676,6 @@ Thank you for booking with us!
                 </div>
               )}
 
-              {/* Payment Method Selection (Pre-Booking) */}
-              {!isQuoteOnlyService && (
-                <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 mt-6">
-                  <label className="block text-sm font-semibold text-gray-900 mb-3">
-                    How would you like to pay? <span className="text-red-600">*</span>
-                  </label>
-                  <div className="grid gap-2 sm:grid-cols-3">
-                    {paymentMethodOptions.map((method) => {
-                      const Icon = paymentMethodIcons[method.value] || CreditCard;
-                      const isMpesa = method.value === "mpesa";
-                      const isSelected = reservationPaymentMethod === method.value;
-                      return (
-                        <button
-                          key={`pre-booking-${method.value}`}
-                          type="button"
-                          onClick={() => setReservationPaymentMethod(method.value)}
-                          aria-pressed={isSelected}
-                          className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold transition-all ${
-                            isSelected
-                              ? "border-[#C5A059] bg-[#C5A059]/10 text-[#1A1A1A]"
-                              : "border-gray-300 bg-white text-gray-700 hover:border-[#1A1A1A]"
-                          }`}
-                        >
-                          {isMpesa ? (
-                            <img src={mpesaIconSrc} alt="M-Pesa" className="h-4 w-4" />
-                          ) : (
-                            <Icon size={16} />
-                          )}
-                          <span>{method.label}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
               {/* Submit Button */}
               <button
                 type="submit"
@@ -1720,12 +1689,13 @@ Thank you for booking with us!
                   </>
                 ) : (
                   <>
-                    {reservationPaymentMethod === "cash" ? "Book Now" : "Continue to Payment"}
+                    Next
+                    <ArrowRight size={18} />
                   </>
                 )}
               </button>
           </form>
-        ) : (
+        ) : bookingStep === 2 ? (
           <div className="space-y-6">
             <div className="booking-portal-enter bg-white rounded-xl border border-green-300 p-5 sm:p-8 shadow-[0_12px_34px_rgba(22,163,74,0.08)]">
               <div className="flex items-start gap-3 sm:gap-4">
@@ -1771,7 +1741,7 @@ Thank you for booking with us!
 	            )}
 
 	            {!activeBooking?.quoteOnly && activeBooking?.paymentMethod !== "cash" && (
-	              <>
+	              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
 	            <section className="bg-white rounded-xl border border-gray-200 p-5 sm:p-8 shadow-[0_10px_28px_rgba(15,23,42,0.05)]">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
                 <h2 className="text-xl font-bold text-gray-900">Active Booking</h2>
@@ -2068,90 +2038,52 @@ Thank you for booking with us!
 	                  : "Pay 20% Reservation"}
 	              </button>
 		            </section>
-		            </>
+		            </div>
 		            )}
 
-	            {/* Booking Action Buttons - Show after reservation */}
-	            <div className="mt-4 flex flex-col gap-3">
-              <a
-                href="/bookings"
-	                className="inline-flex items-center justify-center gap-2 rounded-lg px-4 py-3 bg-[#C5A059] hover:bg-[#1A1A1A] text-white font-semibold transition-all duration-300 ease-out hover:-translate-y-0.5 shadow-[0_8px_16px_rgba(197,160,89,0.16)] text-sm"
-              >
-                <CheckCircle size={16} />
-                View My Bookings
-              </a>
-	              {!activeBooking?.quoteOnly && (
-	                <section className="bg-white rounded-xl border border-gray-200 p-5 sm:p-8 shadow-[0_10px_28px_rgba(15,23,42,0.05)]">
-	                  <h2 className="text-xl font-bold text-gray-900 mb-4">Complete Payment Now</h2>
-	                  <div className="space-y-2 mb-6">
-	                    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide">Select Payment Method</label>
-	                    <div className="grid gap-3 w-full">
-	                      {paymentMethodOptions
-	                        .filter(method => method.value !== "cash")
-	                        .map((method) => {
-	                          const Icon = paymentMethodIcons[method.value] || CreditCard;
-	                          const isMpesa = method.value === "mpesa";
-	                          const isSelected = finalPaymentMethod === method.value;
-	                          return (
-	                            <button
-	                              key={`final-${method.value}`}
-	                              type="button"
-	                              onClick={() => setFinalPaymentMethod(method.value)}
-	                              aria-pressed={isSelected}
-	                              className={`w-full flex items-center gap-3 rounded-lg border-2 px-4 py-3 text-sm font-semibold transition-all ${
-	                                isSelected
-	                                  ? "border-[#C5A059] bg-[#C5A059]/10 text-[#1A1A1A]"
-	                                  : "border-gray-200 bg-gray-50 text-gray-700 hover:border-[#C5A059] hover:bg-white"
-	                              }`}
-	                            >
-	                              {isMpesa ? (
-	                                <img src={mpesaIconSrc} alt="M-Pesa" className="h-5 w-5 flex-shrink-0" />
-	                              ) : (
-	                                <Icon size={20} className="flex-shrink-0" />
-	                              )}
-	                              <div className="flex-1 text-left">
-	                                <span>{method.label}</span>
-	                              </div>
-	                              {isSelected && <CheckCircle size={20} className="text-[#C5A059]" />}
-	                            </button>
-	                          );
-	                        })}
-	                    </div>
-	                  </div>
-	                  <button
-	                    type="button"
-	                    disabled={finalPaymentDisabled}
-	                    onClick={() => handleBookingPayment("final")}
-	                    className="w-full inline-flex items-center justify-center gap-2 rounded-lg px-6 py-3 bg-[#C5A059] hover:bg-[#1A1A1A] text-white font-semibold transition-all duration-300 ease-out hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed text-sm shadow-[0_8px_16px_rgba(197,160,89,0.16)]"
-	                  >
-	                    {isPaying ? <Loader size={18} className="animate-spin" /> : <CreditCard size={18} />}
-	                    {paymentStatusValue === "paid" ? "Payment Complete" : "Complete Payment"}
-	                  </button>
-	                </section>
-	              )}
-	            </div>
-
-            <div className="flex flex-col md:flex-row gap-3 mt-4">
+	            {/* Step Navigation Arrows */}
+	            <div className="flex items-center justify-between mt-6">
               <button
                 type="button"
-                onClick={handleBookAnother}
-                className="rounded-lg px-6 py-3 bg-[#C5A059] hover:bg-[#1A1A1A] text-white font-semibold transition-all duration-300 ease-out hover:-translate-y-0.5 shadow-[0_8px_20px_rgba(197,160,89,0.16)]"
+                onClick={() => { setBookingStep(1); setSubmitStatus(null); }}
+                className="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 border border-gray-300 text-gray-700 hover:bg-gray-100 font-semibold text-sm transition-all"
               >
-                Book Another Ride
-              </button>
-              <button
-                type="button"
-                onClick={onBack}
-                className="rounded-lg px-6 py-3 border border-gray-300 text-gray-900 hover:bg-gray-100 font-semibold transition-all duration-300 ease-out hover:-translate-y-0.5"
-              >
-                Back to Services
+                <ArrowLeft size={16} />
+                Back
               </button>
             </div>
           </div>
-        )}
+        ) : bookingStep === 3 ? (
+          <div className="bg-white rounded-xl border border-green-300 p-8 shadow-[0_12px_34px_rgba(22,163,74,0.08)] text-center">
+            {/* Animated success circle */}
+            <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 ring-4 ring-green-200 ring-offset-2">
+              <CheckCircle size={48} className="text-green-600" />
+            </div>
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">Booking Confirmed!</h2>
+            <p className="text-green-700 font-semibold mb-2">Your reservation is secured.</p>
+            <p className="text-gray-500 mb-8 text-sm max-w-sm mx-auto">Your driver will be assigned and you'll receive details shortly. The remaining balance is settled directly with your driver after the trip.</p>
+            <div className="flex flex-col sm:flex-row justify-center gap-3">
+              <a
+                href="/bookings"
+                className="inline-flex items-center justify-center gap-2 rounded-lg px-8 py-3.5 bg-[#C5A059] hover:bg-[#1A1A1A] text-white font-bold transition-all duration-300 shadow-[0_8px_20px_rgba(197,160,89,0.25)] hover:-translate-y-0.5 text-base"
+              >
+                <CheckCircle size={18} />
+                View My Bookings
+              </a>
+              <button
+                type="button"
+                onClick={handleBookAnother}
+                className="inline-flex items-center justify-center gap-2 rounded-lg px-8 py-3.5 border-2 border-gray-200 text-gray-700 hover:border-gray-900 hover:bg-gray-50 font-semibold transition-all duration-300"
+              >
+                Book Another Service
+              </button>
+            </div>
+          </div>
+        ) : null}
         </div>{/* end left panel */}
 
         {/* RIGHT PANEL — Map (Larger) */}
+        {bookingStep === 1 && (
         <div className="w-full lg:flex-1 flex-shrink-0">
           <div className="lg:sticky lg:top-28 h-[300px] sm:h-[400px] lg:h-[calc(100vh-140px)]">
             <BookingMap
@@ -2168,6 +2100,7 @@ Thank you for booking with us!
             />
           </div>
         </div>
+        )}
 
         </div>{/* end split layout */}
       </div>

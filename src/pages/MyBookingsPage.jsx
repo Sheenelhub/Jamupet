@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Calendar, Clock, Car, MapPin, Loader, Pencil, Save, X, Ban, RotateCcw, AlertCircle, CheckCircle, Users } from "lucide-react";
+import { Calendar, Clock, Car, MapPin, Loader, Pencil, Save, X, Ban, RotateCcw, AlertCircle, CheckCircle, Users, AlertTriangle, CreditCard } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import { useAuthContext } from "../context/AuthContext";
 import {
@@ -623,6 +623,13 @@ export default function MyBookingsPage() {
     );
   }
 
+  const unpaidFinalBookings = bookings.filter(
+    (b) =>
+      b.status !== "cancelled" &&
+      b.payment_status === "reservation_paid" &&
+      b.status !== "completed"
+  );
+
   return (
     <div className="min-h-screen bg-[#FAFAFA] pt-32 pb-20 px-4 sm:px-6">
       <div className="max-w-5xl mx-auto">
@@ -640,6 +647,38 @@ export default function MyBookingsPage() {
             </div>
           )}
         </div>
+
+        {/* Unpaid Final Payment Notification */}
+        {unpaidFinalBookings.length > 0 && (
+          <div className="mb-6 rounded-xl border border-red-300 bg-red-50 p-4 flex items-start gap-4 shadow-sm">
+            <div className="mt-0.5 flex-shrink-0">
+              <span className="relative flex h-4 w-4">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-4 w-4 bg-red-600"></span>
+              </span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold text-red-800">
+                {unpaidFinalBookings.length} booking{unpaidFinalBookings.length > 1 ? 's' : ''} with outstanding final payment
+              </p>
+              <p className="text-xs text-red-600 mt-0.5">
+                The reservation fee has been paid. The remaining balance will be settled directly with your driver after each trip.
+              </p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {unpaidFinalBookings.map((b) => (
+                  <a
+                    key={b.id}
+                    href={`#booking-${b.id}`}
+                    className="text-xs font-semibold text-red-700 bg-red-100 border border-red-200 rounded-full px-3 py-1 hover:bg-red-200 transition-colors"
+                  >
+                    #{b.id.slice(0, 8)}… · {b.service_category || 'Trip'}
+                  </a>
+                ))}
+              </div>
+            </div>
+            <AlertTriangle size={20} className="text-red-500 flex-shrink-0 mt-0.5" />
+          </div>
+        )}
 
         {actionMessage && (
           <div
@@ -702,19 +741,25 @@ export default function MyBookingsPage() {
                         : "bg-yellow-50 text-yellow-700 border-yellow-200"
 
               return (
-                <article key={booking.id} className="bg-white rounded-xl border border-gray-200 shadow-[0_12px_34px_rgba(15,23,42,0.06)] p-5 sm:p-6 md:p-8 hover:shadow-[0_16px_40px_rgba(15,23,42,0.08)] transition-all duration-300 animate-fade-in">
+                <article key={booking.id} id={`booking-${booking.id}`} className="bg-white rounded-xl border border-gray-200 shadow-[0_12px_34px_rgba(15,23,42,0.06)] p-5 sm:p-6 md:p-8 hover:shadow-[0_16px_40px_rgba(15,23,42,0.08)] transition-all duration-300 animate-fade-in">
                   <div className="flex flex-wrap items-center justify-between gap-3 mb-5 pb-4 border-b border-gray-100">
                     <div>
                       <h2 className="text-xl font-bold text-gray-900">{booking.service_category || "Ride Booking"}</h2>
                       <p className="text-[10px] text-gray-400 font-mono mt-0.5 uppercase tracking-wider">ID: {booking.id}</p>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <span className={`px-2.5 py-0.5 text-xs font-semibold rounded border uppercase tracking-wider ${statusClass}`}>
                         {booking.status || "pending"}
                       </span>
                       <span className={`px-2.5 py-0.5 text-xs font-semibold rounded border uppercase tracking-wider ${paymentStatusClass}`}>
                         {booking.payment_status || "unpaid"}
                       </span>
+                      {booking.payment_status === "reservation_paid" && booking.status !== "completed" && booking.status !== "cancelled" && (
+                        <span className="flex items-center gap-1 px-2.5 py-0.5 text-xs font-bold rounded border bg-red-50 text-red-700 border-red-300 uppercase tracking-wider">
+                          <span className="inline-block w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
+                          Final Pmt Pending
+                        </span>
+                      )}
                     </div>
                   </div>
 

@@ -358,9 +358,26 @@ async function calculateMapboxDrivingRoute(start, end) {
   };
 }
 
-export async function calculateTripPricing({ startQuery, endQuery, startCoords, endCoords, vehicleType = "Economy Sedan" }) {
-  const startPoint = startCoords ?? (await geocodeLocation(startQuery));
-  const endPoint = endCoords ?? (await geocodeLocation(endQuery));
+export async function calculateTripPricing({ startQuery, endQuery, startCoords, endCoords, serviceId }) {
+  // Flat rate definitions
+  const FLAT_RATES = {
+    "full-day": 12000 * 100, // 12,000 KES in cents
+    "excursion": 5000 * 100,  // 5,000 KES in cents
+    "airport-transfer": 5000 * 100,
+    "hotel-transfer": 5000 * 100,
+  };
+
+  const isFlatRateService = serviceId && FLAT_RATES[serviceId] !== undefined;
+
+  // We can skip geocoding if it's a flat rate service and we don't necessarily need distance
+  let startPoint = startCoords;
+  let endPoint = endCoords;
+  
+  if (!isFlatRateService) {
+    startPoint = startPoint || (await geocodeLocation(startQuery));
+    endPoint = endPoint || (await geocodeLocation(endQuery));
+  }
+  
   let distanceKm;
   let durationMin = null;
   let usedRoadDistance = false;
@@ -388,29 +405,24 @@ export async function calculateTripPricing({ startQuery, endQuery, startCoords, 
     durationMin = Math.round(distanceKm * 2.2); // ~50 km/h average drive speed in Kenya
   }
   
-  const multiplier = VEHICLE_MULTIPLIERS[vehicleType] || 1.0;
-  
-  // Base price: KES 1000 base fare (includes up to 3 km), plus KES 130/km for distance > 3 km, plus KES 20/minute
-  const extraKm = Math.max(0, distanceKm - BASE_DISTANCE_KM);
-  const distanceChargeCents = Math.round(extraKm * KES_CENTS_PER_KM);
-  const timeChargeCents = (durationMin || 0) * KES_CENTS_PER_MINUTE;
-  const basePriceCents = BASE_FARE_CENTS + distanceChargeCents + timeChargeCents;
-  const totalPriceCents = Math.round(basePriceCents * multiplier);
+  // All services now use flat rates or default to 5000 if not specified (for standard transfers)
+  const totalPriceCents = isFlatRateService ? FLAT_RATES[serviceId] : 5000 * 100;
+  const basePriceCents = totalPriceCents;
   
   const reservationFeeCents = getReservationAmount(totalPriceCents);
   const finalPaymentCents = totalPriceCents - reservationFeeCents;
 
   return {
-    startPoint,
-    endPoint,
-    distanceKm: Number(distanceKm.toFixed(2)),
-    durationMin,
-    usedRoadDistance,
+    startPoint: startPoint || { label: startQuery, latitude: 0, longitude: 0 },
+    endPoint: endPoint || { label: endQuery, latitude: 0, longitude: 0 },
+    distanceKm: Number((distanceKm || 0).toFixed(2)),
+    durationMin: durationMin || 0,
+    usedRoadDistance: usedRoadDistance || false,
     basePriceCents,
     totalPriceCents,
     reservationFeeCents,
     finalPaymentCents,
-    multiplier
+    multiplier: 1.0
   };
 }
 
