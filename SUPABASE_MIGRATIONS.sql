@@ -207,26 +207,24 @@ DROP POLICY IF EXISTS "Admins can view own admin row" ON admin_users;
 CREATE POLICY "Admins can view own admin row" ON admin_users
   FOR SELECT USING (auth.uid() = user_id);
 
+-- Create a security definer function to avoid infinite recursion when policies query their own table
+CREATE OR REPLACE FUNCTION public.is_super_admin()
+RETURNS boolean AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1
+    FROM admin_users
+    WHERE user_id = auth.uid()
+      AND role = 'super_admin'
+      AND is_active = TRUE
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
 DROP POLICY IF EXISTS "Super admins can manage admin users" ON admin_users;
 CREATE POLICY "Super admins can manage admin users" ON admin_users
-  FOR ALL USING (
-    EXISTS (
-      SELECT 1
-      FROM admin_users AS super_admins
-      WHERE super_admins.user_id = auth.uid()
-        AND super_admins.role = 'super_admin'
-        AND super_admins.is_active = TRUE
-    )
-  )
-  WITH CHECK (
-    EXISTS (
-      SELECT 1
-      FROM admin_users AS super_admins
-      WHERE super_admins.user_id = auth.uid()
-        AND super_admins.role = 'super_admin'
-        AND super_admins.is_active = TRUE
-    )
-  );
+  FOR ALL USING ( public.is_super_admin() )
+  WITH CHECK ( public.is_super_admin() );
 
 -- RLS Policies for drivers
 DROP POLICY IF EXISTS "Agents can view available drivers" ON drivers;

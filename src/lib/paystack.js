@@ -358,10 +358,27 @@ async function calculateMapboxDrivingRoute(start, end) {
   };
 }
 
-export async function calculateTripPricing({ serviceType, startQuery, endQuery, startCoords, endCoords }) {
-  let startPoint = null;
-  let endPoint = null;
-  let distanceKm = 0;
+export async function calculateTripPricing({ startQuery, endQuery, startCoords, endCoords, serviceId }) {
+  // Flat rate definitions
+  const FLAT_RATES = {
+    "full-day": 12000 * 100, // 12,000 KES in cents
+    "excursion": 5000 * 100,  // 5,000 KES in cents
+    "airport-transfer": 5000 * 100,
+    "hotel-transfer": 5000 * 100,
+  };
+
+  const isFlatRateService = serviceId && FLAT_RATES[serviceId] !== undefined;
+
+  // We can skip geocoding if it's a flat rate service and we don't necessarily need distance
+  let startPoint = startCoords;
+  let endPoint = endCoords;
+  
+  if (!isFlatRateService) {
+    startPoint = startPoint || (await geocodeLocation(startQuery));
+    endPoint = endPoint || (await geocodeLocation(endQuery));
+  }
+  
+  let distanceKm;
   let durationMin = null;
   let usedRoadDistance = false;
 
@@ -398,33 +415,20 @@ export async function calculateTripPricing({ serviceType, startQuery, endQuery, 
   } catch (err) {
     console.warn("Geocoding/routing failed:", err.message);
   }
-
-  // Flat Rate pricing:
-  // Airport & Hotel Transfers: KES 5,000
-  // Full Day Nairobi (8hrs / up to 100km): KES 12,000
-  // Excursion (up to 3hrs): KES 5,000
-  let totalPriceCents = 5000 * 100; // Default fallback: KES 5,000
-
-  const cleanServiceType = (serviceType || "").toLowerCase().trim();
-  if (cleanServiceType === "full-day" || cleanServiceType.includes("full day") || cleanServiceType.includes("chauffeur")) {
-    totalPriceCents = 12000 * 100;
-  } else if (cleanServiceType === "excursion" || cleanServiceType.includes("excursion")) {
-    totalPriceCents = 5000 * 100;
-  } else {
-    // airport-transfer, hotel-transfer, and all others default to 5000
-    totalPriceCents = 5000 * 100;
-  }
-
+  
+  // All services now use flat rates or default to 5000 if not specified (for standard transfers)
+  const totalPriceCents = isFlatRateService ? FLAT_RATES[serviceId] : 5000 * 100;
   const basePriceCents = totalPriceCents;
+  
   const reservationFeeCents = getReservationAmount(totalPriceCents);
   const finalPaymentCents = totalPriceCents - reservationFeeCents;
 
   return {
-    startPoint,
-    endPoint,
-    distanceKm: Number(distanceKm.toFixed(2)),
-    durationMin,
-    usedRoadDistance,
+    startPoint: startPoint || { label: startQuery, latitude: 0, longitude: 0 },
+    endPoint: endPoint || { label: endQuery, latitude: 0, longitude: 0 },
+    distanceKm: Number((distanceKm || 0).toFixed(2)),
+    durationMin: durationMin || 0,
+    usedRoadDistance: usedRoadDistance || false,
     basePriceCents,
     totalPriceCents,
     reservationFeeCents,

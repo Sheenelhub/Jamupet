@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Calendar, Clock, Car, MapPin, Loader, Pencil, Save, X, Ban, RotateCcw, AlertCircle, CheckCircle, Users } from "lucide-react";
+import { Calendar, Clock, Car, MapPin, Loader, Pencil, Save, X, Ban, RotateCcw, AlertCircle, CheckCircle, Users, AlertTriangle, CreditCard } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import { useAuthContext } from "../context/AuthContext";
 import {
@@ -641,6 +641,16 @@ export default function MyBookingsPage() {
           )}
         </div>
 
+        {/* Final Payment Reminder - simple golden notice */}
+        {bookings.some(b => b.payment_status === 'reservation_paid' && b.status !== 'completed' && b.status !== 'cancelled') && (
+          <div className="mb-6 flex items-center gap-3 rounded-xl border border-[#C5A059]/40 bg-[#C5A059]/8 px-5 py-3.5 shadow-sm">
+            <span className="flex-shrink-0 w-2 h-2 rounded-full bg-[#C5A059] animate-pulse"></span>
+            <p className="text-sm text-[#7A5E2A] font-medium">
+              You have bookings with an outstanding final balance — your chauffeur will guide you on how to complete payment after your trip.
+            </p>
+          </div>
+        )}
+
         {actionMessage && (
           <div
             className={`rounded-xl p-4 mb-6 flex items-start gap-3 border shadow-[0_8px_20px_rgba(15,23,42,0.04)] ${
@@ -702,19 +712,25 @@ export default function MyBookingsPage() {
                         : "bg-yellow-50 text-yellow-700 border-yellow-200"
 
               return (
-                <article key={booking.id} className="bg-white rounded-xl border border-gray-200 shadow-[0_12px_34px_rgba(15,23,42,0.06)] p-5 sm:p-6 md:p-8 hover:shadow-[0_16px_40px_rgba(15,23,42,0.08)] transition-all duration-300 animate-fade-in">
+                <article key={booking.id} id={`booking-${booking.id}`} className="bg-white rounded-xl border border-gray-200 shadow-[0_12px_34px_rgba(15,23,42,0.06)] p-5 sm:p-6 md:p-8 hover:shadow-[0_16px_40px_rgba(15,23,42,0.08)] transition-all duration-300 animate-fade-in">
                   <div className="flex flex-wrap items-center justify-between gap-3 mb-5 pb-4 border-b border-gray-100">
                     <div>
                       <h2 className="text-xl font-bold text-gray-900">{booking.service_category || "Ride Booking"}</h2>
                       <p className="text-[10px] text-gray-400 font-mono mt-0.5 uppercase tracking-wider">ID: {booking.id}</p>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <span className={`px-2.5 py-0.5 text-xs font-semibold rounded border uppercase tracking-wider ${statusClass}`}>
                         {booking.status || "pending"}
                       </span>
                       <span className={`px-2.5 py-0.5 text-xs font-semibold rounded border uppercase tracking-wider ${paymentStatusClass}`}>
                         {booking.payment_status || "unpaid"}
                       </span>
+                      {booking.payment_status === "reservation_paid" && booking.status !== "completed" && booking.status !== "cancelled" && (
+                        <span className="flex items-center gap-1 px-2.5 py-0.5 text-xs font-bold rounded border bg-red-50 text-red-700 border-red-300 uppercase tracking-wider">
+                          <span className="inline-block w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
+                          Final Pmt Pending
+                        </span>
+                      )}
                     </div>
                   </div>
 

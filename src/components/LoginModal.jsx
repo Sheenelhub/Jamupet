@@ -216,7 +216,7 @@ export default function LoginModal({ isOpen, onClose }) {
               {view === "signup" ? "Create Account" : view === "signin" ? "Sign In" : "Welcome"}
             </h2>
             <p className="text-white/60 text-sm">
-              {view === "signup" ? "Join Roam Kenya" : view === "signin" ? "Welcome back" : "to Roam Kenya"}
+              {view === "signup" ? "Join Jamupet" : view === "signin" ? "Welcome back" : "to Jamupet"}
             </p>
           </div>
 
@@ -243,7 +243,7 @@ export default function LoginModal({ isOpen, onClose }) {
                       <UserPlus size={20} />
                       <div className="text-left">
                         <p className="font-bold text-sm">Create Account</p>
-                        <p className="text-[11px] opacity-60">New to Roam Kenya?</p>
+                        <p className="text-[11px] opacity-60">New to Jamupet?</p>
                       </div>
                     </div>
                     <span className="text-lg opacity-0 group-hover:opacity-100 transition-all">→</span>
