@@ -50,7 +50,7 @@ function AppContent({ isLoading }) {
         </div>
       )}
 
-      <main className="relative z-0 pt-24">
+      <main className={`relative z-0 ${!isAdminRoute ? 'pt-24' : ''}`}>
         <Routes>
           <Route path="/" element={
             <>

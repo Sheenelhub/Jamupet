@@ -148,10 +148,10 @@ export default function AuthPage() {
           <div className="text-center mb-8">
             <div className="flex items-center justify-center gap-2 mb-4">
               <div className="w-12 h-12 bg-[#B35A38] rounded-full flex items-center justify-center font-bold text-xl text-white shadow-lg shadow-[#B35A38]/30">
-                R
+                J
               </div>
             </div>
-            <h1 className="text-3xl font-bold text-white mb-2">Roam Kenya</h1>
+            <h1 className="text-3xl font-bold text-white mb-2">Jamupet</h1>
             <p className="text-white/60 text-sm">
               {isSignUp ? 'Create your account' : 'Welcome back'}
             </p>

@@ -34,7 +34,7 @@ export default function AdminLayout({ children }) {
             }`}
           >
             <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">
-              <span className="text-lg font-semibold text-gray-900">Roam Kenya Admin</span>
+              <span className="text-lg font-semibold text-gray-900">Jamupet Admin</span>
               <button
                 type="button"
                 className="lg:hidden p-2 rounded-md text-gray-700 hover:bg-gray-100"
@@ -91,7 +91,7 @@ export default function AdminLayout({ children }) {
                   <Menu className="h-5 w-5" />
                 </button>
               )}
-              <h1 className="text-lg font-semibold text-gray-900">Roam Kenya Admin</h1>
+              <h1 className="text-lg font-semibold text-gray-900">Jamupet Admin</h1>
             </div>
             <div className="flex items-center gap-3">
               <div className="hidden sm:flex items-center gap-2 text-sm text-gray-600">
