@@ -134,7 +134,8 @@ serve(async (req) => {
       .maybeSingle();
 
     if (bookingError || !booking) {
-      return new Response(JSON.stringify({ success: false, error: "Booking not found." }), {
+      console.error("Booking lookup failed:", { bookingError, bookingId, userId });
+      return new Response(JSON.stringify({ success: false, error: "Booking not found. Please ensure your booking was saved before paying." }), {
         status: 404,
         headers: corsHeaders
       });
@@ -184,7 +185,7 @@ serve(async (req) => {
         PhoneNumber: normalizedPhone,
         CallBackURL: callbackUrl,
         AccountReference: reference,
-        TransactionDesc: `Roam Kenya ${paymentStage} payment`
+        TransactionDesc: `Jamupet ${paymentStage} payment`
       })
     });
 

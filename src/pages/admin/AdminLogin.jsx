@@ -55,12 +55,12 @@ export default function AdminLogin() {
       <div className="w-full max-w-md bg-white shadow-lg rounded-lg p-8">
         <div className="flex items-center justify-center mb-6">
           <div className="h-12 w-12 rounded-full bg-[#B35A38] text-white flex items-center justify-center font-semibold">
-            RK
+            JP
           </div>
         </div>
         <h1 className="text-2xl font-semibold text-center text-gray-900">Admin Access</h1>
         <p className="text-sm text-gray-500 text-center mt-2">
-          Sign in to manage Roam Kenya operations.
+          Sign in to manage Jamupet operations.
         </p>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
