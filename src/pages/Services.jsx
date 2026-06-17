@@ -124,66 +124,66 @@ export default function Services() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
-            {/* Standard Tier */}
+            {/* Transfers Card */}
             <div className="bg-white p-10 rounded-[2.5rem] border border-gray-100 relative group hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(0,0,0,0.05)] hover:border-[#C5A059]/30 transition-all duration-500 shadow-sm">
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">Executive Sedan</h3>
-              <p className="text-gray-500 text-sm mb-8 font-light">Perfect for city meetings & airport drops.</p>
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">Transfers</h3>
+              <p className="text-gray-500 text-sm mb-8 font-light">Punctual drop-offs & pick-ups for airport & hotels.</p>
               <div className="mb-10">
-                <span className="text-4xl font-black text-gray-900">Flexible</span>
-                <span className="text-gray-400 text-xs tracking-widest uppercase block mt-2">Hourly & Airport Rates</span>
+                <span className="text-4xl font-black text-gray-900">KES 5,000</span>
+                <span className="text-gray-400 text-xs tracking-widest uppercase block mt-2">Flat Rate per Transfer</span>
               </div>
               <ul className="space-y-4 mb-10">
-                {['Up to 3 Passengers', 'Pristine, air-conditioned comfort', 'Professional Chauffeur', 'Complimentary Bottled Water'].map((feature, i) => (
+                {['Premium SUV Chauffeur', 'Complimentary waiting time', 'Professional meet & greet', 'Complimentary Bottled Water'].map((feature, i) => (
                   <li key={i} className="flex items-center gap-3 text-sm text-gray-600 font-light">
                     <CheckCircle2 size={16} className="text-[#C5A059]" /> {feature}
                   </li>
                 ))}
               </ul>
-              <button onClick={() => navigate("/booking", { state: { type: "Sedan Rental" }})} className="w-full py-4 rounded-xl border border-gray-200 text-gray-900 font-bold hover:bg-[#C5A059] hover:border-[#C5A059] hover:text-white transition-colors text-xs uppercase tracking-widest bg-gray-50">
-                Book Sedan
+              <button onClick={() => navigate("/booking")} className="w-full py-4 rounded-xl border border-gray-200 text-gray-900 font-bold hover:bg-[#C5A059] hover:border-[#C5A059] hover:text-white transition-colors text-xs uppercase tracking-widest bg-gray-50">
+                Book Transfer
               </button>
             </div>
 
-            {/* Featured Tier */}
+            {/* Full Day Nairobi Card */}
             <div className="bg-white p-10 md:p-12 rounded-[2.5rem] shadow-[0_20px_60px_-15px_rgba(197,160,89,0.2)] relative transform lg:-translate-y-6 border border-[#C5A059]/30 group hover:-translate-y-8 transition-all duration-500 z-10">
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#C5A059] text-white text-[10px] font-bold uppercase tracking-widest px-6 py-2 rounded-full shadow-lg flex items-center gap-2">
-                <Star size={12} fill="white" /> Most Popular
+                <Star size={12} fill="white" /> Best Value
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2 text-center">Luxury SUV</h3>
-              <p className="text-gray-500 text-sm mb-8 font-light text-center">Ideal for intercity rides & corporate teams.</p>
+              <h3 className="text-2xl font-bold text-gray-900 mb-2 text-center">Full Day Nairobi</h3>
+              <p className="text-gray-500 text-sm mb-8 font-light text-center">8 hours chauffeur-driven service within Nairobi & environs.</p>
               <div className="mb-10 text-center">
-                <span className="text-5xl font-black text-[#C5A059]">Custom</span>
-                <span className="text-gray-400 text-xs tracking-widest uppercase block mt-3">Daily / Hourly available</span>
+                <span className="text-5xl font-black text-[#C5A059]">KES 12,000</span>
+                <span className="text-gray-400 text-xs tracking-widest uppercase block mt-3">8 Hours & Up to 100kms</span>
               </div>
               <ul className="space-y-4 mb-10">
-                {['Up to 7 Passengers', 'Superior legroom & luggage space', 'Elite, discreet chauffeurs', 'Free Wi-Fi & Refreshments', 'Priority Booking Status'].map((feature, i) => (
+                {['Premium SUV Fleet Only', 'Elite, professional local chauffeurs', 'Flexible routing & unlimited stops', 'Free Wi-Fi & Refreshments', 'Priority Booking Status'].map((feature, i) => (
                   <li key={i} className="flex items-center gap-3 text-sm text-gray-700 font-light">
                     <CheckCircle2 size={16} className="text-[#C5A059]" /> {feature}
                   </li>
                 ))}
               </ul>
-              <button onClick={() => navigate("/booking", { state: { type: "SUV Rental" }})} className="w-full py-4 rounded-xl bg-[#C5A059] text-white font-bold hover:bg-gray-900 transition-colors text-xs uppercase tracking-widest shadow-lg">
-                Book Luxury SUV
+              <button onClick={() => navigate("/booking")} className="w-full py-4 rounded-xl bg-[#C5A059] text-white font-bold hover:bg-gray-900 transition-colors text-xs uppercase tracking-widest shadow-lg">
+                Book Full Day
               </button>
             </div>
 
-            {/* Premium Tier */}
+            {/* Excursion & Custom Card */}
             <div className="bg-white p-10 rounded-[2.5rem] border border-gray-100 relative group hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(0,0,0,0.05)] hover:border-[#C5A059]/30 transition-all duration-500 shadow-sm">
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">Safari Class</h3>
-              <p className="text-gray-500 text-sm mb-8 font-light">Designed for special events & expeditions.</p>
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">Excursion & Custom</h3>
+              <p className="text-gray-500 text-sm mb-8 font-light">Short errands or tailor-made safari itineraries.</p>
               <div className="mb-10">
-                <span className="text-4xl font-black text-gray-900">Per Trip</span>
-                <span className="text-gray-400 text-xs tracking-widest uppercase block mt-2">Based on exact itinerary</span>
+                <span className="text-4xl font-black text-gray-900">From KES 5,000</span>
+                <span className="text-gray-400 text-xs tracking-widest uppercase block mt-2">Excursions & Safaris</span>
               </div>
               <ul className="space-y-4 mb-10">
-                {['Modified Safari Vans/Cruisers', 'Pristine Wedding Fleet', 'Expert driver-guides available', 'Custom Routing & Safaris'].map((feature, i) => (
+                {['Excursions (Max 3 hrs) KES 5,000', 'Dinner, shopping & quick errands', 'Custom Safari itineraries', 'Wedding travel & special events'].map((feature, i) => (
                   <li key={i} className="flex items-center gap-3 text-sm text-gray-600 font-light">
                     <CheckCircle2 size={16} className="text-[#C5A059]" /> {feature}
                   </li>
                 ))}
               </ul>
-              <button onClick={() => navigate("/booking", { state: { type: "Specialty Rental" }})} className="w-full py-4 rounded-xl border border-gray-200 text-gray-900 font-bold hover:bg-[#C5A059] hover:border-[#C5A059] hover:text-white transition-colors text-xs uppercase tracking-widest bg-gray-50">
-                Request Quote
+              <button onClick={() => navigate("/booking")} className="w-full py-4 rounded-xl border border-gray-200 text-gray-900 font-bold hover:bg-[#C5A059] hover:border-[#C5A059] hover:text-white transition-colors text-xs uppercase tracking-widest bg-gray-50">
+                Book Excursion
               </button>
             </div>
           </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Calendar, Clock, MapPin, Users, Phone, ArrowLeft, AlertCircle, CheckCircle, Loader, Plane, Car, Hotel, Heart, Camera, CreditCard, Navigation, Crosshair, Shield, Info, Truck, Banknote } from "lucide-react";
+import { Calendar, Clock, MapPin, Users, Phone, ArrowLeft, AlertCircle, CheckCircle, Loader, Plane, Car, Hotel, Heart, Camera, CreditCard, Navigation, Crosshair, Shield, Info, Truck, Banknote, ShoppingBag } from "lucide-react";
 import BookingMap from "./BookingMap";
 import { useDatabase } from "../hooks/useDatabase";
 import { useAuthContext } from "../context/AuthContext";
@@ -43,22 +43,15 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
   const [reservationPaymentMethod, setReservationPaymentMethod] = useState("paystack");
   const [finalPaymentMethod, setFinalPaymentMethod] = useState("paystack");
 
-    // Service icons mapping
+  // Service icons mapping
   const serviceIcons = {
     "airport-transfer": Plane,
     "hotel-transfer": Hotel,
+    "full-day": Clock,
+    "excursion": ShoppingBag,
     "intercity-ride": MapPin,
     "wedding-travel": Heart,
     "safari-tour": Camera,
-  };
-
-    // Vehicle type options for each service
-  const vehicleOptions = {
-    "airport-transfer": ["Economy Sedan", "Executive Sedan", "SUV (7-seater)", "Luxury Car"],
-    "hotel-transfer": ["Economy Sedan", "Executive Sedan", "SUV (7-seater)"],
-    "intercity-ride": ["Economy Sedan", "Executive Sedan", "SUV (7-seater)", "Van (14-seater)"],
-    "wedding-travel": ["Executive Sedan", "Luxury Car", "SUV (7-seater)", "Limousine"],
-    "safari-tour": ["SUV (7-seater)", "Land Cruiser", "Safari Van (15-seater)"],
   };
 
   // Service-specific field configurations
@@ -71,8 +64,7 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
         { name: "flightNumber", label: "Flight Number (Optional)", placeholder: "e.g., KQ101", required: false },
         { name: "date", label: "Arrival Date", type: "date", required: true },
         { name: "time", label: "Pickup Time", type: "time", required: true },
-        { name: "vehicleType", label: "Vehicle Type", type: "select", options: vehicleOptions["airport-transfer"], required: true },
-        { name: "passengers", label: "Passengers", type: "number", min: 1, max: 10, required: true }
+        { name: "passengers", label: "Passengers", type: "number", min: 1, max: 7, required: true }
       ]
     },
     "hotel-transfer": {
@@ -82,8 +74,26 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
         { name: "destination", label: "Destination", placeholder: "Where are you arriving from?", required: true },
         { name: "checkInDate", label: "Check-in Date", type: "date", required: true },
         { name: "checkInTime", label: "Check-in Time", type: "time", required: true },
-        { name: "vehicleType", label: "Vehicle Type", type: "select", options: vehicleOptions["hotel-transfer"], required: true },
-        { name: "passengers", label: "Passengers", type: "number", min: 1, max: 6, required: true }
+        { name: "passengers", label: "Passengers", type: "number", min: 1, max: 7, required: true }
+      ]
+    },
+    "full-day": {
+      label: "Full Day Nairobi",
+      fields: [
+        { name: "pickup", label: "Pickup Location", placeholder: "Where should we pick you up?", required: true },
+        { name: "date", label: "Booking Date", type: "date", required: true },
+        { name: "time", label: "Pickup Time", type: "time", required: true },
+        { name: "passengers", label: "Passengers", type: "number", min: 1, max: 7, required: true }
+      ]
+    },
+    "excursion": {
+      label: "Excursion",
+      fields: [
+        { name: "pickup", label: "Pickup Location", placeholder: "Starting location", required: true },
+        { name: "destination", label: "Destination / Errands", placeholder: "e.g. Dinner, Shopping, or Meetings", required: true },
+        { name: "date", label: "Booking Date", type: "date", required: true },
+        { name: "time", label: "Pickup Time", type: "time", required: true },
+        { name: "passengers", label: "Passengers", type: "number", min: 1, max: 7, required: true }
       ]
     },
     "intercity-ride": {
@@ -93,8 +103,7 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
         { name: "destination", label: "To", placeholder: "Destination city", required: true },
         { name: "date", label: "Travel Date", type: "date", required: true },
         { name: "time", label: "Departure Time", type: "time", required: true },
-        { name: "vehicleType", label: "Vehicle Type", type: "select", options: vehicleOptions["intercity-ride"], required: true },
-        { name: "passengers", label: "Passengers", type: "number", min: 1, max: 8, required: true }
+        { name: "passengers", label: "Passengers", type: "number", min: 1, max: 7, required: true }
       ]
     },
     "wedding-travel": {
@@ -104,27 +113,25 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
         { name: "destination", label: "Destination / Venue", placeholder: "Wedding venue or drop-off location", required: true },
         { name: "eventDate", label: "Event Date", type: "date", required: true },
         { name: "eventTime", label: "Event Time", type: "time", required: true },
-        { name: "vehicleType", label: "Vehicle Type", type: "select", options: vehicleOptions["wedding-travel"], required: true },
-        { name: "guestCount", label: "Guest Count", type: "number", min: 1, max: 20, required: true },
+        { name: "guestCount", label: "Guest Count", type: "number", min: 1, max: 7, required: true },
         { name: "specialRequests", label: "Special Requests", placeholder: "e.g., flowers, decorations", required: false }
       ]
     },
-	    "safari-tour": {
-	      label: "Safari Tour",
-	      fields: [
-	        { name: "pickup", label: "Start Location", placeholder: "e.g., Nairobi, JKIA, or your hotel", required: true },
-	        { name: "destination", label: "Safari Destination", placeholder: "e.g., Maasai Mara, Amboseli, Ol Pejeta", required: true },
-	        { name: "startDate", label: "Start Date", type: "date", required: true },
-	        { name: "startTime", label: "Start Time", type: "time", required: true },
-	        { name: "vehicleType", label: "Vehicle Type", type: "select", options: vehicleOptions["safari-tour"], required: true },
+    "safari-tour": {
+      label: "Safari Tour",
+      fields: [
+        { name: "pickup", label: "Start Location", placeholder: "e.g., Nairobi, JKIA, or your hotel", required: true },
+        { name: "destination", label: "Safari Destination", placeholder: "e.g., Maasai Mara, Amboseli, Ol Pejeta", required: true },
+        { name: "startDate", label: "Start Date", type: "date", required: true },
+        { name: "startTime", label: "Start Time", type: "time", required: true },
         { name: "duration", label: "Duration (Days)", type: "number", min: 1, max: 7, required: true },
-        { name: "guestCount", label: "Guests", type: "number", min: 1, max: 20, required: true }
+        { name: "guestCount", label: "Guests", type: "number", min: 1, max: 7, required: true }
       ]
     }
   };
 
-	  const config = serviceFields[serviceType] || serviceFields["airport-transfer"];
-	  const isQuoteOnlyService = serviceType === "safari-tour";
+  const config = serviceFields[serviceType] || serviceFields["airport-transfer"];
+  const isQuoteOnlyService = ["safari-tour", "wedding-travel", "intercity-ride"].includes(serviceType);
   const [formData, setFormData] = useState({});
   const [formErrors, setFormErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -152,17 +159,10 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
   const [mpesaReceiptLoading, setMpesaReceiptLoading] = useState(false);
   const [dropPinMode, setDropPinMode] = useState(null);
 
-	  // Function to get vehicle capacity based on vehicle type
-	  const getVehicleCapacity = (vehicleType) => {
-	    if (!vehicleType) return 10; // Default fallback
-	    if (vehicleType.includes('7-seater')) return 7;
-	    if (vehicleType.includes('10-seater')) return 10;
-	    if (vehicleType.includes('14-seater') || vehicleType.includes('15-seater')) return 15;
-	    if (vehicleType.includes('Land Cruiser')) return 4;
-	    if (vehicleType.includes('Luxury') || vehicleType.includes('Executive')) return 4;
-	    if (vehicleType.includes('Limousine')) return 6;
-	    return 10; // Default for other types
-	  };
+  // Function to get vehicle capacity based on vehicle type
+  const getVehicleCapacity = (vehicleType) => {
+    return 7; // Only SUVs are available, max capacity is 7 passengers
+  };
 
   const locationFieldPriority = ["pickup", "airport", "location", "destination", "hotelName", "eventVenue", "tourType"];
   const fieldNames = config.fields.map((field) => field.name);
@@ -384,26 +384,26 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
     }
   }, [activeBooking]);
 
-	  useEffect(() => {
-	    const pickupField = resolvedLocationFields.pickupField;
-	    const dropoffField = resolvedLocationFields.dropoffField;
+  useEffect(() => {
+    const pickupField = resolvedLocationFields.pickupField;
+    const dropoffField = resolvedLocationFields.dropoffField;
 
-	    if (isQuoteOnlyService) {
-	      setTripEstimate(null);
-	      setEstimateError(null);
-	      return;
-	    }
+    if (isQuoteOnlyService) {
+      setTripEstimate(null);
+      setEstimateError(null);
+      return;
+    }
 
-	    if (!pickupField || !dropoffField) {
-	      setTripEstimate(null);
+    if (!pickupField) {
+      setTripEstimate(null);
       setEstimateError(null);
       return;
     }
 
     const startQuery = formData[pickupField]?.trim();
-    const endQuery = formData[dropoffField]?.trim();
+    const endQuery = dropoffField && dropoffField !== pickupField ? formData[dropoffField]?.trim() : null;
 
-    if (!startQuery || !endQuery || startQuery.length < 3 || endQuery.length < 3) {
+    if (!startQuery || startQuery.length < 3 || (dropoffField && dropoffField !== pickupField && (!endQuery || endQuery.length < 3))) {
       setTripEstimate(null);
       setEstimateError(null);
       return;
@@ -412,11 +412,11 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
     const timer = setTimeout(async () => {
       try {
         const pricing = await calculateTripPricing({
+          serviceType,
           startQuery,
           endQuery,
           startCoords: pickupGps || locationCoords[pickupField],
-          endCoords: locationCoords[dropoffField],
-          vehicleType: formData.vehicleType || config.fields.find(f => f.name === "vehicleType")?.options[0] || "Economy Sedan"
+          endCoords: dropoffField ? locationCoords[dropoffField] : null
         });
         setTripEstimate(pricing);
         setEstimateError(null);
@@ -427,7 +427,7 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
     }, 350);
 
     return () => clearTimeout(timer);
-	  }, [formData, locationCoords, pickupGps, resolvedLocationFields.pickupField, resolvedLocationFields.dropoffField, isQuoteOnlyService]);
+  }, [formData, locationCoords, pickupGps, resolvedLocationFields.pickupField, resolvedLocationFields.dropoffField, isQuoteOnlyService, serviceType]);
 
   const validateForm = () => {
     const errors = {};
@@ -548,50 +548,50 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
         formData.tourType ||
         pickupLocationValue;
 
-	      if (!pickupLocationValue || !destinationLocationValue) {
-	        throw new Error(
-	          isQuoteOnlyService
-	            ? "Start location and safari destination are required."
-	            : "Pickup and destination are required for distance-based pricing."
-	        );
-	      }
-	
-	      const pricing = isQuoteOnlyService
-	        ? null
-	        : await calculateTripPricing({
-	            startQuery: pickupLocationValue,
-	            endQuery: destinationLocationValue,
-	            startCoords: pickupGps || locationCoords[resolvedLocationFields.pickupField],
-	            endCoords: locationCoords[resolvedLocationFields.dropoffField],
-	            vehicleType: formData.vehicleType || "Economy Sedan"
-	          });
+      if (!pickupLocationValue || (serviceType !== "full-day" && !destinationLocationValue)) {
+        throw new Error(
+          isQuoteOnlyService
+            ? "Start location and destination/safari tour details are required."
+            : "Pickup and destination locations are required."
+        );
+      }
 
-	      const durationLabel = formData.duration
-	        ? `${formData.duration} Day${Number(formData.duration) === 1 ? "" : "s"}`
-	        : formData.rentalPeriod || "Full Day";
-	      const notes = [
-	        formData.specialRequests,
-	        isQuoteOnlyService ? "Quote requested by customer" : null,
-	        `Phone: ${phoneNumber}`
-	      ].filter(Boolean).join(". ");
+      const pricing = isQuoteOnlyService
+        ? null
+        : await calculateTripPricing({
+            serviceType,
+            startQuery: pickupLocationValue,
+            endQuery: serviceType === "full-day" ? null : destinationLocationValue,
+            startCoords: pickupGps || locationCoords[resolvedLocationFields.pickupField],
+            endCoords: serviceType === "full-day" ? null : locationCoords[resolvedLocationFields.dropoffField]
+          });
+
+      const durationLabel = formData.duration
+        ? `${formData.duration} Day${Number(formData.duration) === 1 ? "" : "s"}`
+        : formData.rentalPeriod || (serviceType === "full-day" ? "8 Hours" : "Trip");
+      const notes = [
+        formData.specialRequests,
+        isQuoteOnlyService ? "Quote requested by customer" : null,
+        `Phone: ${phoneNumber}`
+      ].filter(Boolean).join(". ");
 
       // Prepare booking payload with minimal required fields
       const bookingPayload = {
         user_id: user.id,
         pickup_location: pickupLocationValue,
-        destination_location: destinationLocationValue,
+        destination_location: serviceType === "full-day" ? "Nairobi & Environs" : destinationLocationValue,
         flight_number: formData.flightNumber || null,
         booking_date: formData.date || formData.startDate || formData.checkInDate || formData.eventDate || new Date().toISOString().split("T")[0],
         pickup_time: formData.time || formData.startTime || formData.checkInTime || formData.eventTime || "09:00", // Use selected time or default
-	        duration: durationLabel,
-	        passengers: parseInt(formData.passengers || formData.guestCount || "1"),
-	        vehicle_type: formData.vehicleType || "Standard", // Now from user selection
-	        service_category: config.label,
-	        status: "pending",
-	        payment_status: isQuoteOnlyService ? "awaiting_quote" : "unpaid",
-	        price_amount: pricing?.reservationFeeCents ?? null,
-	        total_price: pricing?.totalPriceCents ?? null,
-	        notes,
+        duration: durationLabel,
+        passengers: parseInt(formData.passengers || formData.guestCount || "1"),
+        vehicle_type: "SUV", // Always SUV
+        service_category: config.label,
+        status: "pending",
+        payment_status: isQuoteOnlyService ? "awaiting_quote" : "unpaid",
+        price_amount: pricing?.reservationFeeCents ?? null,
+        total_price: pricing?.totalPriceCents ?? null,
+        notes,
         created_at: new Date(),
         updated_at: new Date()
       };
