@@ -546,6 +546,32 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
         formData.eventVenue ||
         formData.tourType ||
         pickupLocationValue;
+
+      // Use already-computed trip estimate for pricing
+      const pricing = tripEstimate;
+
+      const bookingPayload = {
+        user_id: user.id,
+        service_type: serviceType,
+        pickup_location: pickupLocationValue,
+        destination_location: destinationLocationValue,
+        flight_number: formData.flightNumber || null,
+        booking_date: formData.date || formData.checkInDate || formData.eventDate || formData.startDate || null,
+        pickup_time: formData.time || formData.checkInTime || formData.eventTime || formData.startTime || null,
+        duration: serviceType === "full-day" ? "8 Hours" : serviceType === "excursion" ? "Up to 3 Hours" : null,
+        passengers: parseInt(formData.passengers || formData.guestCount || 1),
+        vehicle_type: "SUV",
+        status: isQuoteOnlyService ? "quote_pending" : "pending",
+        payment_status: "unpaid",
+        payment_method: reservationPaymentMethod || "paystack",
+        payment_stage: null,
+        total_price: pricing ? Math.round(pricing.totalPriceCents / 100) : null,
+        notes: formData.specialRequests || null,
+        phone: phoneNumber,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
       // Save booking to database
       const savedBooking = await bookingsDb.insert([bookingPayload]);
 
