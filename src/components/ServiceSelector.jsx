@@ -74,34 +74,36 @@ export default function ServiceSelector({ onSelectService }) {
               <button
                 key={service.id}
                 onClick={() => onSelectService(service.id)}
-                className="booking-portal-enter group relative rounded-xl p-5 sm:p-8 bg-white border border-gray-200 shadow-[0_10px_28px_rgba(15,23,42,0.04)] hover:border-[#1A1A1A]/40 hover:-translate-y-0.5 hover:shadow-[0_16px_36px_rgba(15,23,42,0.10)] transition-all duration-300 ease-out text-left cursor-pointer"
+                className="booking-portal-enter group relative rounded-xl p-4 sm:p-5 bg-white border border-gray-200 shadow-[0_6px_20px_rgba(15,23,42,0.03)] hover:border-[#1A1A1A]/40 hover:-translate-y-0.5 hover:shadow-[0_12px_28px_rgba(15,23,42,0.08)] transition-all duration-300 ease-out text-left cursor-pointer"
               >
                 {/* Content */}
-                <div>
-                  {/* Icon */}
-                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-[#C5A059] group-hover:bg-[#1A1A1A] flex items-center justify-center mb-4 shadow-[0_8px_18px_rgba(197,160,89,0.18)] group-hover:shadow-[0_10px_22px_rgba(15,23,42,0.22)] transition-all duration-300">
-                    <IconComponent
-                      size={32}
-                      className="text-white"
-                    />
+                <div className="flex flex-col h-full justify-between">
+                  <div>
+                    {/* Icon */}
+                    <div className="w-10 h-10 rounded-lg bg-[#C5A059] group-hover:bg-[#1A1A1A] flex items-center justify-center mb-3 shadow-[0_6px_12px_rgba(197,160,89,0.15)] group-hover:shadow-[0_8px_16px_rgba(15,23,42,0.18)] transition-all duration-300">
+                      <IconComponent
+                        size={20}
+                        className="text-white"
+                      />
+                    </div>
+
+                    {/* Title */}
+                    <h3 className="text-base font-bold text-gray-900 mb-1 group-hover:text-[#1A1A1A] transition-colors duration-300">
+                      {service.name}
+                    </h3>
+
+                    {/* Description */}
+                    <p className="text-gray-500 text-xs mb-4 group-hover:text-gray-700 transition-colors duration-300 line-clamp-3">
+                      {service.description}
+                    </p>
                   </div>
 
-                  {/* Title */}
-                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 group-hover:text-[#1A1A1A] transition-colors duration-300">
-                    {service.name}
-                  </h3>
-
-                  {/* Description */}
-                  <p className="text-gray-600 text-sm mb-6 group-hover:text-gray-800 transition-colors duration-300">
-                    {service.description}
-                  </p>
-
                   {/* Arrow indicator */}
-                  <div className="inline-flex items-center gap-2 rounded-lg px-4 py-2 bg-gray-100 border border-gray-200 group-hover:bg-[#1A1A1A] group-hover:border-[#1A1A1A] group-hover:text-white transition-all duration-300">
-                    <span className="text-xs font-semibold tracking-widest">
+                  <div className="inline-flex items-center gap-1.5 self-start rounded-lg px-3 py-1.5 bg-gray-50 border border-gray-200 group-hover:bg-[#1A1A1A] group-hover:border-[#1A1A1A] group-hover:text-white transition-all duration-300">
+                    <span className="text-[10px] font-semibold tracking-wider">
                       SELECT
                     </span>
-                    <span className="text-lg group-hover:translate-x-1 transition-transform">→</span>
+                    <span className="text-sm group-hover:translate-x-0.5 transition-transform">→</span>
                   </div>
                 </div>
               </button>

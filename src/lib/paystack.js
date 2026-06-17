@@ -383,26 +383,37 @@ export async function calculateTripPricing({ startQuery, endQuery, startCoords, 
   let usedRoadDistance = false;
 
   try {
-    const routeResult = await calculateMapboxDrivingRoute(startPoint, endPoint);
-    distanceKm = routeResult.distanceKm;
-    durationMin = routeResult.durationMin;
-    usedRoadDistance = true;
-
-    // Correct Mapbox routing detours in Kenya (where road network data has gaps)
-    const straightKm = calculateDistanceKm(startPoint, endPoint);
-    if (distanceKm > straightKm * 1.35) {
-      console.warn(`⚠️ Mapbox road distance (${distanceKm.toFixed(2)} km) seems to be a detour from straight-line (${straightKm.toFixed(2)} km). Correcting...`);
-      distanceKm = straightKm * 1.18; // 1.18 factor perfectly maps Eldoret Airport to Eka Hotel to ~16.65 km!
-      durationMin = Math.round(distanceKm * 2.2); // ~50 km/h average drive speed in Kenya
+    if (startQuery) {
+      startPoint = startCoords ?? (await geocodeLocation(startQuery));
+    }
+    if (endQuery) {
+      endPoint = endCoords ?? (await geocodeLocation(endQuery));
     }
 
-    console.log(`✅ Road distance: ${distanceKm.toFixed(1)} km, ~${durationMin} min drive`);
-  } catch (error) {
-    console.warn("⚠️ Mapbox Directions failed, using straight-line fallback:", error.message);
-    // Multiply straight-line by 1.35 to better approximate road distance
-    const straightKm = calculateDistanceKm(startPoint, endPoint);
-    distanceKm = straightKm * 1.35;
-    durationMin = Math.round(distanceKm * 2.2); // ~50 km/h average drive speed in Kenya
+    if (startPoint && endPoint) {
+      try {
+        const routeResult = await calculateMapboxDrivingRoute(startPoint, endPoint);
+        distanceKm = routeResult.distanceKm;
+        durationMin = routeResult.durationMin;
+        usedRoadDistance = true;
+
+        // Correct Mapbox routing detours in Kenya (where road network data has gaps)
+        const straightKm = calculateDistanceKm(startPoint, endPoint);
+        if (distanceKm > straightKm * 1.35) {
+          console.warn(`⚠️ Mapbox road distance (${distanceKm.toFixed(2)} km) seems to be a detour from straight-line (${straightKm.toFixed(2)} km). Correcting...`);
+          distanceKm = straightKm * 1.18;
+          durationMin = Math.round(distanceKm * 2.2);
+        }
+
+        console.log(`✅ Road distance: ${distanceKm.toFixed(1)} km, ~${durationMin} min drive`);
+      } catch (error) {
+        console.warn("⚠️ Mapbox Directions failed, using straight-line fallback:", error.message);
+        const straightKm = calculateDistanceKm(startPoint, endPoint);
+        distanceKm = straightKm * 1.35;
+      }
+    }
+  } catch (err) {
+    console.warn("Geocoding/routing failed:", err.message);
   }
   
   // All services now use flat rates or default to 5000 if not specified (for standard transfers)

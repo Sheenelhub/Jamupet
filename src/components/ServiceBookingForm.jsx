@@ -10,8 +10,7 @@ import {
   createPaymentReference,
   formatKesFromCents,
   reverseGeocodeLocation,
-  startPaystackCheckout,
-  VEHICLE_MULTIPLIERS
+  startPaystackCheckout
 } from "../lib/paystack";
 import {
   searchLocationAliases,
@@ -47,6 +46,8 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
   const serviceIcons = {
     "airport-transfer": Plane,
     "hotel-transfer": Hotel,
+    "full-day": Clock,
+    "excursion": ShoppingBag,
     "intercity-ride": MapPin,
     "wedding-travel": Heart,
     "safari-tour": Camera,
@@ -369,26 +370,26 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
     }
   }, [activeBooking]);
 
-	  useEffect(() => {
-	    const pickupField = resolvedLocationFields.pickupField;
-	    const dropoffField = resolvedLocationFields.dropoffField;
+  useEffect(() => {
+    const pickupField = resolvedLocationFields.pickupField;
+    const dropoffField = resolvedLocationFields.dropoffField;
 
-	    if (isQuoteOnlyService) {
-	      setTripEstimate(null);
-	      setEstimateError(null);
-	      return;
-	    }
+    if (isQuoteOnlyService) {
+      setTripEstimate(null);
+      setEstimateError(null);
+      return;
+    }
 
-	    if (!pickupField || !dropoffField) {
-	      setTripEstimate(null);
+    if (!pickupField) {
+      setTripEstimate(null);
       setEstimateError(null);
       return;
     }
 
     const startQuery = formData[pickupField]?.trim();
-    const endQuery = formData[dropoffField]?.trim();
+    const endQuery = dropoffField && dropoffField !== pickupField ? formData[dropoffField]?.trim() : null;
 
-    if (!startQuery || !endQuery || startQuery.length < 3 || endQuery.length < 3) {
+    if (!startQuery || startQuery.length < 3 || (dropoffField && dropoffField !== pickupField && (!endQuery || endQuery.length < 3))) {
       setTripEstimate(null);
       setEstimateError(null);
       return;
@@ -397,11 +398,11 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
     const timer = setTimeout(async () => {
       try {
         const pricing = await calculateTripPricing({
+          serviceType,
           startQuery,
           endQuery,
           startCoords: pickupGps || locationCoords[pickupField],
-          endCoords: locationCoords[dropoffField],
-          vehicleType: formData.vehicleType || config.fields.find(f => f.name === "vehicleType")?.options[0] || "Economy Sedan"
+          endCoords: dropoffField ? locationCoords[dropoffField] : null
         });
         setTripEstimate(pricing);
         setEstimateError(null);
@@ -412,7 +413,7 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
     }, 350);
 
     return () => clearTimeout(timer);
-	  }, [formData, locationCoords, pickupGps, resolvedLocationFields.pickupField, resolvedLocationFields.dropoffField, isQuoteOnlyService]);
+  }, [formData, locationCoords, pickupGps, resolvedLocationFields.pickupField, resolvedLocationFields.dropoffField, isQuoteOnlyService, serviceType]);
 
   const validateForm = () => {
     const errors = {};
