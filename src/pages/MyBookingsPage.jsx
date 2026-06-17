@@ -623,13 +623,6 @@ export default function MyBookingsPage() {
     );
   }
 
-  const unpaidFinalBookings = bookings.filter(
-    (b) =>
-      b.status !== "cancelled" &&
-      b.payment_status === "reservation_paid" &&
-      b.status !== "completed"
-  );
-
   return (
     <div className="min-h-screen bg-[#FAFAFA] pt-32 pb-20 px-4 sm:px-6">
       <div className="max-w-5xl mx-auto">
@@ -648,35 +641,13 @@ export default function MyBookingsPage() {
           )}
         </div>
 
-        {/* Unpaid Final Payment Notification */}
-        {unpaidFinalBookings.length > 0 && (
-          <div className="mb-6 rounded-xl border border-red-300 bg-red-50 p-4 flex items-start gap-4 shadow-sm">
-            <div className="mt-0.5 flex-shrink-0">
-              <span className="relative flex h-4 w-4">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-4 w-4 bg-red-600"></span>
-              </span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-red-800">
-                {unpaidFinalBookings.length} booking{unpaidFinalBookings.length > 1 ? 's' : ''} with outstanding final payment
-              </p>
-              <p className="text-xs text-red-600 mt-0.5">
-                The reservation fee has been paid. The remaining balance will be settled directly with your driver after each trip.
-              </p>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {unpaidFinalBookings.map((b) => (
-                  <a
-                    key={b.id}
-                    href={`#booking-${b.id}`}
-                    className="text-xs font-semibold text-red-700 bg-red-100 border border-red-200 rounded-full px-3 py-1 hover:bg-red-200 transition-colors"
-                  >
-                    #{b.id.slice(0, 8)}… · {b.service_category || 'Trip'}
-                  </a>
-                ))}
-              </div>
-            </div>
-            <AlertTriangle size={20} className="text-red-500 flex-shrink-0 mt-0.5" />
+        {/* Final Payment Reminder - simple golden notice */}
+        {bookings.some(b => b.payment_status === 'reservation_paid' && b.status !== 'completed' && b.status !== 'cancelled') && (
+          <div className="mb-6 flex items-center gap-3 rounded-xl border border-[#C5A059]/40 bg-[#C5A059]/8 px-5 py-3.5 shadow-sm">
+            <span className="flex-shrink-0 w-2 h-2 rounded-full bg-[#C5A059] animate-pulse"></span>
+            <p className="text-sm text-[#7A5E2A] font-medium">
+              You have bookings with an outstanding final balance — your chauffeur will guide you on how to complete payment after your trip.
+            </p>
           </div>
         )}
 

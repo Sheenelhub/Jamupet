@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { HashLink } from "react-router-hash-link";
-import { Menu, X, ChevronDown, User } from "lucide-react";
+import { Menu, X, ChevronDown, User, BookMarked } from "lucide-react";
 import { useAuthContext } from "../context/AuthContext";
+import { useUnpaidBookingsCount } from "../hooks/useUnpaidBookingsCount";
 import LoginModal from "./LoginModal";
 import UserProfile from "./UserProfile";
 
@@ -15,6 +16,7 @@ export default function Navbar() {
   
   const authContext = useAuthContext();
   const user = authContext ? authContext.user : null;
+  const unpaidCount = useUnpaidBookingsCount();
 
   // Close mobile menu when route changes
   useEffect(() => {
@@ -42,7 +44,7 @@ export default function Navbar() {
 
   return (
     <>
-      {/* Fixed Header - stays at top when scrolling */}
+      {/* Fixed Header */}
       <nav className="fixed top-0 left-0 w-full z-[3000] bg-[#050505]/95 backdrop-blur-md py-4 border-b border-white/10 shadow-2xl">
         <div className="max-w-[1440px] mx-auto px-6 md:px-12 flex justify-between items-center">
           
@@ -56,6 +58,7 @@ export default function Navbar() {
             />
           </Link>
 
+          {/* Desktop Nav */}
           <div className="hidden lg:flex items-center gap-8">
             
             <div className="flex items-center gap-8 mr-4 mt-1">
@@ -88,7 +91,18 @@ export default function Navbar() {
               </div>
 
               <Link to="/destinations" className={getLinkClass("/destinations")}>Destinations</Link>
-              {user && <Link to="/bookings" className={getLinkClass("/bookings")}>My Bookings</Link>}
+
+              {/* My Bookings with badge */}
+              {user && (
+                <Link to="/bookings" className={`relative ${getLinkClass("/bookings")}`}>
+                  My Bookings
+                  {unpaidCount > 0 && (
+                    <span className="absolute -top-2.5 -right-3 min-w-[16px] h-4 px-1 flex items-center justify-center rounded-full bg-[#C5A059] text-black text-[9px] font-bold shadow-md">
+                      {unpaidCount > 9 ? '9+' : unpaidCount}
+                    </span>
+                  )}
+                </Link>
+              )}
             </div>
 
             <div className="flex items-center gap-4 border-l border-gray-600/50 pl-8">
@@ -114,12 +128,29 @@ export default function Navbar() {
 
           </div>
 
-          <button 
-            className="lg:hidden text-white hover:text-[#C5A059] transition-colors" 
-            onClick={() => setIsOpen(!isOpen)}
-          >
-            {isOpen ? <X size={28} /> : <Menu size={28} />}
-          </button>
+          {/* Mobile right side: bookings icon + hamburger */}
+          <div className="lg:hidden flex items-center gap-3">
+            {user && (
+              <Link
+                to="/bookings"
+                className="relative flex items-center justify-center w-9 h-9 rounded-lg bg-white/8 border border-white/15 hover:border-[#C5A059]/50 hover:bg-[#C5A059]/10 transition-all duration-200"
+                title="My Bookings"
+              >
+                <BookMarked size={18} className="text-[#C5A059]" />
+                {unpaidCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 flex items-center justify-center rounded-full bg-[#C5A059] text-black text-[9px] font-bold shadow-md">
+                    {unpaidCount > 9 ? '9+' : unpaidCount}
+                  </span>
+                )}
+              </Link>
+            )}
+            <button 
+              className="text-white hover:text-[#C5A059] transition-colors" 
+              onClick={() => setIsOpen(!isOpen)}
+            >
+              {isOpen ? <X size={28} /> : <Menu size={28} />}
+            </button>
+          </div>
         </div>
       </nav>
 
@@ -140,8 +171,13 @@ export default function Navbar() {
           <div className="w-12 h-[1px] my-2 bg-white/10" />
           <Link to="/destinations" className="text-2xl font-serif text-white hover:text-[#C5A059] transition-colors">Destinations</Link>
           {user && (
-            <Link to="/bookings" className="text-2xl font-serif text-white hover:text-[#C5A059] transition-colors">
+            <Link to="/bookings" className="relative text-2xl font-serif text-white hover:text-[#C5A059] transition-colors">
               My Bookings
+              {unpaidCount > 0 && (
+                <span className="absolute -top-2 -right-5 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-[#C5A059] text-black text-[10px] font-bold shadow-md">
+                  {unpaidCount > 9 ? '9+' : unpaidCount}
+                </span>
+              )}
             </Link>
           )}
           

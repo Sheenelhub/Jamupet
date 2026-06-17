@@ -1324,8 +1324,8 @@ Thank you for booking with us!
         {/* === SPLIT LAYOUT: Form Left (Narrower) + Map Right (Larger) === */}
         <div className="flex flex-col lg:flex-row gap-4 lg:gap-5">
 
-        {/* LEFT PANEL — Form (Narrower on desktop) */}
-        <div className="w-full lg:w-[520px] lg:flex-shrink-0 min-w-0">
+        {/* LEFT PANEL — Full width on steps 2 & 3, narrow on step 1 */}
+        <div className={`min-w-0 ${bookingStep === 1 ? 'w-full lg:w-[520px] lg:flex-shrink-0' : 'w-full'}`}>
         {bookingStep === 1 ? (
           <form onSubmit={handleSubmit} className="booking-portal-enter bg-white rounded-xl border border-gray-200 shadow-[0_12px_34px_rgba(15,23,42,0.06)] p-4 sm:p-6 md:p-8 space-y-5">
             {/* Dynamic Service Fields */}
@@ -1696,7 +1696,7 @@ Thank you for booking with us!
               </button>
           </form>
         ) : bookingStep === 2 ? (
-          <div className="space-y-6">
+          <div className="space-y-6 max-w-5xl mx-auto w-full">
             <div className="booking-portal-enter bg-white rounded-xl border border-green-300 p-5 sm:p-8 shadow-[0_12px_34px_rgba(22,163,74,0.08)]">
               <div className="flex items-start gap-3 sm:gap-4">
                 <div className="p-2 sm:p-3 bg-green-100 border border-green-300 rounded-lg">
@@ -2054,7 +2054,7 @@ Thank you for booking with us!
             </div>
           </div>
         ) : bookingStep === 3 ? (
-          <div className="bg-white rounded-xl border border-green-300 p-8 shadow-[0_12px_34px_rgba(22,163,74,0.08)] text-center">
+          <div className="max-w-2xl mx-auto w-full bg-white rounded-xl border border-green-300 p-8 shadow-[0_12px_34px_rgba(22,163,74,0.08)] text-center">
             {/* Animated success circle */}
             <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 ring-4 ring-green-200 ring-offset-2">
               <CheckCircle size={48} className="text-green-600" />
