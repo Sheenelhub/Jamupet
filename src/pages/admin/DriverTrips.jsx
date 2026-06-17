@@ -19,6 +19,51 @@ export default function DriverTrips() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [actionLoading, setActionLoading] = useState(false)
+  const [currentTime, setCurrentTime] = useState(Date.now())
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(Date.now())
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [])
+
+  const handleStartWaiting = async () => {
+    if (!activeAssignment?.bookings?.id) return
+    try {
+      setActionLoading(true)
+      const { error: updateError } = await supabase
+        .from('bookings')
+        .update({ waiting_started_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+        .eq('id', activeAssignment.bookings.id)
+        
+      if (updateError) throw updateError
+      await loadDashboard()
+    } catch (err) {
+      alert(`Failed to start waiting timer: ${err.message}`)
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  const handleCancelWaiting = async () => {
+    if (!activeAssignment?.bookings?.id) return
+    if (!window.confirm("Are you sure you want to cancel the waiting timer? All accumulated waiting time for this session will be cleared.")) return
+    try {
+      setActionLoading(true)
+      const { error: updateError } = await supabase
+        .from('bookings')
+        .update({ waiting_started_at: null, waiting_charge: 0, updated_at: new Date().toISOString() })
+        .eq('id', activeAssignment.bookings.id)
+        
+      if (updateError) throw updateError
+      await loadDashboard()
+    } catch (err) {
+      alert(`Failed to cancel waiting timer: ${err.message}`)
+    } finally {
+      setActionLoading(false)
+    }
+  }
 
   const loadDashboard = useCallback(async () => {
     if (!user?.email) return
@@ -147,17 +192,43 @@ export default function DriverTrips() {
     if (!activeAssignment?.bookings?.id) return
     try {
       setActionLoading(true)
-      const { error: updateError } = await supabase
-        .from('bookings')
-        .update({ status: newStatus, updated_at: new Date().toISOString() })
-        .eq('id', activeAssignment.bookings.id)
-        
-      if (updateError) throw updateError
+      
+      let finalWaitingCharge = 0
+      let updatedTotalPrice = Number(activeAssignment.bookings.total_price || activeAssignment.bookings.total_fare || 0)
+
+      if (newStatus === 'completed') {
+        if (activeAssignment.bookings.waiting_started_at) {
+          const startTime = new Date(activeAssignment.bookings.waiting_started_at).getTime()
+          const endTime = Date.now()
+          const elapsedMs = Math.max(0, endTime - startTime)
+          // 500 KES/hr = 50000 cents/hr
+          finalWaitingCharge = Math.round((elapsedMs / 3600000) * 500 * 100)
+          updatedTotalPrice += finalWaitingCharge
+        }
+
+        const { error: updateBookingError } = await supabase
+          .from('bookings')
+          .update({
+            status: 'completed',
+            waiting_charge: finalWaitingCharge,
+            total_price: updatedTotalPrice,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', activeAssignment.bookings.id)
+          
+        if (updateBookingError) throw updateBookingError
+      } else {
+        const { error: updateBookingError } = await supabase
+          .from('bookings')
+          .update({ status: newStatus, updated_at: new Date().toISOString() })
+          .eq('id', activeAssignment.bookings.id)
+          
+        if (updateBookingError) throw updateBookingError
+      }
 
       if (newStatus === 'completed') {
         const perf = driver.driver_performance?.[0] || {}
-        const fare = Number(activeAssignment.bookings.total_fare ?? activeAssignment.bookings.total_price ?? 0)
-        const addedFare = Number.isNaN(fare) ? 0 : fare
+        const addedFare = updatedTotalPrice
 
         const { error: assignError } = await supabase.from('booking_assignments')
           .update({ completed_at: new Date().toISOString() })
@@ -352,6 +423,78 @@ export default function DriverTrips() {
                       <p className="text-xs text-gray-500 font-medium mb-1">FARE</p>
                       <p className="text-gray-900 font-bold text-lg">{formatCurrency(activeAssignment.bookings.total_fare ?? activeAssignment.bookings.total_price)}</p>
                     </div>
+                    <div>
+                      <p className="text-xs text-gray-500 font-medium mb-1">PAYMENT STATUS</p>
+                      <span className={`px-2.5 py-1 text-xs font-semibold border uppercase inline-block mt-0.5 ${
+                        activeBooking.payment_status === "paid"
+                          ? "bg-green-100 text-green-700 border-green-200"
+                          : activeBooking.payment_status === "reservation_paid"
+                            ? "bg-blue-100 text-blue-700 border-blue-200"
+                            : "bg-yellow-100 text-yellow-700 border-yellow-200"
+                      }`}>
+                        {activeBooking.payment_status === "paid"
+                          ? "Fully Paid"
+                          : activeBooking.payment_status === "reservation_paid"
+                            ? "Deposit Paid Only"
+                            : activeBooking.payment_status?.replace('_', ' ') || "Unpaid"}
+                      </span>
+                    </div>
+
+                    {activeBooking && (
+                      <div className="border-t border-gray-200 pt-3">
+                        <p className="text-xs text-gray-500 font-medium mb-1.5">WAITING TIMER</p>
+                        {activeBooking.waiting_started_at ? (
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 animate-pulse">
+                                Active
+                              </span>
+                              <span className="text-sm font-mono font-bold text-gray-900">
+                                {(() => {
+                                  const start = new Date(activeBooking.waiting_started_at).getTime()
+                                  const diff = Math.max(0, currentTime - start)
+                                  const hours = Math.floor(diff / 3600000)
+                                  const minutes = Math.floor((diff % 3600000) / 60000)
+                                  const seconds = Math.floor((diff % 60000) / 1000)
+                                  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+                                })()}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between text-[11px] text-gray-600">
+                              <span>Rate: KES 500 / hr</span>
+                              <span className="font-semibold text-gray-900">
+                                Accrued: {(() => {
+                                  const start = new Date(activeBooking.waiting_started_at).getTime()
+                                  const diff = Math.max(0, currentTime - start)
+                                  const accruedCents = (diff / 3600000) * 500 * 100
+                                  return formatCurrency(accruedCents)
+                                })()}
+                              </span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={handleCancelWaiting}
+                              disabled={actionLoading}
+                              className="w-full border border-gray-300 text-gray-700 font-semibold py-1 px-3 text-[10px] rounded hover:bg-gray-100 transition-colors"
+                            >
+                              Cancel Timer
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="space-y-1.5">
+                            <p className="text-[11px] text-gray-400">Timer is stopped. Start if customer is late.</p>
+                            <button
+                              type="button"
+                              onClick={handleStartWaiting}
+                              disabled={actionLoading}
+                              className="w-full bg-amber-500 hover:bg-amber-600 text-white font-semibold py-1 px-3 text-[11px] rounded transition-colors disabled:opacity-50"
+                            >
+                              Customer is Late (Start Timer)
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
                     
                     <div className="pt-2 flex flex-col gap-2">
                       {activeAssignment.bookings.status === 'assigned' && (

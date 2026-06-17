@@ -1,11 +1,15 @@
+import React from "react";
 import PaystackPop from "@paystack/inline-js";
 import { searchLocationAliases } from "./kenyaLocations";
 
 export const PAYSTACK_PUBLIC_KEY = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
 export const MAPBOX_ACCESS_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
 
-export const KES_CENTS_PER_KM = 43 * 100;
-const RESERVATION_PERCENTAGE = 0.3;
+export const KES_CENTS_PER_KM = 130 * 100;
+export const KES_CENTS_PER_MINUTE = 20 * 100;
+export const BASE_FARE_CENTS = 1000 * 100;
+export const BASE_DISTANCE_KM = 3.0;
+const RESERVATION_PERCENTAGE = 0.2;
 const MAPBOX_GEOCODING_URL = "https://api.mapbox.com/geocoding/v5/mapbox.places";
 const MAPBOX_DIRECTIONS_URL = "https://api.mapbox.com/directions/v5/mapbox/driving";
 const KENYA_BBOX = "33.501,-4.899,41.899,5.430";
@@ -17,8 +21,55 @@ export function getReservationAmount(totalPriceCents) {
   return Math.round(totalPriceCents * RESERVATION_PERCENTAGE);
 }
 
+let usdToKesRate = 130;
+if (typeof window !== 'undefined') {
+  if (window.__usdToKesRate) {
+    usdToKesRate = window.__usdToKesRate;
+  } else {
+    try {
+      const cached = localStorage.getItem('usd_to_kes_rate');
+      if (cached) {
+        const parsed = parseFloat(cached);
+        if (parsed > 0) {
+          usdToKesRate = parsed;
+          window.__usdToKesRate = parsed;
+        }
+      }
+    } catch (e) {}
+    
+    fetch('https://open.er-api.com/v6/latest/USD')
+      .then(res => res.json())
+      .then(data => {
+        const rate = data?.rates?.KES;
+        if (rate && rate > 0) {
+          window.__usdToKesRate = rate;
+          try {
+            localStorage.setItem('usd_to_kes_rate', rate.toString());
+          } catch (e) {}
+        }
+      })
+      .catch(err => console.warn("Failed to fetch live USD/KES rate:", err));
+  }
+}
+
 export function formatKesFromCents(amountCents) {
-  return `KES ${(amountCents / 100).toLocaleString()}`;
+  if (amountCents === undefined || amountCents === null || amountCents === '') return '—';
+  const cents = Number(amountCents);
+  if (Number.isNaN(cents)) return amountCents;
+  
+  const currentRate = typeof window !== 'undefined' && window.__usdToKesRate ? window.__usdToKesRate : usdToKesRate;
+  const amountKes = cents / 100;
+  const amountUsd = amountKes / currentRate;
+  
+  const formattedUsd = `$${amountUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const formattedKes = `KES ${amountKes.toLocaleString()}`;
+  
+  return React.createElement(
+    'span',
+    { className: 'inline-flex flex-col leading-tight' },
+    React.createElement('span', { className: 'font-bold text-gray-900 group-hover:text-white transition-colors' }, formattedUsd),
+    React.createElement('span', { className: 'text-xs text-gray-400 font-normal group-hover:text-white/70 transition-colors' }, formattedKes)
+  );
 }
 
 export function createPaymentReference(bookingId) {
@@ -333,14 +384,13 @@ export async function calculateTripPricing({ serviceType, startQuery, endQuery, 
         const straightKm = calculateDistanceKm(startPoint, endPoint);
         if (distanceKm > straightKm * 1.35) {
           console.warn(`⚠️ Mapbox road distance (${distanceKm.toFixed(2)} km) seems to be a detour from straight-line (${straightKm.toFixed(2)} km). Correcting...`);
-          distanceKm = straightKm * 1.18; // 1.18 factor perfectly maps Eldoret Airport to Eka Hotel to ~16.65 km!
-          durationMin = Math.round(distanceKm * 2.2); // ~50 km/h average drive speed in Kenya
+          distanceKm = straightKm * 1.18;
+          durationMin = Math.round(distanceKm * 2.2);
         }
 
         console.log(`✅ Road distance: ${distanceKm.toFixed(1)} km, ~${durationMin} min drive`);
       } catch (error) {
         console.warn("⚠️ Mapbox Directions failed, using straight-line fallback:", error.message);
-        // Multiply straight-line by 1.35 to better approximate road distance
         const straightKm = calculateDistanceKm(startPoint, endPoint);
         distanceKm = straightKm * 1.35;
       }
@@ -348,22 +398,23 @@ export async function calculateTripPricing({ serviceType, startQuery, endQuery, 
   } catch (err) {
     console.warn("Geocoding/routing failed:", err.message);
   }
-  
-  // Flat Rate pricing calculation:
-  // Airport and Hotel Transfers: 5000/=
-  // Full day within Nairobi/it's environs (8hrs): 12000/=
-  // Excursion (short errands up to 3hrs): 5000/=
+
+  // Flat Rate pricing:
+  // Airport & Hotel Transfers: KES 5,000
+  // Full Day Nairobi (8hrs / up to 100km): KES 12,000
+  // Excursion (up to 3hrs): KES 5,000
   let totalPriceCents = 5000 * 100; // Default fallback: KES 5,000
 
   const cleanServiceType = (serviceType || "").toLowerCase().trim();
-  if (cleanServiceType.includes("airport") || cleanServiceType.includes("hotel") || cleanServiceType === "airport-transfer" || cleanServiceType === "hotel-transfer") {
-    totalPriceCents = 5000 * 100;
-  } else if (cleanServiceType === "full-day" || cleanServiceType.includes("full day") || cleanServiceType.includes("chauffeur")) {
+  if (cleanServiceType === "full-day" || cleanServiceType.includes("full day") || cleanServiceType.includes("chauffeur")) {
     totalPriceCents = 12000 * 100;
   } else if (cleanServiceType === "excursion" || cleanServiceType.includes("excursion")) {
     totalPriceCents = 5000 * 100;
+  } else {
+    // airport-transfer, hotel-transfer, and all others default to 5000
+    totalPriceCents = 5000 * 100;
   }
-  
+
   const basePriceCents = totalPriceCents;
   const reservationFeeCents = getReservationAmount(totalPriceCents);
   const finalPaymentCents = totalPriceCents - reservationFeeCents;

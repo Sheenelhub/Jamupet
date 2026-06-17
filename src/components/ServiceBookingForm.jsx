@@ -10,8 +10,7 @@ import {
   createPaymentReference,
   formatKesFromCents,
   reverseGeocodeLocation,
-  startPaystackCheckout,
-  VEHICLE_MULTIPLIERS
+  startPaystackCheckout
 } from "../lib/paystack";
 import {
   searchLocationAliases,
@@ -547,55 +546,6 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
         formData.eventVenue ||
         formData.tourType ||
         pickupLocationValue;
-
-      if (!pickupLocationValue || (serviceType !== "full-day" && !destinationLocationValue)) {
-        throw new Error(
-          isQuoteOnlyService
-            ? "Start location and destination/safari tour details are required."
-            : "Pickup and destination locations are required."
-        );
-      }
-
-      const pricing = isQuoteOnlyService
-        ? null
-        : await calculateTripPricing({
-            serviceType,
-            startQuery: pickupLocationValue,
-            endQuery: serviceType === "full-day" ? null : destinationLocationValue,
-            startCoords: pickupGps || locationCoords[resolvedLocationFields.pickupField],
-            endCoords: serviceType === "full-day" ? null : locationCoords[resolvedLocationFields.dropoffField]
-          });
-
-      const durationLabel = formData.duration
-        ? `${formData.duration} Day${Number(formData.duration) === 1 ? "" : "s"}`
-        : formData.rentalPeriod || (serviceType === "full-day" ? "8 Hours" : "Trip");
-      const notes = [
-        formData.specialRequests,
-        isQuoteOnlyService ? "Quote requested by customer" : null,
-        `Phone: ${phoneNumber}`
-      ].filter(Boolean).join(". ");
-
-      // Prepare booking payload with minimal required fields
-      const bookingPayload = {
-        user_id: user.id,
-        pickup_location: pickupLocationValue,
-        destination_location: serviceType === "full-day" ? "Nairobi & Environs" : destinationLocationValue,
-        flight_number: formData.flightNumber || null,
-        booking_date: formData.date || formData.startDate || formData.checkInDate || formData.eventDate || new Date().toISOString().split("T")[0],
-        pickup_time: formData.time || formData.startTime || formData.checkInTime || formData.eventTime || "09:00", // Use selected time or default
-        duration: durationLabel,
-        passengers: parseInt(formData.passengers || formData.guestCount || "1"),
-        vehicle_type: "SUV", // Always SUV
-        service_category: config.label,
-        status: "pending",
-        payment_status: isQuoteOnlyService ? "awaiting_quote" : "unpaid",
-        price_amount: pricing?.reservationFeeCents ?? null,
-        total_price: pricing?.totalPriceCents ?? null,
-        notes,
-        created_at: new Date(),
-        updated_at: new Date()
-      };
-
       // Save booking to database
       const savedBooking = await bookingsDb.insert([bookingPayload]);
 
@@ -700,7 +650,7 @@ Thank you for booking with us!
 	        status: isQuoteOnlyService ? "Quote Pending" : "Active",
 	        flightNumber: bookingPayload.flight_number || null,
 	        paymentStatus: bookingPayload.payment_status,
-	        paymentMethod: bookingPayload.payment_method || null,
+	        paymentMethod: bookingPayload.payment_method || reservationPaymentMethod || "paystack",
 	        paymentStage: bookingPayload.payment_stage || null,
 	        reservationAmount,
 	        totalPriceAmount: pricing?.totalPriceCents ?? null,
@@ -1577,7 +1527,7 @@ Thank you for booking with us!
                          </div>
                        )}
                     </div>
-                    <p className="text-xs text-gray-500">30% refundable reservation · Final payment after confirmation</p>
+                    <p className="text-xs text-gray-500">20% refundable reservation · Final payment after confirmation</p>
                   </div>
                   {tripEstimate ? (
                     <div className="px-4 pb-4">
@@ -1587,14 +1537,14 @@ Thank you for booking with us!
                           <p className="text-lg font-black text-gray-900 mt-0.5">{formatKesFromCents(tripEstimate.totalPriceCents)}</p>
                         </div>
                         <div className="bg-[#C5A059]/10 rounded-lg border border-[#C5A059]/20 p-3">
-                          <p className="text-[10px] text-[#C5A059] uppercase tracking-wider font-semibold">Reserve (30%)</p>
+                          <p className="text-[10px] text-[#C5A059] uppercase tracking-wider font-semibold">Reserve (20%)</p>
                           <p className="text-lg font-black text-[#C5A059] mt-0.5">{formatKesFromCents(tripEstimate.reservationFeeCents)}</p>
                         </div>
                       </div>
                       <div className="mt-3 flex items-center gap-2 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
                         <Shield size={14} className="text-green-600 flex-shrink-0" />
                         <p className="text-[11px] text-green-700 font-medium">
-                          30% deposit is <span className="font-bold">fully refundable</span> if cancelled within 24 hours
+                          20% deposit is <span className="font-bold">fully refundable</span> if cancelled within 24 hours
                         </p>
                       </div>
                       <div className="mt-2 flex items-center gap-2 text-xs text-gray-400">
@@ -1670,6 +1620,42 @@ Thank you for booking with us!
                 </div>
               )}
 
+              {/* Payment Method Selection (Pre-Booking) */}
+              {!isQuoteOnlyService && (
+                <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 mt-6">
+                  <label className="block text-sm font-semibold text-gray-900 mb-3">
+                    How would you like to pay? <span className="text-red-600">*</span>
+                  </label>
+                  <div className="grid gap-2 sm:grid-cols-3">
+                    {paymentMethodOptions.map((method) => {
+                      const Icon = paymentMethodIcons[method.value] || CreditCard;
+                      const isMpesa = method.value === "mpesa";
+                      const isSelected = reservationPaymentMethod === method.value;
+                      return (
+                        <button
+                          key={`pre-booking-${method.value}`}
+                          type="button"
+                          onClick={() => setReservationPaymentMethod(method.value)}
+                          aria-pressed={isSelected}
+                          className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold transition-all ${
+                            isSelected
+                              ? "border-[#C5A059] bg-[#C5A059]/10 text-[#1A1A1A]"
+                              : "border-gray-300 bg-white text-gray-700 hover:border-[#1A1A1A]"
+                          }`}
+                        >
+                          {isMpesa ? (
+                            <img src={mpesaIconSrc} alt="M-Pesa" className="h-4 w-4" />
+                          ) : (
+                            <Icon size={16} />
+                          )}
+                          <span>{method.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               {/* Submit Button */}
               <button
                 type="submit"
@@ -1683,7 +1669,7 @@ Thank you for booking with us!
                   </>
                 ) : (
                   <>
-                    Reserve/Book
+                    {reservationPaymentMethod === "cash" ? "Book Now" : "Continue to Payment"}
                   </>
                 )}
               </button>
@@ -1716,7 +1702,24 @@ Thank you for booking with us!
 	              </section>
 	            )}
 
-	            {!activeBooking?.quoteOnly && (
+	            {!activeBooking?.quoteOnly && activeBooking?.paymentMethod === "cash" && (
+	              <section className="bg-white rounded-xl border border-[#C5A059]/30 p-5 sm:p-8 shadow-[0_10px_28px_rgba(197,160,89,0.08)]">
+	                <div className="flex items-start gap-3">
+	                  <div className="mt-0.5 text-[#C5A059]"><Banknote size={20} /></div>
+	                  <div>
+	                    <h2 className="text-xl font-bold text-gray-900">Cash Payment</h2>
+	                    <p className="text-sm text-gray-600 mt-1">
+	                      Your booking is confirmed. You can pay <strong>{formatKesFromCents(activeBooking?.totalPriceAmount || 0)}</strong> in cash when the driver arrives.
+	                    </p>
+	                    <p className="text-xs text-gray-500 mt-2">
+	                      No deposit is required upfront.
+	                    </p>
+	                  </div>
+	                </div>
+	              </section>
+	            )}
+
+	            {!activeBooking?.quoteOnly && activeBooking?.paymentMethod !== "cash" && (
 	              <>
 	            <section className="bg-white rounded-xl border border-gray-200 p-5 sm:p-8 shadow-[0_10px_28px_rgba(15,23,42,0.05)]">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
@@ -2011,7 +2014,7 @@ Thank you for booking with us!
 	                {isPaying ? <Loader size={18} className="animate-spin" /> : <CreditCard size={18} />}
 	                {paymentStatusValue === "reservation_paid" || paymentStatusValue === "paid"
 	                  ? "Reservation Paid"
-	                  : "Pay 30% Reservation"}
+	                  : "Pay 20% Reservation"}
 	              </button>
 		            </section>
 		            </>

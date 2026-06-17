@@ -366,3 +366,7 @@ GRANT SELECT ON admin_users TO authenticated;
 GRANT SELECT, INSERT, UPDATE ON booking_assignments TO authenticated;
 GRANT SELECT, INSERT, UPDATE ON drivers TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON driver_performance TO authenticated;
+
+-- Migration to add driver waiting timer and charge columns
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS waiting_started_at TIMESTAMP WITH TIME ZONE;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS waiting_charge DECIMAL(10, 2) DEFAULT 0;
