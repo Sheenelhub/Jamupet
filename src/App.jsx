@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { AdminAuthProvider } from "./context/AdminAuthContext";
 import ScrollToTop from "./components/ScrollToTop";
@@ -37,6 +37,19 @@ import DriverTrips from "./pages/admin/DriverTrips";
 import { ProtectedAdminRoute } from "./pages/admin/ProtectedAdminRoute";
 function AppContent({ isLoading }) {
   const location = useLocation();
+  const navigate = useNavigate();
+
+  // Clean OAuth tokens from the URL using React Router (to prevent React Router from restoring them)
+  useEffect(() => {
+    if (location.hash.includes("access_token") || location.search.includes("code=")) {
+      // Give Supabase a brief moment to process the tokens before wiping them
+      const timer = setTimeout(() => {
+        navigate(location.pathname, { replace: true });
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [location, navigate]);
+
   const isAdminRoute =
     location.pathname.startsWith('/admin') ||
     location.pathname === '/isAdmin' ||
