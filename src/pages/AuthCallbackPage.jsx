@@ -17,7 +17,7 @@ export default function AuthCallbackPage() {
     // We just need to wait a moment then redirect cleanly.
     const timer = setTimeout(() => {
       navigate("/", { replace: true });
-    }, 1200);
+    }, 0);
 
     return () => clearTimeout(timer);
   }, [navigate]);

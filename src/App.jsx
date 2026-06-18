@@ -47,7 +47,7 @@ function AppContent({ isLoading }) {
         navigate({ pathname: location.pathname, hash: '' }, { replace: true });
         // Double check with native API just in case
         window.history.replaceState(null, '', window.location.pathname);
-      }, 500);
+      }, 0);
       return () => clearTimeout(timer);
     }
   }, [location, navigate]);
