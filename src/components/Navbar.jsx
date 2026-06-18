@@ -144,6 +144,20 @@ export default function Navbar() {
                 )}
               </Link>
             )}
+
+            {/* Profile / Login icon — mobile */}
+            {user ? (
+              <UserProfile />
+            ) : (
+              <button
+                onClick={() => setShowLoginModal(true)}
+                className="flex items-center justify-center w-9 h-9 rounded-lg bg-white/8 border border-white/15 hover:border-[#C5A059]/50 hover:bg-[#C5A059]/10 transition-all duration-200"
+                title="Login"
+              >
+                <User size={18} className="text-white" />
+              </button>
+            )}
+
             <button 
               className="text-white hover:text-[#C5A059] transition-colors" 
               onClick={() => setIsOpen(!isOpen)}
