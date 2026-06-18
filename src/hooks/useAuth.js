@@ -126,7 +126,8 @@ export function useAuth() {
       const { data, error } = await supabaseAuth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/`,
+          // Explicitly redirect to /auth/callback to match Supabase's allowlist
+          redirectTo: `${window.location.origin}/auth/callback`,
         }
       })
       if (error) throw error
@@ -143,7 +144,7 @@ export function useAuth() {
       const { data, error } = await supabaseAuth.signInWithOAuth({
         provider: 'facebook',
         options: {
-          redirectTo: `${window.location.origin}/`,
+          redirectTo: `${window.location.origin}/auth/callback`,
         }
       })
       if (error) throw error
