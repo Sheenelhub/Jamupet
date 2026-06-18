@@ -58,6 +58,10 @@ export function useAuth() {
         setUser(currentUser)
         if (event === 'SIGNED_IN' && currentUser) {
           syncProfile(currentUser)
+          // Clean OAuth tokens from URL bar (security: remove hash/query tokens)
+          if (window.location.hash.includes('access_token') || window.location.search.includes('code=')) {
+            window.history.replaceState(null, '', window.location.pathname)
+          }
         }
       }
     )
@@ -122,7 +126,9 @@ export function useAuth() {
       const { data, error } = await supabaseAuth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/`
+          // PKCE: redirect to callback page where the code is exchanged securely
+          redirectTo: `${window.location.origin}/auth/callback`,
+          skipBrowserRedirect: false,
         }
       })
       if (error) throw error
@@ -139,7 +145,8 @@ export function useAuth() {
       const { data, error } = await supabaseAuth.signInWithOAuth({
         provider: 'facebook',
         options: {
-          redirectTo: `${window.location.origin}/`
+          redirectTo: `${window.location.origin}/auth/callback`,
+          skipBrowserRedirect: false,
         }
       })
       if (error) throw error

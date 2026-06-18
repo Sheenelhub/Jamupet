@@ -25,6 +25,7 @@ import MyBookingsPage from "./pages/MyBookingsPage";
 import ProfileSettingsPage from "./pages/ProfileSettingsPage";
 import AccountSettingsPage from "./pages/AccountSettingsPage";
 import ResetPassword from "./pages/ResetPassword";
+import AuthCallbackPage from "./pages/AuthCallbackPage";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminHome from "./pages/admin/AdminHome";
 import BookingsManagement from "./pages/admin/BookingsManagement";
@@ -67,6 +68,7 @@ function AppContent({ isLoading }) {
           <Route path="/services" element={<Services />} />
           <Route path="/destinations" element={<Destination />} />
           <Route path="/auth" element={<AuthPage />} />
+          <Route path="/auth/callback" element={<AuthCallbackPage />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/booking" element={<BookingPage />} />
           <Route path="/bookings" element={<MyBookingsPage />} />
