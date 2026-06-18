@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { HashLink } from "react-router-hash-link";
-import { Menu, X, ChevronDown, User, BookMarked } from "lucide-react";
+import { Menu, X, ChevronDown, User, BookMarked, LogOut } from "lucide-react";
 import { useAuthContext } from "../context/AuthContext";
 import { useUnpaidBookingsCount } from "../hooks/useUnpaidBookingsCount";
 import LoginModal from "./LoginModal";
@@ -10,6 +10,7 @@ import UserProfile from "./UserProfile";
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showMobileProfile, setShowMobileProfile] = useState(false);
   
   const location = useLocation();
   const navigate = useNavigate();
@@ -145,18 +146,61 @@ export default function Navbar() {
               </Link>
             )}
 
-            {/* Profile / Login icon — mobile */}
-            {user ? (
-              <UserProfile />
-            ) : (
-              <button
-                onClick={() => setShowLoginModal(true)}
-                className="flex items-center justify-center w-9 h-9 rounded-lg bg-white/8 border border-white/15 hover:border-[#C5A059]/50 hover:bg-[#C5A059]/10 transition-all duration-200"
-                title="Login"
-              >
-                <User size={18} className="text-white" />
-              </button>
-            )}
+            {/* Profile icon — mobile (simple icon only, no avatar) */}
+            <div className="relative">
+              {user ? (
+                <>
+                  <button
+                    onClick={() => setShowMobileProfile(!showMobileProfile)}
+                    className="flex items-center justify-center w-9 h-9 rounded-lg bg-white/8 border border-white/15 hover:border-[#C5A059]/50 hover:bg-[#C5A059]/10 transition-all duration-200"
+                    title="Account"
+                  >
+                    <User size={18} className="text-[#C5A059]" />
+                  </button>
+
+                  {/* Compact dropdown */}
+                  {showMobileProfile && (
+                    <>
+                      <div
+                        className="fixed inset-0 z-[3998]"
+                        onClick={() => setShowMobileProfile(false)}
+                      />
+                      <div className="absolute right-0 mt-2 w-52 bg-[#111]/95 backdrop-blur-xl rounded-xl border border-white/15 shadow-2xl z-[3999] overflow-hidden">
+                        <div className="px-4 py-3 border-b border-white/10">
+                          <p className="text-white text-sm font-semibold truncate">
+                            {user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0]}
+                          </p>
+                          <p className="text-white/50 text-xs truncate">{user.email}</p>
+                        </div>
+                        <Link
+                          to="/bookings"
+                          onClick={() => setShowMobileProfile(false)}
+                          className="flex items-center gap-2 px-4 py-2.5 text-sm text-white/80 hover:text-white hover:bg-white/8 transition-all"
+                        >
+                          <BookMarked size={14} className="text-[#C5A059]" />
+                          My Bookings
+                        </Link>
+                        <button
+                          onClick={async () => { await authContext.signOut(); setShowMobileProfile(false); navigate('/'); }}
+                          className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all border-t border-white/10"
+                        >
+                          <LogOut size={14} />
+                          Sign Out
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </>
+              ) : (
+                <button
+                  onClick={() => setShowLoginModal(true)}
+                  className="flex items-center justify-center w-9 h-9 rounded-lg bg-white/8 border border-white/15 hover:border-[#C5A059]/50 hover:bg-[#C5A059]/10 transition-all duration-200"
+                  title="Login"
+                >
+                  <User size={18} className="text-white" />
+                </button>
+              )}
+            </div>
 
             <button 
               className="text-white hover:text-[#C5A059] transition-colors" 
