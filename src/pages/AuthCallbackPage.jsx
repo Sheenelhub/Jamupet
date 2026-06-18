@@ -1,56 +1,26 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "../lib/supabase";
 import { Loader } from "lucide-react";
 
 /**
  * Auth Callback Page
- * Handles the PKCE OAuth code exchange after Google/Facebook login.
- * The URL will contain a short-lived `code=` param (NOT tokens).
- * Supabase exchanges this code for a session securely, then we redirect.
+ * For implicit flow SPAs, Supabase's detectSessionInUrl handles the token
+ * extraction automatically. This page just shows a brief spinner while
+ * the session is established, then redirects home.
  */
 export default function AuthCallbackPage() {
   const navigate = useNavigate();
-  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const handleCallback = async () => {
-      try {
-        // Supabase detects the `code` param and exchanges it for a session
-        const { data, error } = await supabase.auth.exchangeCodeForSession(
-          window.location.href
-        );
+    // Supabase (with detectSessionInUrl: true) automatically processes
+    // the #access_token hash before this component even mounts.
+    // We just need to wait a moment then redirect cleanly.
+    const timer = setTimeout(() => {
+      navigate("/", { replace: true });
+    }, 1200);
 
-        if (error) throw error;
-
-        // Clean the URL (remove code param) and redirect to home
-        window.history.replaceState(null, "", window.location.pathname);
-        navigate("/", { replace: true });
-      } catch (err) {
-        console.error("Auth callback error:", err);
-        setError(err.message || "Authentication failed. Please try again.");
-      }
-    };
-
-    handleCallback();
+    return () => clearTimeout(timer);
   }, [navigate]);
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center text-white px-4">
-        <div className="max-w-md w-full bg-white/5 border border-white/10 rounded-2xl p-8 text-center">
-          <p className="text-red-400 font-semibold mb-4">Login Error</p>
-          <p className="text-white/70 text-sm mb-6">{error}</p>
-          <button
-            onClick={() => navigate("/")}
-            className="px-6 py-3 bg-[#C5A059] text-black font-semibold rounded-lg hover:bg-white transition-all"
-          >
-            Back to Home
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center text-white">

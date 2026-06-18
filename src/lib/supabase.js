@@ -10,13 +10,11 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
-    // PKCE flow: tokens are exchanged securely, never appear in the URL
-    flowType: 'pkce',
-    // Automatically detect and exchange the auth code from the URL
+    // detectSessionInUrl: picks up tokens from the URL hash after OAuth redirect
     detectSessionInUrl: true,
-    // Store session in localStorage (default, secure for SPA)
+    // Persist session in localStorage across page reloads
     persistSession: true,
-    // Redirect to clean URL after OAuth (removes hash tokens from address bar)
+    // Automatically refresh tokens before they expire
     autoRefreshToken: true,
   }
 })

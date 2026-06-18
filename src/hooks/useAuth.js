@@ -126,9 +126,7 @@ export function useAuth() {
       const { data, error } = await supabaseAuth.signInWithOAuth({
         provider: 'google',
         options: {
-          // PKCE: redirect to callback page where the code is exchanged securely
-          redirectTo: `${window.location.origin}/auth/callback`,
-          skipBrowserRedirect: false,
+          redirectTo: `${window.location.origin}/`,
         }
       })
       if (error) throw error
@@ -145,8 +143,7 @@ export function useAuth() {
       const { data, error } = await supabaseAuth.signInWithOAuth({
         provider: 'facebook',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-          skipBrowserRedirect: false,
+          redirectTo: `${window.location.origin}/`,
         }
       })
       if (error) throw error
