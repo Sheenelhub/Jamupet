@@ -108,15 +108,14 @@ export default function LoginModal({ isOpen, onClose }) {
     setError(null);
     try {
       const result = await signInWithGoogle();
-      if (result.success) {
-        handleClose();
-        navigate("/booking");
-      } else {
+      if (!result.success) {
         setError(result.error?.message || "Google login failed");
+        setIsLoading(false);
       }
+      // If success, do nothing. The browser will redirect to Google shortly,
+      // and keeping isLoading=true ensures the user sees a loading state until then.
     } catch (err) {
       setError(err.message || "Failed to login with Google");
-    } finally {
       setIsLoading(false);
     }
   };
@@ -126,15 +125,13 @@ export default function LoginModal({ isOpen, onClose }) {
     setError(null);
     try {
       const result = await signInWithFacebook();
-      if (result.success) {
-        handleClose();
-        navigate("/booking");
-      } else {
+      if (!result.success) {
         setError(result.error?.message || "Facebook login failed");
+        setIsLoading(false);
       }
+      // If success, browser will redirect
     } catch (err) {
       setError(err.message || "Failed to login with Facebook");
-    } finally {
       setIsLoading(false);
     }
   };
