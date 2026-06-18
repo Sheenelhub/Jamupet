@@ -44,7 +44,9 @@ function AppContent({ isLoading }) {
     if (location.hash.includes("access_token") || location.search.includes("code=")) {
       // Give Supabase a brief moment to process the tokens before wiping them
       const timer = setTimeout(() => {
-        navigate(location.pathname, { replace: true });
+        navigate({ pathname: location.pathname, hash: '' }, { replace: true });
+        // Double check with native API just in case
+        window.history.replaceState(null, '', window.location.pathname);
       }, 500);
       return () => clearTimeout(timer);
     }
