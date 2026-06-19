@@ -515,6 +515,28 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
         formData.eventVenue ||
         formData.tourType ||
         pickupLocationValue;
+
+      const bookingPayload = {
+        user_id: user.id,
+        pickup_location: pickupLocationValue,
+        destination_location: destinationLocationValue,
+        flight_number: formData.flightNumber || null,
+        booking_date: formData.date || formData.startDate || formData.checkInDate || formData.eventDate || new Date().toISOString().split('T')[0],
+        pickup_time: formData.time || formData.checkInTime || formData.eventTime || null,
+        duration: formData.duration ? String(formData.duration) : "Transfer Only",
+        passengers: formData.passengers ? parseInt(formData.passengers) : 1,
+        vehicle_type: formData.vehicleType || "Executive Sedan",
+        service_category: config.label || serviceType,
+        status: isQuoteOnlyService ? 'quote_pending' : 'pending',
+        notes: formData.specialRequests || formData.notes || '',
+        total_price: tripEstimate?.totalPriceCents ?? null,
+        payment_status: 'pending',
+        payment_stage: null,
+        payment_method: null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
       // Save booking to database
       const savedBooking = await bookingsDb.insert([bookingPayload]);
 
@@ -598,7 +620,7 @@ Thank you for booking with us!
         console.error("WhatsApp sending error:", whatsappErr);
       }
 
-	      const reservationAmount = pricing?.reservationFeeCents ?? null;
+	      const reservationAmount = tripEstimate?.reservationFeeCents ?? null;
 	      setSubmitStatus({
 	        type: "success",
 	        message: isQuoteOnlyService
@@ -623,11 +645,11 @@ Thank you for booking with us!
 	        paymentMethod: bookingPayload.payment_method || reservationPaymentMethod || "paystack",
 	        paymentStage: bookingPayload.payment_stage || null,
 	        reservationAmount,
-	        totalPriceAmount: pricing?.totalPriceCents ?? null,
-	        finalPaymentAmount: pricing?.finalPaymentCents ?? null,
-	        distanceKm: pricing?.distanceKm ?? null,
-	        pricingStart: pricing?.startPoint ?? null,
-	        pricingEnd: pricing?.endPoint ?? null,
+	        totalPriceAmount: tripEstimate?.totalPriceCents ?? null,
+	        finalPaymentAmount: tripEstimate?.finalPaymentCents ?? null,
+	        distanceKm: tripEstimate?.distanceKm ?? null,
+	        pricingStart: tripEstimate?.startPoint ?? null,
+	        pricingEnd: tripEstimate?.endPoint ?? null,
 	        quoteOnly: isQuoteOnlyService,
 	        paymentReference: null
 	      });
