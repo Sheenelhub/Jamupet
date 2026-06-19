@@ -398,7 +398,7 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
     const timer = setTimeout(async () => {
       try {
         const pricing = await calculateTripPricing({
-          serviceType,
+          serviceId: serviceType,
           startQuery,
           endQuery,
           startCoords: pickupGps || locationCoords[pickupField],
@@ -707,6 +707,10 @@ Thank you for booking with us!
           setLocationCoords((prev) => ({
             ...prev,
             [resolvedLocationFields.pickupField]: coordinates
+          }));
+          setFormErrors((prev) => ({
+            ...prev,
+            [resolvedLocationFields.pickupField]: null
           }));
           try {
             const place = await reverseGeocodeLocation(coordinates);

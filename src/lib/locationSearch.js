@@ -381,7 +381,7 @@ export async function searchNominatim(query, options = {}) {
         'User-Agent': 'RoamKenya/1.0 (booking-app)'
       },
       signal
-    });
+    }, 1200);
 
     if (!response.ok) {
       console.warn('OpenStreetMap search error:', response.status);
@@ -569,9 +569,21 @@ export async function searchLocationsUnified(query, options = {}) {
 
   const results = [];
 
-  searchLocationAliases(cleanQuery, 12)
-    .map(normalizeLocalResult)
-    .forEach((result) => addResult(results, result));
+  const localResults = searchLocationAliases(cleanQuery, 12).map(normalizeLocalResult);
+  localResults.forEach((result) => addResult(results, result));
+
+  if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
+
+  // If we have an exceptionally strong local match (e.g. an exact or very good partial match
+  // for a major hotel/area), we can return early to provide instant results and avoid network latency.
+  if (results.length > 0) {
+    const bestLocalScore = Math.max(...results.map(r => scoreResult(cleanQuery, r, proximity)));
+    if (bestLocalScore > 1500) {
+      const finalResults = rankResults(cleanQuery, results, proximity, limit);
+      setCachedResults(cleanQuery, proximity, finalResults);
+      return finalResults;
+    }
+  }
 
   if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
 

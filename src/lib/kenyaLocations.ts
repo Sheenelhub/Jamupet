@@ -348,6 +348,126 @@ export const NAIROBI_NEIGHBORHOODS: Record<string, LocationData> = {
     aliases: ["Loresho", "loresho"],
     latitude: -1.2528, longitude: 36.7792,
     shortLabel: "Loresho", fullLabel: "Loresho, Nairobi"
+  },
+  "Kitisuru": {
+    aliases: ["Kitisuru", "kitisuru"],
+    latitude: -1.2389, longitude: 36.7861,
+    shortLabel: "Kitisuru", fullLabel: "Kitisuru, Nairobi"
+  },
+  "Nyari": {
+    aliases: ["Nyari", "nyari estate"],
+    latitude: -1.2300, longitude: 36.7800,
+    shortLabel: "Nyari", fullLabel: "Nyari Estate, Nairobi"
+  },
+  "Ridgeways": {
+    aliases: ["Ridgeways", "ridgeways nairobi"],
+    latitude: -1.2167, longitude: 36.8500,
+    shortLabel: "Ridgeways", fullLabel: "Ridgeways, Nairobi"
+  },
+  "Thome": {
+    aliases: ["Thome", "thome estate"],
+    latitude: -1.2100, longitude: 36.8667,
+    shortLabel: "Thome", fullLabel: "Thome, Nairobi"
+  },
+  "Garden Estate": {
+    aliases: ["Garden Estate", "garden estate nairobi"],
+    latitude: -1.2267, longitude: 36.8717,
+    shortLabel: "Garden Estate", fullLabel: "Garden Estate, Nairobi"
+  },
+  "Zimmerman": {
+    aliases: ["Zimmerman", "zimmerman nairobi", "zima"],
+    latitude: -1.2050, longitude: 36.8833,
+    shortLabel: "Zimmerman", fullLabel: "Zimmerman, Nairobi"
+  },
+  "Kahawa West": {
+    aliases: ["Kahawa West", "kahawa west nairobi"],
+    latitude: -1.1833, longitude: 36.8833,
+    shortLabel: "Kahawa West", fullLabel: "Kahawa West, Nairobi"
+  },
+  "Utawala": {
+    aliases: ["Utawala", "utawala nairobi"],
+    latitude: -1.2833, longitude: 36.9667,
+    shortLabel: "Utawala", fullLabel: "Utawala, Nairobi"
+  },
+  "Syokimau": {
+    aliases: ["Syokimau", "syokimau machakos"],
+    latitude: -1.3667, longitude: 36.9333,
+    shortLabel: "Syokimau", fullLabel: "Syokimau"
+  },
+  "Mlolongo": {
+    aliases: ["Mlolongo", "mlolongo town"],
+    latitude: -1.3967, longitude: 36.9383,
+    shortLabel: "Mlolongo", fullLabel: "Mlolongo"
+  },
+  "Kitengela": {
+    aliases: ["Kitengela", "kitengela kajiado", "kite"],
+    latitude: -1.4833, longitude: 36.9667,
+    shortLabel: "Kitengela", fullLabel: "Kitengela"
+  },
+  "Athi River": {
+    aliases: ["Athi River", "athi river machakos"],
+    latitude: -1.4500, longitude: 36.9833,
+    shortLabel: "Athi River", fullLabel: "Athi River"
+  },
+  "Ongata Rongai": {
+    aliases: ["Rongai", "ongata rongai", "rongai kajiado"],
+    latitude: -1.3967, longitude: 36.7550,
+    shortLabel: "Rongai", fullLabel: "Ongata Rongai"
+  },
+  "Kiserian": {
+    aliases: ["Kiserian", "kiserian kajiado"],
+    latitude: -1.4333, longitude: 36.7000,
+    shortLabel: "Kiserian", fullLabel: "Kiserian"
+  },
+  "Ngong Town": {
+    aliases: ["Ngong Town", "ngong", "ngong kajiado"],
+    latitude: -1.3611, longitude: 36.6564,
+    shortLabel: "Ngong", fullLabel: "Ngong Town"
+  },
+  "Ruai": {
+    aliases: ["Ruai", "ruai nairobi"],
+    latitude: -1.2500, longitude: 37.0000,
+    shortLabel: "Ruai", fullLabel: "Ruai, Nairobi"
+  },
+  "Kamulu": {
+    aliases: ["Kamulu", "kamulu nairobi"],
+    latitude: -1.2667, longitude: 37.0500,
+    shortLabel: "Kamulu", fullLabel: "Kamulu, Nairobi"
+  },
+  "Dandora": {
+    aliases: ["Dandora", "dandora nairobi"],
+    latitude: -1.2500, longitude: 36.8833,
+    shortLabel: "Dandora", fullLabel: "Dandora, Nairobi"
+  },
+  "Kariobangi": {
+    aliases: ["Kariobangi", "kariobangi nairobi"],
+    latitude: -1.2583, longitude: 36.8833,
+    shortLabel: "Kariobangi", fullLabel: "Kariobangi, Nairobi"
+  },
+  "Juja": {
+    aliases: ["Juja", "juja town", "juja kiambu"],
+    latitude: -1.1083, longitude: 37.0167,
+    shortLabel: "Juja", fullLabel: "Juja, Kiambu"
+  },
+  "Ruiru": {
+    aliases: ["Ruiru", "ruiru kiambu"],
+    latitude: -1.1500, longitude: 36.9667,
+    shortLabel: "Ruiru", fullLabel: "Ruiru, Kiambu"
+  },
+  "Kikuyu": {
+    aliases: ["Kikuyu", "kikuyu town", "kikuyu kiambu"],
+    latitude: -1.2500, longitude: 36.6667,
+    shortLabel: "Kikuyu", fullLabel: "Kikuyu Town"
+  },
+  "Kabete": {
+    aliases: ["Kabete", "kabete kiambu"],
+    latitude: -1.2417, longitude: 36.7333,
+    shortLabel: "Kabete", fullLabel: "Kabete"
+  },
+  "Wangige": {
+    aliases: ["Wangige", "wangige market"],
+    latitude: -1.2333, longitude: 36.6833,
+    shortLabel: "Wangige", fullLabel: "Wangige"
   }
 };
 
@@ -1197,6 +1317,51 @@ export const KENYA_HOTELS_RESORTS: Record<string, LocationData> = {
     aliases: ["Stanley", "Sarova Stanley", "sarova stanley"],
     latitude: -1.2856, longitude: 36.8208,
     shortLabel: "Sarova Stanley", fullLabel: "Sarova Stanley Hotel, Nairobi"
+  },
+  "Fairview Hotel": {
+    aliases: ["Fairview Hotel", "fairview nairobi", "Fairview"],
+    latitude: -1.2944, longitude: 36.8122,
+    shortLabel: "Fairview Hotel", fullLabel: "Fairview Hotel, Nairobi"
+  },
+  "Four Points by Sheraton Nairobi Airport": {
+    aliases: ["Four Points Airport", "Four Points JKIA", "four points by sheraton airport"],
+    latitude: -1.3325, longitude: 36.9169,
+    shortLabel: "Four Points Airport", fullLabel: "Four Points by Sheraton, Nairobi Airport"
+  },
+  "Four Points by Sheraton Nairobi Hurlingham": {
+    aliases: ["Four Points Hurlingham", "four points hurlingham"],
+    latitude: -1.2917, longitude: 36.7972,
+    shortLabel: "Four Points Hurlingham", fullLabel: "Four Points by Sheraton, Hurlingham"
+  },
+  "Tamarind Tree Hotel": {
+    aliases: ["Tamarind Tree", "Tamarind Hotel", "tamarind nairobi"],
+    latitude: -1.3250, longitude: 36.7978,
+    shortLabel: "Tamarind Tree", fullLabel: "Tamarind Tree Hotel, Nairobi"
+  },
+  "Trademark Hotel": {
+    aliases: ["Trademark Hotel", "trademark nairobi", "trademark village market"],
+    latitude: -1.2289, longitude: 36.8028,
+    shortLabel: "Trademark Hotel", fullLabel: "Trademark Hotel, Village Market"
+  },
+  "Panari Hotel": {
+    aliases: ["Panari Hotel", "panari nairobi", "panari mombasa road"],
+    latitude: -1.3267, longitude: 36.8522,
+    shortLabel: "Panari Hotel", fullLabel: "The Panari Hotel, Nairobi"
+  },
+  "The Boma Nairobi": {
+    aliases: ["The Boma", "boma hotel nairobi", "boma nairobi"],
+    latitude: -1.3178, longitude: 36.8306,
+    shortLabel: "The Boma", fullLabel: "The Boma Hotel, Nairobi"
+  },
+  "Mövenpick Hotel & Residences Nairobi": {
+    aliases: ["Movenpick", "movenpick nairobi", "movenpick hotel"],
+    latitude: -1.2650, longitude: 36.8006,
+    shortLabel: "Mövenpick Hotel", fullLabel: "Mövenpick Hotel & Residences, Nairobi"
+  },
+  "Sankara Nairobi": {
+    aliases: ["Sankara", "sankara nairobi", "sankara westlands"],
+    latitude: -1.2642, longitude: 36.8022,
+    shortLabel: "Sankara Nairobi", fullLabel: "Sankara Nairobi, Autograph Collection"
   },
   "Eka Hotel Nairobi": {
     aliases: ["Eka Hotel", "eka hotel nairobi"],
