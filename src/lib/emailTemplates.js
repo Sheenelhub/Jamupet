@@ -31,7 +31,7 @@ export const driverAssignedCustomerEmail = ({
     <p><strong>Destination:</strong> ${destination}</p>
     <p><strong>Date/Time:</strong> ${pickupDatetime}</p>
     <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;" />
-    <p style="font-size: 12px; color: #6b7280;">Roam Kenya Support — support@roamkenya.com</p>
+    <p style="font-size: 12px; color: #6b7280;">Jamupet Transit Support — jamupetlogistics@gmail.com</p>
   `
 
   return {
@@ -90,7 +90,7 @@ export const bookingStatusUpdateEmail = ({
     <p><strong>Destination:</strong> ${destination}</p>
     <p><strong>Date/Time:</strong> ${pickupDatetime}</p>
     <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;" />
-    <p style="font-size: 12px; color: #6b7280;">Roam Kenya Support — support@roamkenya.com</p>
+    <p style="font-size: 12px; color: #6b7280;">Jamupet Transit Support — jamupetlogistics@gmail.com</p>
   `
 
   return {

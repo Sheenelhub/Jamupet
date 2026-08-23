@@ -1,5 +1,5 @@
 // Thin wrapper around Resend API
-// from: 'Roam Kenya <bookings@roamkenya.com>' (placeholder, easy to swap)
+// from: 'Jamupet Transit <jamupetlogistics@gmail.com>' (placeholder, easy to swap)
 export async function sendEmail({ to, subject, html }) {
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
@@ -8,7 +8,7 @@ export async function sendEmail({ to, subject, html }) {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      from: 'Roam Kenya <bookings@roamkenya.com>',
+      from: 'Jamupet Transit <jamupetlogistics@gmail.com>',
       to,
       subject,
       html

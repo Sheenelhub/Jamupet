@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import supabase from "../supabaseClient";
 import { 
   Mail, Phone, MapPin, Instagram, Facebook, Linkedin, Twitter, 
   ArrowRight, ShieldCheck, MessageCircle, Loader2, Check 
@@ -11,17 +12,26 @@ export default function Footer() {
   const [email, setEmail] = useState("");
   const [subStatus, setSubStatus] = useState("idle");
 
-  const handleSubscribe = (e) => {
+  const handleSubscribe = async (e) => {
     e.preventDefault();
     if (!email) return;
     
     setSubStatus("loading");
     
-    setTimeout(() => {
+    try {
+      const { error } = await supabase
+        .from('subscribers')
+        .insert([{ email }]);
+        
+      if (error && error.code !== '23505') throw error; // Ignore duplicate email errors quietly
+      
       setSubStatus("success");
       setEmail("");
       setTimeout(() => setSubStatus("idle"), 3000);
-    }, 1500);
+    } catch (err) {
+      console.error("Subscription error:", err);
+      setSubStatus("idle");
+    }
   };
 
   const handleWhatsAppChat = () => {
@@ -127,11 +137,11 @@ export default function Footer() {
                   <span>+254 722 413 102</span>
                 </li>
                 <li 
-                  onClick={() => window.location.href = 'mailto:bookings@jamupet.com'}
+                  onClick={() => window.location.href = 'mailto:jamupetlogistics@gmail.com'}
                   className="flex items-center gap-3 text-gray-400 text-sm hover:text-[#C5A059] transition-colors cursor-pointer group"
                 >
                   <Mail size={18} className="group-hover:text-[#C5A059] text-gray-500 transition-colors" />
-                  <span>bookings@jamupet.com</span>
+                  <span>jamupetlogistics@gmail.com</span>
                 </li>
               </ul>
             </div>
