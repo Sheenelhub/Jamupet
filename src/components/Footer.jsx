@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import supabase from "../supabaseClient";
+import { supabase } from "../supabaseClient";
 import { 
   Mail, Phone, MapPin, Instagram, Facebook, Linkedin, Twitter, 
   ArrowRight, ShieldCheck, MessageCircle, Loader2, Check 
