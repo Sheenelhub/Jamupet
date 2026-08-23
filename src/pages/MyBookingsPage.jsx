@@ -49,6 +49,7 @@ export default function MyBookingsPage() {
 	  const [finalPaymentMethods, setFinalPaymentMethods] = useState({});
 	  const [finalMpesaPhones, setFinalMpesaPhones] = useState({});
   const [editForm, setEditForm] = useState({
+    service_category: "",
     pickup_location: "",
     destination_location: "",
     booking_date: "",
@@ -145,6 +146,7 @@ export default function MyBookingsPage() {
     setEditingBookingId(booking.id);
     setActionMessage(null);
     setEditForm({
+      service_category: booking.service_category || "",
       pickup_location: booking.pickup_location || "",
       destination_location: booking.destination_location || "",
       booking_date: booking.booking_date || "",
@@ -158,6 +160,7 @@ export default function MyBookingsPage() {
     setEditingBookingId(null);
     setSavingBookingId(null);
     setEditForm({
+      service_category: "",
       pickup_location: "",
       destination_location: "",
       booking_date: "",
@@ -172,6 +175,7 @@ export default function MyBookingsPage() {
     setActionMessage(null);
     try {
       const updates = {
+        service_category: editForm.service_category.trim(),
         pickup_location: editForm.pickup_location.trim(),
         destination_location: editForm.destination_location.trim(),
         booking_date: editForm.booking_date,
@@ -606,6 +610,116 @@ export default function MyBookingsPage() {
       setProcessingFinalPaymentBookingId(null);
     }
   };
+
+  const handleDownloadReceipt = (booking) => {
+    const printWindow = window.open('', '_blank');
+    const htmlContent = `
+      <html>
+        <head>
+          <title>Receipt - Booking #${booking.id}</title>
+          <style>
+            body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; margin: 0; padding: 40px; line-height: 1.6; }
+            .receipt-container { max-width: 800px; margin: 0 auto; border: 1px solid #eee; border-radius: 8px; padding: 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+            .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; border-bottom: 2px solid #C5A059; padding-bottom: 20px; }
+            .logo-section h1 { color: #C5A059; margin: 0 0 5px 0; font-size: 28px; text-transform: uppercase; letter-spacing: 2px; }
+            .logo-section p { margin: 0; font-size: 12px; color: #777; }
+            .invoice-details { text-align: right; }
+            .invoice-details h2 { margin: 0 0 10px 0; font-size: 24px; color: #333; }
+            .invoice-details p { margin: 0; font-size: 14px; color: #555; }
+            .section { margin-bottom: 30px; }
+            .section-title { font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: #888; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 15px; font-weight: bold; }
+            table { w-full; width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+            th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; }
+            th { font-weight: bold; color: #555; background-color: #fcfcfc; }
+            .total-row td { font-weight: bold; font-size: 16px; border-top: 2px solid #333; }
+            .footer { text-align: center; margin-top: 50px; font-size: 12px; color: #888; border-top: 1px solid #eee; padding-top: 20px; }
+            .status-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; background-color: #e6f4ea; color: #1e8e3e; }
+          </style>
+        </head>
+        <body>
+          <div class="receipt-container">
+            <div class="header">
+              <div class="logo-section">
+                <h1>Jamupet Transit</h1>
+                <p>Premium Chauffeur & Transfer Services</p>
+                <p>Nairobi, Kenya</p>
+                <p>KRA PIN: P051XXXXXXX (Placeholder)</p>
+              </div>
+              <div class="invoice-details">
+                <h2>RECEIPT</h2>
+                <p><strong>Booking ID:</strong> ${booking.id}</p>
+                <p><strong>Date:</strong> ${new Date().toLocaleDateString()}</p>
+                <p class="status-badge">${booking.payment_status === 'paid' ? 'FULLY PAID' : 'RESERVATION PAID'}</p>
+              </div>
+            </div>
+
+            <div class="section">
+              <div class="section-title">Passenger Details</div>
+              <p><strong>Name:</strong> ${user?.user_metadata?.full_name || user?.email || 'N/A'}</p>
+              <p><strong>Email:</strong> ${user?.email || 'N/A'}</p>
+            </div>
+
+            <div class="section">
+              <div class="section-title">Trip Information</div>
+              <table>
+                <tr>
+                  <th>Service</th>
+                  <td>${booking.service_category || 'Premium Transfer'}</td>
+                </tr>
+                <tr>
+                  <th>Date & Time</th>
+                  <td>${booking.booking_date} at ${booking.pickup_time}</td>
+                </tr>
+                <tr>
+                  <th>Pickup</th>
+                  <td>${booking.pickup_location}</td>
+                </tr>
+                <tr>
+                  <th>Destination</th>
+                  <td>${booking.destination_location}</td>
+                </tr>
+                <tr>
+                  <th>Vehicle Type</th>
+                  <td>${booking.vehicle_type || 'Executive Sedan'}</td>
+                </tr>
+              </table>
+            </div>
+
+            <div class="section">
+              <div class="section-title">Payment Summary</div>
+              <table>
+                <tr>
+                  <th>Description</th>
+                  <th style="text-align: right;">Amount</th>
+                </tr>
+                <tr>
+                  <td>Trip Fare (${booking.payment_status === 'paid' ? 'Full Payment' : 'Reservation Deposit'})</td>
+                  <td style="text-align: right;">${booking.payment_method ? booking.payment_method.toUpperCase() : 'Card/Bank'} Payment</td>
+                </tr>
+                <tr class="total-row">
+                  <td>Amount Paid</td>
+                  <td style="text-align: right;">Ksh ${booking.payment_status === 'paid' ? booking.price_amount : (booking.price_amount * 0.2).toFixed(2)}</td>
+                </tr>
+              </table>
+            </div>
+
+            <div class="footer">
+              <p>Thank you for choosing Jamupet Transit for your journey.</p>
+              <p>For inquiries, please contact us at support@jamupet.com | 0722413102</p>
+            </div>
+          </div>
+          <script>
+            window.onload = function() {
+              window.print();
+            }
+          </script>
+        </body>
+      </html>
+    `;
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+  };
+
   if (!user) {
     return (
       <div className="min-h-screen bg-[#FAFAFA] pt-32 pb-20 px-4 sm:px-6">
@@ -738,6 +852,26 @@ export default function MyBookingsPage() {
                     <div className="bg-gray-50 rounded-xl border border-gray-200 p-5 space-y-4">
                       <h3 className="text-sm font-bold text-gray-900 mb-2">Revise Trip Details</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-500 mb-1">Service Category</label>
+                          <select
+                            value={editForm.service_category}
+                            onChange={(e) => setEditForm((prev) => ({ ...prev, service_category: e.target.value }))}
+                            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 bg-white focus:outline-none focus:border-[#C5A059]"
+                          >
+                            <option value="Airport Transfer">Airport Transfer</option>
+                            <option value="SGR Transfer">SGR Transfer</option>
+                            <option value="Full Day Nairobi">Full Day Nairobi</option>
+                            <option value="Excursions">Excursions</option>
+                            <option value="VIP / Diplomatic">VIP / Diplomatic</option>
+                            <option value="Wedding Travel">Wedding Travel</option>
+                            <option value="Corporate / NGO">Corporate / NGO</option>
+                            <option value="Long Distance">Long Distance</option>
+                            <option value="Cross Border">Cross Border</option>
+                            <option value="Events">Events</option>
+                            <option value="Funeral Travel">Funeral Travel</option>
+                          </select>
+                        </div>
                         <div>
                           <label className="block text-xs font-semibold text-gray-500 mb-1">Pickup Location</label>
                           <input
@@ -891,6 +1025,7 @@ export default function MyBookingsPage() {
                                 {formatKesFromCents(Number(booking.waiting_charge))}
                               </div>
                             </div>
+
                           )}
                           <div>
                             <p className="text-xs text-gray-500">Outstanding Balance</p>
@@ -965,6 +1100,16 @@ export default function MyBookingsPage() {
                             >
                               <Pencil size={14} />
                               Revise Booking
+                            </button>
+                          )}
+                          {(booking.payment_status === "paid" || booking.payment_status === "reservation_paid") && (
+                            <button
+                              type="button"
+                              onClick={() => handleDownloadReceipt(booking)}
+                              className="inline-flex items-center gap-1.5 px-4 py-2 border border-[#C5A059] text-xs font-semibold text-[#C5A059] hover:bg-[#C5A059]/10 rounded-lg transition-colors shadow-sm"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                              Download Receipt
                             </button>
                           )}
                           {booking.payment_status === "reservation_paid" && booking.status !== "cancelled" && (

@@ -6,7 +6,7 @@ export default function Hero() {
   const navigate = useNavigate();
 
   return (
-    <section className="relative w-full h-screen bg-[#FDFCFB] overflow-hidden">
+    <section className="relative w-full min-h-[100dvh] flex flex-col justify-between bg-[#FDFCFB] overflow-hidden pt-24 md:pt-0">
       
       {/* BACKGROUND */}
       <div className="absolute inset-0 z-0">
@@ -22,7 +22,7 @@ export default function Hero() {
       </div>
 
       {/* MAIN CONTENT */}
-      <div className="relative z-20 max-w-[1440px] mx-auto h-full px-6 md:px-12 flex items-center pt-32 pb-56 md:pt-0 md:pb-0">
+      <div className="relative z-20 max-w-[1440px] w-full mx-auto flex-1 px-6 md:px-12 flex items-center py-10 md:py-0">
         
         <div className="max-w-4xl mb-0 md:mb-24 mt-8 md:mt-0">
           
@@ -80,7 +80,7 @@ export default function Hero() {
       </div>
 
       {/* COMPACT SERVICE STRIP - Light Glassmorphism */}
-      <div className="absolute bottom-0 left-0 w-full z-30 grid grid-cols-1 md:grid-cols-3 border-t border-white bg-white/80 backdrop-blur-xl shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
+      <div className="relative w-full z-30 grid grid-cols-1 md:grid-cols-3 border-t border-white bg-white/80 backdrop-blur-xl shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
         
         <div className="p-6 md:p-8 border-r border-gray-100 flex flex-col gap-3 group hover:bg-white transition-all cursor-default">
           <Plane className="text-[#C5A059] w-6 h-6 md:w-8 md:h-8 group-hover:scale-110 transition-transform" strokeWidth={1.5} />

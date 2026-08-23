@@ -1,3 +1,6 @@
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+
 const formatDate = (value) => {
   if (!value) return ''
   const date = value instanceof Date ? value : new Date(value)
@@ -72,4 +75,55 @@ export function exportToCSV(data, filename) {
   link.click()
   link.remove()
   URL.revokeObjectURL(url)
+}
+
+export function exportToPDF(data, filename) {
+  if (!Array.isArray(data) || data.length === 0) return;
+
+  const doc = new jsPDF('landscape');
+  
+  // Title
+  doc.setFontSize(18);
+  doc.text('Jamupet Transit - Bookings Report', 14, 22);
+  doc.setFontSize(11);
+  doc.setTextColor(100);
+  doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 30);
+
+  const flattened = data.map((row) => flattenObject(row));
+  const headers = Array.from(
+    flattened.reduce((set, row) => {
+      Object.keys(row).forEach((key) => set.add(key));
+      return set;
+    }, new Set())
+  );
+
+  const formatHeader = (key) => {
+    return key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  };
+
+  const rows = flattened.map((row) =>
+    headers.map((header) => {
+      const value = row[header];
+      if (shouldFormatDate(value)) {
+        const formatted = formatDate(value);
+        if (formatted) return formatted;
+      }
+      if (typeof value === 'object' && value !== null) {
+        return JSON.stringify(value);
+      }
+      return value !== undefined && value !== null ? String(value) : '';
+    })
+  );
+
+  doc.autoTable({
+    startY: 40,
+    head: [headers.map(formatHeader)],
+    body: rows,
+    styles: { fontSize: 8 },
+    headStyles: { fillColor: [197, 160, 89] },
+    alternateRowStyles: { fillColor: [250, 250, 250] },
+    margin: { top: 40 },
+  });
+
+  doc.save(filename);
 }

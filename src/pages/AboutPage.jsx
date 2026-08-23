@@ -10,10 +10,15 @@ import {
   MapPin, 
   CheckCircle2, 
   Check,
-  Compass
+  Compass,
+  Shield, 
+  Clock, 
+  Star, 
+  Play
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import BackButton from "../components/BackButton";
+import SEO from "../components/SEO";
 
 const stats = [
   { label: "KM Driven", value: "500k+" },
@@ -26,7 +31,7 @@ export default function AboutPage() {
   const navigate = useNavigate();
 
   const handleDriverApplication = () => {
-    const phoneNumber = "254705416781";
+    const phoneNumber = "254722413102";
     const message = "Hello Jamupet Transit, I am interested in applying for a Professional Chauffeur position. I have viewed the requirements on your website.";
     window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`, "_blank");
   };
@@ -34,13 +39,17 @@ export default function AboutPage() {
   return (
     // Base background is a very soft, warm pearl white (#FDFCFB) to match the gold branding
     <div className="bg-[#FDFCFB] min-h-screen text-gray-900 font-sans selection:bg-[#C5A059] selection:text-white overflow-hidden">
+      <SEO 
+        title="About Us - Luxury Transport & Chauffeurs Kenya"
+        description="Learn about Jamupet Transit's commitment to premium, reliable, and discreet luxury transportation services in Kenya."
+      />
       <BackButton />
 
       {/* 1. CINEMATIC HERO */}
       <section className="pt-40 pb-24 relative overflow-hidden flex items-center min-h-[60vh]">
         <div className="absolute inset-0 z-0">
           <img 
-            src="/assets/jkia.webp" 
+            src="/assets/jkia-airport-transfer-nairobi.webp" 
             alt="Nairobi Skyline" 
             className="w-full h-full object-cover opacity-15 grayscale scale-105"
             onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?q=80&w=1920"; }}
@@ -97,7 +106,7 @@ export default function AboutPage() {
               <div className="absolute -inset-4 bg-gradient-to-tr from-[#C5A059]/20 to-transparent opacity-0 group-hover:opacity-100 blur-2xl transition-opacity duration-700" />
               <div className="rounded-[2rem] overflow-hidden shadow-2xl h-[500px] border border-gray-200 relative z-10">
                 <img 
-                  src="/assets/Nairobi-City.webp" 
+                  src="/assets/nairobi-city-executive-tours.webp" 
                   alt="Luxury Fleet" 
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000"
                   onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1542282088-fe8426682b8f?q=80&w=800"; }}
@@ -179,7 +188,7 @@ export default function AboutPage() {
           <div className="relative group">
             <div className="relative w-full aspect-[4/5] md:aspect-square lg:aspect-[4/5] rounded-[3rem] overflow-hidden border border-gray-200 shadow-xl">
               <img 
-                src="/assets/book-now.webp" 
+                src="/assets/book-luxury-ride-now.webp" 
                 alt="Booking Experience" 
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 opacity-90"
                 onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1517430816045-df4b7de11d1d?q=80&w=1000"; }}
@@ -205,9 +214,9 @@ export default function AboutPage() {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <FleetCard title="Executive Sedan" img="/assets/black-sedan.webp" pax="1-3" bags="2" fallback="https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?q=80&w=800" />
-            <FleetCard title="Luxury SUV" img="/assets/suv.webp" pax="1-6" bags="4" fallback="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?q=80&w=800" />
-            <FleetCard title="Safari Cruiser" img="/assets/Safari-van.webp" pax="1-7" bags="6" fallback="https://images.unsplash.com/photo-1516426122078-c23e76319801?q=80&w=800" />
+            <FleetCard title="Executive Sedan" img="/assets/executive-sedan-airport-transfer.webp" pax="1-3" bags="2" fallback="https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?q=80&w=800" />
+            <FleetCard title="Luxury SUV" img="/assets/luxury-suv-chauffeur-kenya.webp" pax="1-6" bags="4" fallback="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?q=80&w=800" />
+            <FleetCard title="Safari Cruiser" img="/assets/custom-safari-tour-van-kenya.webp" pax="1-7" bags="6" fallback="https://images.unsplash.com/photo-1516426122078-c23e76319801?q=80&w=800" />
           </div>
         </div>
       </section>

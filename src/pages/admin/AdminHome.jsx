@@ -109,24 +109,24 @@ export default function AdminHome() {
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {kpiCards.map((card) => (
-            <div key={card.label} className="rounded-lg bg-white border border-gray-200 p-4 shadow-sm">
-              <div className="flex items-center justify-between text-sm text-gray-500">
+            <div key={card.label} className="rounded-2xl bg-white border border-gray-100 p-6 shadow-[0_4px_20px_rgba(15,23,42,0.04)]">
+              <div className="flex items-center justify-between text-xs font-bold tracking-wider uppercase text-gray-500">
                 <span>{card.label}</span>
-                <TrendingUp className="h-4 w-4 text-[#B35A38]" />
+                <TrendingUp className="h-4 w-4 text-[#C5A059]" />
               </div>
-              <div className="mt-3 text-2xl font-semibold text-gray-900">{card.value}</div>
+              <div className="mt-4 text-3xl font-bold text-gray-900 font-serif">{card.value}</div>
             </div>
           ))}
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-4">
+        <div className="grid gap-4 lg:grid-cols-4 pt-4">
           {KANBAN_COLUMNS.map((column) => {
             const items = groupedBookings[column.key] || []
             return (
-              <div key={column.key} className="bg-white border border-gray-200 rounded-lg flex flex-col">
-                <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
-                  <h3 className="text-sm font-semibold text-gray-900">{column.label}</h3>
-                  <span className="text-xs font-semibold bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full">
+              <div key={column.key} className="bg-[#FDFCFB] border border-gray-100 rounded-2xl shadow-[0_4px_20px_rgba(15,23,42,0.03)] flex flex-col">
+                <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-white rounded-t-2xl">
+                  <h3 className="text-sm font-bold tracking-wide text-gray-900">{column.label}</h3>
+                  <span className="text-xs font-bold bg-[#C5A059]/10 text-[#C5A059] px-2.5 py-1 rounded-full">
                     {items.length}
                   </span>
                 </div>
@@ -160,20 +160,20 @@ export default function AdminHome() {
                           key={booking.id}
                           type="button"
                           onClick={() => setSelectedBooking(booking)}
-                          className="w-full text-left rounded-lg border border-gray-200 p-3 hover:shadow-sm"
+                          className="w-full text-left rounded-xl bg-white border border-gray-100 p-4 transition-all duration-300 hover:shadow-[0_8px_20px_rgba(197,160,89,0.08)] hover:border-[#C5A059]/30"
                         >
                           <div className="flex items-center justify-between">
-                            <span className="text-xs font-semibold text-gray-500">{bookingId}</span>
-                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${badgeClass}`}>
+                            <span className="text-[10px] font-bold tracking-widest text-gray-400">{bookingId}</span>
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${badgeClass}`}>
                               {statusLabel}
                             </span>
                           </div>
-                          <div className="mt-2 text-sm font-semibold text-gray-900">{customerName}</div>
-                          <div className="mt-1 text-xs text-gray-500">
+                          <div className="mt-3 text-sm font-bold text-gray-900">{customerName}</div>
+                          <div className="mt-1.5 text-xs font-medium text-gray-500">
                             {pickup} → {destination}
                           </div>
-                          <div className="mt-2 text-xs text-gray-500">{dateLabel}</div>
-                          <div className="mt-2 inline-flex items-center px-2 py-0.5 rounded-full bg-orange-50 text-xs text-[#B35A38]">
+                          <div className="mt-2 text-[11px] text-gray-400">{dateLabel}</div>
+                          <div className="mt-3 inline-flex items-center px-2.5 py-1 rounded-md bg-[#C5A059]/10 text-[10px] font-bold tracking-wider uppercase text-[#C5A059]">
                             {vehicleType}
                           </div>
                         </button>

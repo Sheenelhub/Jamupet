@@ -73,11 +73,11 @@ export default function ProfileSettingsPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-white pt-32 pb-20 px-6">
-        <div className="max-w-3xl mx-auto border border-gray-300 p-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-3">Profile Settings</h1>
-          <p className="text-gray-600 mb-6">Sign in to edit your profile details.</p>
-          <Link to="/auth" className="inline-block px-6 py-3 bg-[#B35A38] text-white font-semibold hover:bg-[#8B4225] transition-colors">
+      <div className="bg-[#FDFCFB] min-h-screen pt-32 pb-20 px-6 font-sans selection:bg-[#C5A059] selection:text-white">
+        <div className="max-w-3xl mx-auto bg-white rounded-2xl border border-gray-100 shadow-[0_12px_34px_rgba(15,23,42,0.06)] p-8 text-center">
+          <h1 className="text-3xl font-bold text-gray-900 mb-3 font-serif">Profile Settings</h1>
+          <p className="text-gray-600 mb-6 font-light">Sign in to edit your profile details.</p>
+          <Link to="/auth" className="inline-block px-8 py-3 bg-[#C5A059] text-white font-bold rounded-xl hover:bg-gray-900 transition-colors uppercase tracking-widest text-xs shadow-lg">
             Sign In
           </Link>
         </div>
@@ -86,27 +86,27 @@ export default function ProfileSettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white pt-32 pb-20 px-6">
+    <div className="bg-[#FDFCFB] min-h-screen pt-32 pb-20 px-6 font-sans selection:bg-[#C5A059] selection:text-white">
       <div className="max-w-3xl mx-auto">
-        <div className="border border-gray-300 p-8 mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Profile Settings</h1>
-          <p className="text-gray-600">Manage your personal details used for bookings.</p>
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-[0_12px_34px_rgba(15,23,42,0.06)] p-8 mb-6">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2 font-serif">Profile Settings</h1>
+          <p className="text-gray-600 font-light text-sm">Manage your personal details used for luxury bookings.</p>
         </div>
 
         {loading ? (
-          <div className="border border-gray-300 p-8 flex items-center gap-3 text-gray-700">
-            <Loader size={18} className="animate-spin" />
-            Loading profile...
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-[0_12px_34px_rgba(15,23,42,0.06)] p-12 flex flex-col items-center justify-center text-gray-500 gap-3">
+            <Loader size={24} className="animate-spin text-[#C5A059]" />
+            <p className="text-sm font-semibold">Loading profile...</p>
           </div>
         ) : (
-          <form onSubmit={handleSave} className="border border-gray-300 p-8 space-y-5">
+          <form onSubmit={handleSave} className="bg-white rounded-2xl border border-gray-100 shadow-[0_12px_34px_rgba(15,23,42,0.06)] p-8 space-y-6">
             <div>
               <label className="block text-sm font-semibold text-gray-900 mb-2">Email</label>
               <input
                 type="email"
                 value={user.email || ""}
                 disabled
-                className="w-full px-4 py-3 border border-gray-300 bg-gray-100 text-gray-700"
+                className="w-full rounded-xl px-4 py-3 border border-gray-200 bg-gray-50 text-gray-500 cursor-not-allowed"
               />
             </div>
 
@@ -117,7 +117,7 @@ export default function ProfileSettingsPage() {
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 placeholder="Your full name"
-                className="w-full px-4 py-3 border border-gray-300 bg-white text-gray-900 focus:outline-none focus:border-[#B35A38]"
+                className="w-full rounded-xl px-4 py-3 border border-gray-300 bg-white text-gray-900 focus:outline-none focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059] transition-all duration-300 hover:border-gray-400"
               />
             </div>
 
@@ -128,24 +128,26 @@ export default function ProfileSettingsPage() {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="Your phone number"
-                className="w-full px-4 py-3 border border-gray-300 bg-white text-gray-900 focus:outline-none focus:border-[#B35A38]"
+                className="w-full rounded-xl px-4 py-3 border border-gray-300 bg-white text-gray-900 focus:outline-none focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059] transition-all duration-300 hover:border-gray-400"
               />
             </div>
 
             {status && (
-              <div className={`p-4 border ${status.type === "success" ? "bg-green-50 border-green-400 text-green-700" : "bg-red-50 border-red-400 text-red-700"}`}>
-                {status.message}
+              <div className={`p-4 rounded-xl border ${status.type === "success" ? "bg-green-50 border-green-200 text-green-700" : "bg-red-50 border-red-200 text-red-700"}`}>
+                <p className="text-sm font-medium">{status.message}</p>
               </div>
             )}
 
-            <button
-              type="submit"
-              disabled={saving}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-[#B35A38] text-white font-semibold hover:bg-[#8B4225] disabled:opacity-50 transition-colors"
-            >
-              {saving ? <Loader size={18} className="animate-spin" /> : <Save size={18} />}
-              {saving ? "Saving..." : "Save Profile"}
-            </button>
+            <div className="pt-4">
+              <button
+                type="submit"
+                disabled={saving}
+                className="w-full sm:w-auto inline-flex justify-center items-center gap-2 px-8 py-3 bg-[#C5A059] text-white font-bold rounded-xl hover:bg-gray-900 disabled:opacity-50 transition-all uppercase tracking-widest text-xs shadow-lg"
+              >
+                {saving ? <Loader size={16} className="animate-spin" /> : <Save size={16} />}
+                {saving ? "Saving..." : "Save Changes"}
+              </button>
+            </div>
           </form>
         )}
       </div>

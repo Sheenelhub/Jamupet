@@ -2,6 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom"; 
 import { MapPin, Plane, TreePine, Building2, MessageCircle } from "lucide-react";
 import BackButton from "../components/BackButton";
+import SEO from "../components/SEO";
 
 const coverage = [
   {
@@ -25,13 +26,18 @@ export default function Destinations() {
   const navigate = useNavigate(); 
 
   const handleCustomInquiry = () => {
-    const phoneNumber = "254705416781"; 
+    const phoneNumber = "254722413102"; 
     const message = "Hello Jamupet Transit, I would like to inquire about a custom transport route.";
     window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`, "_blank");
   };
 
   return (
     <div className="pt-32 pb-32 bg-[#FDFCFB] min-h-screen text-gray-900">
+      <SEO 
+        title="Top Safari Destinations in Kenya - Jamupet Transit"
+        description="Discover Kenya's premium safari destinations like Maasai Mara, Amboseli, and Tsavo with Jamupet Transit's luxury travel packages."
+      />
+      <BackButton />
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <div className="mb-20">
           <div className="flex items-center gap-4 mb-4">

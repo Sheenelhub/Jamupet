@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { CheckCircle2, Building, TrendingUp, ShieldCheck, ArrowRight, Star, Car, Users } from "lucide-react";
 import BackButton from "../components/BackButton";
+import SEO from "../components/SEO";
 import ServiceFlipCards from "../components/Services/ServiceFlipCards";
 import ClientReviews from "../components/Services/ClientReviews";
 
@@ -31,19 +32,23 @@ export default function Services() {
   }, [hash]); 
 
   const handlePropertyListing = () => {
-    const phoneNumber = "254705416781";
+    const phoneNumber = "254722413102";
     const message = "Hello Jamupet Transit, I own a property/Airbnb and I am interested in partnering with you for guest transfers.";
     window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`, "_blank");
   };
 
   const handleFleetPartnership = () => {
-    const phoneNumber = "254705416781";
+    const phoneNumber = "254722413102";
     const message = "Hello Jamupet Transit, I own a premium vehicle and I am interested in your Fleet Management partnership.";
     window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`, "_blank");
   };
 
   return (
     <div className="bg-[#FDFCFB] min-h-screen text-gray-900 selection:bg-[#C5A059] selection:text-white">
+      <SEO 
+        title="Luxury Transport Services - Jamupet Transit Kenya"
+        description="Explore our range of premium transport solutions including airport transfers, executive rentals, and B2B fleet management in Nairobi."
+      />
       <BackButton />
 
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
@@ -81,7 +86,7 @@ export default function Services() {
       <section className="pt-40 pb-24 relative overflow-hidden flex items-center min-h-[50vh]">
         <div className="absolute inset-0 z-0">
           <img 
-            src="/assets/Hotel-transfers.webp" 
+            src="/assets/nairobi-luxury-hotel-transfers.webp" 
             alt="Luxury Services" 
             className="w-full h-full object-cover opacity-30 grayscale scale-105"
             onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?q=80&w=1920"; }}
@@ -100,7 +105,7 @@ export default function Services() {
             </h1>
           </div>
           <p className="text-gray-600 text-base md:text-lg font-light max-w-sm border-l-2 border-[#C5A059]/30 pl-6 mb-2">
-            Professional logistics for the discerning traveler, tourist, and elite property partner.
+            Professional logistics for the discerning traveler,<strong> tourist</strong>, and elite property partner.
           </p>
         </div>
       </section>
@@ -190,92 +195,142 @@ export default function Services() {
         </div>
       </section>
 
-      {/* 3. PROPERTY PARTNERSHIP (Hotels & Lodges) */}
-      <section className="py-16 px-6 relative" id="hotels">
-        <div className="max-w-6xl mx-auto">
-          <div className="bg-white/90 backdrop-blur-xl rounded-[3rem] p-10 md:p-16 border border-gray-100 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] relative overflow-hidden group hover:border-[#C5A059]/30 transition-colors duration-700">
+      {/* 3. PROPERTY PARTNERSHIP (Staggered Image Layout) */}
+      <section className="py-24 px-6 relative" id="hotels">
+        <div className="max-w-7xl mx-auto">
+          <div className="bg-white/90 backdrop-blur-xl rounded-[3rem] p-8 md:p-16 border border-gray-100 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] relative overflow-hidden group hover:border-[#C5A059]/30 transition-colors duration-700">
             <div className="absolute -top-24 -right-24 w-96 h-96 bg-[#C5A059] opacity-10 rounded-full blur-[100px] transition-all duration-700 group-hover:scale-110"></div>
             
-            <div className="relative z-10 flex flex-col md:flex-row gap-16 items-center">
-              <div className="flex-1 text-center md:text-left">
+            <div className="relative z-10 flex flex-col lg:flex-row gap-16 items-center">
+              
+              {/* LEFT SIDE: Text and Benefits */}
+              <div className="flex-1 w-full text-center lg:text-left">
                 <span className="text-[#B35A38] font-bold tracking-[.3em] text-[10px] uppercase mb-4 block">B2B Partnerships</span>
-                <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight font-serif">
-                  Elevate Your <br/>Guest Experience.
+                <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight font-serif">
+                  Elevate Your <br className="hidden lg:block"/>Guest Experience.
                 </h2>
-                <p className="text-gray-600 font-light leading-relaxed mb-10 text-sm md:text-base">
+                <p className="text-gray-600 font-light leading-relaxed mb-10 text-sm md:text-base max-w-xl mx-auto lg:mx-0">
                   Do you own a premium Hotel, Boutique Airbnb, or Lodge in Kenya? Partner with Jamupet Transit to offer your guests seamless, reliable transportation from the moment they land at JKIA straight to your doorstep. 
                 </p>
+                
+                {/* Benefits Stacked */}
+                <div className="space-y-4 mb-10 max-w-xl mx-auto lg:mx-0">
+                  <PartnerBenefit 
+                    icon={<Building size={20} className="text-[#C5A059]" />}
+                    title="Direct Client Connections"
+                    desc="Provide immense value to your guests by solving their logistical headaches before they arrive."
+                  />
+                  <PartnerBenefit 
+                    icon={<TrendingUp size={20} className="text-[#C5A059]" />}
+                    title="Zero Hassle, High Reward"
+                    desc="We handle the driving, the tracking, and the luggage. You get the 5-star review."
+                  />
+                  <PartnerBenefit 
+                    icon={<ShieldCheck size={20} className="text-[#C5A059]" />}
+                    title="Guaranteed Vetting"
+                    desc="Rest easy knowing your guests are handled by verified, professional Kenyan chauffeurs."
+                  />
+                </div>
+
                 <button 
                   onClick={handlePropertyListing}
-                  className="bg-[#C5A059] text-white px-8 py-4 rounded-xl font-bold hover:bg-gray-900 transition-all flex items-center justify-center md:justify-start gap-3 w-full md:w-auto text-xs uppercase tracking-widest shadow-[0_10px_30px_rgba(197,160,89,0.3)]"
+                  className="bg-[#C5A059] text-white px-8 py-4 rounded-xl font-bold hover:bg-gray-900 transition-all flex items-center justify-center lg:justify-start gap-3 w-full sm:w-auto text-xs uppercase tracking-widest shadow-[0_10px_30px_rgba(197,160,89,0.3)] mx-auto lg:mx-0"
                 >
                   List Your Property <ArrowRight size={16} />
                 </button>
               </div>
 
-              <div className="flex-1 w-full space-y-4">
-                <PartnerBenefit 
-                  icon={<Building size={20} className="text-[#C5A059]" />}
-                  title="Direct Client Connections"
-                  desc="Provide immense value to your guests by solving their logistical headaches before they arrive."
-                />
-                <PartnerBenefit 
-                  icon={<TrendingUp size={20} className="text-[#C5A059]" />}
-                  title="Zero Hassle, High Reward"
-                  desc="We handle the driving, the tracking, and the luggage. You get the 5-star review for a smooth check-in."
-                />
-                <PartnerBenefit 
-                  icon={<ShieldCheck size={20} className="text-[#C5A059]" />}
-                  title="Guaranteed Vetting"
-                  desc="Rest easy knowing your guests are handled by verified, professional Kenyan chauffeurs."
-                />
+              {/* RIGHT SIDE: Staggered Overlapping Images */}
+              <div className="flex-1 w-full relative h-[400px] md:h-[600px] hidden sm:block">
+                
+                {/* Main Large Image (Top Right) */}
+                <div className="absolute top-0 right-0 w-[75%] h-[80%] rounded-[2rem] overflow-hidden shadow-2xl border border-gray-100 z-10 group-hover:-translate-y-2 transition-transform duration-700">
+                  <img 
+                    src="/assets/b2b-property-transfer-partnerships.webp" 
+                    alt="Luxury Hotel" 
+                    className="w-full h-full object-cover"
+                    onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1542314831-c6a4203251f8?q=80&w=800"; }}
+                  />
+                </div>
+                
+                {/* Secondary Small Image (Bottom Left, Overlapping) */}
+                <div className="absolute bottom-0 left-0 w-[60%] h-[55%] rounded-[2rem] overflow-hidden shadow-2xl border-[8px] border-white z-20 group-hover:translate-x-3 transition-transform duration-700">
+                  <img 
+                    src="/assets/premium-hotel-partnerships-kenya.webp" 
+                    alt="Guest Transfer" 
+                    className="w-full h-full object-cover"
+                    onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=800"; }}
+                  />
+                </div>
+
+                {/* Subtle Decorative Pattern Grid */}
+                <div className="absolute -bottom-8 -right-8 w-40 h-40 bg-[radial-gradient(circle,#C5A059_2px,transparent_2px)] [background-size:16px_16px] opacity-20 z-0 group-hover:opacity-40 transition-opacity duration-700"></div>
               </div>
+
             </div>
           </div>
         </div>
       </section>
-
-      {/* 4. FLEET MANAGEMENT PARTNERSHIP (New Section) */}
-      <section className="py-16 px-6 relative mb-16" id="fleet">
-        <div className="max-w-6xl mx-auto">
-          {/* Note: md:flex-row-reverse switches the layout for visual rhythm */}
-          <div className="bg-white/90 backdrop-blur-xl rounded-[3rem] p-10 md:p-16 border border-gray-100 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] relative overflow-hidden group hover:border-[#B35A38]/30 transition-colors duration-700">
+{/* 4. FLEET MANAGEMENT PARTNERSHIP (Zig-Zag Layout) */}
+      <section className="py-24 px-6 relative mb-16" id="fleet">
+        <div className="max-w-7xl mx-auto">
+          {/* Base Container - md:flex-row is standard (Image Left, Text Right) */}
+          <div className="bg-white/90 backdrop-blur-xl rounded-[3rem] p-8 md:p-16 border border-gray-100 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] relative overflow-hidden group hover:border-[#B35A38]/30 transition-colors duration-700">
             <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-[#B35A38] opacity-10 rounded-full blur-[100px] transition-all duration-700 group-hover:scale-110"></div>
             
-            <div className="relative z-10 flex flex-col md:flex-row-reverse gap-16 items-center">
+            <div className="relative z-10 flex flex-col md:flex-row gap-16 items-center">
+              
+              {/* LEFT SIDE: Cinematic Single Image */}
+              <div className="flex-1 w-full relative h-[300px] md:h-[500px]">
+                <div className="absolute inset-0 rounded-[2rem] overflow-hidden shadow-2xl border border-gray-100 z-10 group-hover:scale-105 transition-transform duration-700">
+                  <img 
+                    src="/assets/kenya-premium-fleet-management.webp" 
+                    alt="Premium Vehicle at Golden Hour" 
+                    className="w-full h-full object-cover grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700"
+                    onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?q=80&w=800"; }}
+                  />
+                  {/* Subtle vignette for editorial feel */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+                </div>
+              </div>
+
+              {/* RIGHT SIDE: Text and Benefits */}
               <div className="flex-1 text-center md:text-left">
                 <span className="text-[#B35A38] font-bold tracking-[.3em] text-[10px] uppercase mb-4 block">Asset Management</span>
-                <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight font-serif">
+                <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight font-serif">
                   Turn Your Vehicle <br/>Into Revenue.
                 </h2>
-                <p className="text-gray-600 font-light leading-relaxed mb-10 text-sm md:text-base">
+                <p className="text-gray-600 font-light leading-relaxed mb-10 text-sm md:text-base max-w-xl mx-auto md:mx-0">
                   Partner with Jamupet Transit to monetize your premium SUV, Van, or Executive Sedan. We handle the vetting, the driving, and the maintenance, ensuring your asset is protected while generating consistent, high-yield returns.
                 </p>
+
+                {/* Benefits Stacked */}
+                <div className="space-y-4 mb-10 max-w-xl mx-auto md:mx-0">
+                  <PartnerBenefit 
+                    icon={<ShieldCheck size={20} className="text-[#B35A38]" />}
+                    title="Comprehensive Protection"
+                    desc="Your vehicle is fully insured and monitored with state-of-the-art GPS tracking at all times."
+                  />
+                  <PartnerBenefit 
+                    icon={<Users size={20} className="text-[#B35A38]" />}
+                    title="Driven by Professionals"
+                    desc="Only our elite, rigorously vetted chauffeurs will ever get behind the wheel of your asset."
+                  />
+                  <PartnerBenefit 
+                    icon={<TrendingUp size={20} className="text-[#B35A38]" />}
+                    title="Transparent Payouts"
+                    desc="Access clear, itemized monthly reports of your vehicle's earnings and maintenance schedules."
+                  />
+                </div>
+
                 <button 
                   onClick={handleFleetPartnership}
-                  className="bg-gray-900 text-white px-8 py-4 rounded-xl font-bold hover:bg-[#C5A059] transition-all flex items-center justify-center md:justify-start gap-3 w-full md:w-auto text-xs uppercase tracking-widest shadow-lg"
+                  className="bg-gray-900 text-white px-8 py-4 rounded-xl font-bold hover:bg-[#C5A059] transition-all flex items-center justify-center md:justify-start gap-3 w-full sm:w-auto text-xs uppercase tracking-widest shadow-lg mx-auto md:mx-0"
                 >
                   Partner Your Vehicle <ArrowRight size={16} />
                 </button>
               </div>
-
-              <div className="flex-1 w-full space-y-4">
-                <PartnerBenefit 
-                  icon={<ShieldCheck size={20} className="text-[#B35A38]" />}
-                  title="Comprehensive Protection"
-                  desc="Your vehicle is fully insured and monitored with state-of-the-art GPS tracking at all times."
-                />
-                <PartnerBenefit 
-                  icon={<Users size={20} className="text-[#B35A38]" />}
-                  title="Driven by Professionals"
-                  desc="Only our elite, rigorously vetted chauffeurs will ever get behind the wheel of your asset."
-                />
-                <PartnerBenefit 
-                  icon={<TrendingUp size={20} className="text-[#B35A38]" />}
-                  title="Transparent Payouts"
-                  desc="Access clear, itemized monthly reports of your vehicle's earnings and maintenance schedules."
-                />
-              </div>
+              
             </div>
           </div>
         </div>
@@ -290,8 +345,8 @@ export default function Services() {
 // Light Theme Partner Benefit Micro-Component
 function PartnerBenefit({ icon, title, desc }) {
   return (
-    <div className="bg-gray-50 border border-gray-100 p-6 rounded-2xl flex gap-5 items-start hover:bg-white hover:shadow-md hover:border-[#C5A059]/20 transition-all duration-300 hover:-translate-y-1">
-      <div className="mt-1 bg-white p-3 rounded-xl border border-gray-100 shadow-sm">{icon}</div>
+    <div className="bg-gray-50 border border-gray-100 p-5 rounded-2xl flex gap-4 items-start hover:bg-white hover:shadow-md hover:border-[#C5A059]/20 transition-all duration-300">
+      <div className="mt-1 bg-white p-3 rounded-xl border border-gray-100 shadow-sm flex-shrink-0">{icon}</div>
       <div>
         <h4 className="text-gray-900 font-bold text-base mb-1">{title}</h4>
         <p className="text-gray-500 font-light text-xs md:text-sm leading-relaxed">{desc}</p>

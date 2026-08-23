@@ -6,7 +6,7 @@ export default function CTA() {
   const navigate = useNavigate();
 
   const handleWhatsApp = () => {
-    const phoneNumber = "254705416781";
+    const phoneNumber = "254722413102";
     const message = "Hello Jamupet Transit, I have a quick question about booking a transfer.";
     window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`, "_blank");
   };

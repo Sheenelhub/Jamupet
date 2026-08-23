@@ -150,6 +150,7 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
   const [mpesaReceiptInput, setMpesaReceiptInput] = useState("");
   const [mpesaReceiptLoading, setMpesaReceiptLoading] = useState(false);
   const [dropPinMode, setDropPinMode] = useState(null);
+
   const locationFieldPriority = ["pickup", "airport", "location", "destination", "hotelName", "eventVenue", "tourType"];
   const fieldNames = config.fields.map((field) => field.name);
   const resolvedLocationFields = (() => {
@@ -415,6 +416,15 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
     return () => clearTimeout(timer);
   }, [formData, locationCoords, pickupGps, resolvedLocationFields.pickupField, resolvedLocationFields.dropoffField, isQuoteOnlyService, serviceType]);
 
+  const getVehicleCapacity = (type) => {
+    if (!type) return 4;
+    if (type.includes("15-seater")) return 15;
+    if (type.includes("14-seater")) return 14;
+    if (type.includes("10-seater")) return 10;
+    if (type.includes("7-seater") || type.includes("Land Cruiser")) return 7;
+    return 4;
+  };
+
   const validateForm = () => {
     const errors = {};
 
@@ -509,6 +519,8 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
         formData.purpose ||
         "";
       const destinationLocationValue =
+        serviceType === "full-day" ? "As Directed (Nairobi & Environs)" :
+        serviceType === "wedding-travel" ? formData.eventVenue || "Event Venue" :
         (resolvedLocationFields.dropoffField ? formData[resolvedLocationFields.dropoffField] : "") ||
         formData.destination ||
         formData.hotelName ||
@@ -1621,6 +1633,15 @@ Thank you for booking with us!
                   placeholder="Any special requirements or preferences..."
                   className="w-full rounded-lg px-4 py-3 border border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059] transition-all duration-300 resize-none h-20 hover:border-gray-400"
                 />
+              </div>
+
+              {/* Luxury Location Reassurance */}
+              <div className="flex items-start gap-3 bg-[#FDFCFB] border border-[#C5A059]/20 rounded-lg p-4 mt-2 shadow-[0_4px_12px_rgba(197,160,89,0.05)]">
+                <MapPin size={20} className="text-[#C5A059] flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-gray-700 font-light leading-relaxed">
+                  <span className="font-semibold text-gray-900 block mb-1">Precise Location Coordination</span>
+                  For your absolute convenience, our concierge or your assigned chauffeur will contact you directly prior to your trip to confirm the exact pinpoint location of your pickup, ensuring a seamless and personalized experience.
+                </p>
               </div>
 
               {/* Static Passenger Information */}

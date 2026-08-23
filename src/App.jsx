@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from "react";
+import { HelmetProvider } from "react-helmet-async";
 import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { AdminAuthProvider } from "./context/AdminAuthContext";
 import ScrollToTop from "./components/ScrollToTop";
 import Preloader from "./components/Preloader";
 import Navbar from "./components/Navbar";
+import SEO from "./components/SEO";
 
 import Hero from "./components/Hero";
+import ServiceSelector from "./components/ServiceSelector";
 import AboutTeaser from "./components/AboutTeaser";
 import Packages from "./components/Packages";
 import Features from "./components/Features";
@@ -35,6 +38,10 @@ import Analytics from "./pages/admin/Analytics";
 import AgentHome from "./pages/admin/AgentHome";
 import DriverTrips from "./pages/admin/DriverTrips";
 import { ProtectedAdminRoute } from "./pages/admin/ProtectedAdminRoute";
+
+// Added Accessibility Widget Import
+import AccessibilityWidget from './components/AccessibilityWidget';
+
 function AppContent({ isLoading }) {
   const location = useLocation();
   const navigate = useNavigate();
@@ -54,23 +61,36 @@ function AppContent({ isLoading }) {
 
   const isAdminRoute =
     location.pathname.startsWith('/admin') ||
-    location.pathname === '/isAdmin' ||
     location.pathname === '/agent' ||
     location.pathname === '/driver';
 
   return (
     <div className={isLoading ? "h-screen overflow-hidden" : ""}>
+      
+      {/* GLOBAL PUBLIC COMPONENTS
+        The Navbar and Accessibility Widget are placed here so they 
+        persist across all non-admin pages without re-rendering. 
+      */}
       {!isAdminRoute && (
-        <div className="relative z-[1000]">
-          <Navbar />
-        </div>
+        <>
+          <div className="relative z-[1000]">
+            <Navbar />
+          </div>
+          <AccessibilityWidget />
+        </>
       )}
 
       <main className={`relative z-0 ${!isAdminRoute ? 'pt-24' : ''}`}>
         <Routes>
           <Route path="/" element={
             <>
+              <SEO 
+                title="Premium Airport Transfers & Safari Tours in Kenya"
+                description="Experience seamless, reliable luxury transport in Kenya. From JKIA airport transfers to Maasai Mara safaris, Jamupet Transit offers executive chauffeur services."
+                canonical="https://jamupettransit.com/"
+              />
               <Hero />
+              <ServiceSelector onSelectService={(id) => navigate('/booking', { state: { serviceType: id } })} />
               <AboutTeaser />
               <Packages />
               <Features /> 
@@ -90,7 +110,8 @@ function AppContent({ isLoading }) {
           <Route path="/profile" element={<ProfileSettingsPage />} />
           <Route path="/settings" element={<AccountSettingsPage />} />
 
-          <Route path="/isAdmin" element={<AdminLogin />} />
+          {/* ADMIN ROUTES */}
+          <Route path="/admin/login" element={<AdminLogin />} />
           <Route
             path="/admin"
             element={
@@ -167,16 +188,17 @@ function App() {
   }, []);
 
   return (
-    <AuthProvider>
-      <AdminAuthProvider>
-        <Router>
-          <ScrollToTop />
-          <Preloader isLoading={isLoading} />
-          <AppContent isLoading={isLoading} />
-        </Router>
-      </AdminAuthProvider>
-    </AuthProvider>
+    <HelmetProvider>
+      <AuthProvider>
+        <AdminAuthProvider>
+          <Router>
+            <ScrollToTop />
+            <Preloader isLoading={isLoading} />
+            <AppContent isLoading={isLoading} />
+          </Router>
+        </AdminAuthProvider>
+      </AuthProvider>
+    </HelmetProvider>
   );
 }
-
 export default App;

@@ -34,13 +34,29 @@ export default function FAQ() {
   };
 
   const handleWhatsApp = () => {
-    const phoneNumber = "254705416781";
+    const phoneNumber = "254722413102";
     const message = "Hello Jamupet Transit, I have a specific question about your services.";
     window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`, "_blank");
   };
 
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(faq => ({
+      "@type": "Question",
+      "name": faq.question,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": faq.answer
+      }
+    }))
+  };
+
   return (
     <section className="py-24 bg-[#FDFCFB] relative overflow-hidden">
+      {/* JSON-LD for AEO */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      
       {/* Subtle Background Glow */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#C5A059]/5 rounded-full blur-[120px] pointer-events-none" />
 

@@ -64,19 +64,19 @@ export default function BookingModal({ booking, isOpen, onClose, onStatusChange,
     } finally {
       setActionLoading(null)
     }
+  }
 
-    const handleCashConfirmation = async () => {
-      if (!booking?.id) return
-      setError(null)
-      setActionLoading('cash')
-      try {
-        const updated = await confirmCashPayment(booking.id)
-        if (onStatusChange) onStatusChange({ ...booking, ...updated })
-      } catch (err) {
-        setError(err.message)
-      } finally {
-        setActionLoading(null)
-      }
+  const handleCashConfirmation = async () => {
+    if (!booking?.id) return
+    setError(null)
+    setActionLoading('cash')
+    try {
+      const updated = await confirmCashPayment(booking.id)
+      if (onStatusChange) onStatusChange({ ...booking, ...updated })
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setActionLoading(null)
     }
   }
 

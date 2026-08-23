@@ -25,7 +25,7 @@ export default function Footer() {
   };
 
   const handleWhatsAppChat = () => {
-    const phoneNumber = "254705416781";
+    const phoneNumber = "254722413102";
     const message = "Hello Jamupet Transit, I have a quick question about your services.";
     window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`, "_blank");
   };
@@ -124,7 +124,7 @@ export default function Footer() {
                   className="flex items-center gap-3 text-gray-400 text-sm hover:text-[#C5A059] transition-colors cursor-pointer group"
                 >
                   <Phone size={18} className="group-hover:text-[#C5A059] text-gray-500 transition-colors" />
-                  <span>+254 705 416 781</span>
+                  <span>+254 722 413 102</span>
                 </li>
                 <li 
                   onClick={() => window.location.href = 'mailto:bookings@jamupet.com'}

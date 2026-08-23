@@ -101,3 +101,36 @@ h6 {
   from { opacity: 1; visibility: visible; }
   to { opacity: 0; visibility: hidden; }
 }
+/* ACCESSIBILITY WIDGET STYLES */
+.a11y-dyslexic {
+  font-family: 'Comic Sans MS', 'OpenDyslexic', sans-serif !important;
+}
+
+.a11y-grayscale {
+  filter: grayscale(100%) !important;
+}
+
+.a11y-contrast {
+  filter: contrast(150%) saturate(110%) !important;
+}
+
+.a11y-negative {
+  filter: invert(100%) hue-rotate(180deg) !important;
+}
+
+.a11y-bw {
+  filter: grayscale(100%) contrast(200%) !important;
+}
+
+.a11y-underline-links a, 
+.a11y-underline-links button {
+  text-decoration: underline !important;
+  text-underline-offset: 4px;
+}
+
+.a11y-highlight-links a, 
+.a11y-highlight-links button {
+  background-color: #ffeb3b !important;
+  color: #000000 !important;
+  border-color: #000000 !important;
+}

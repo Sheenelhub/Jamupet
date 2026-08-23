@@ -15,7 +15,7 @@ export default function AboutTeaser() {
           <div className="w-full lg:w-1/2 relative">
             <div className="relative rounded-[2rem] overflow-hidden border border-gray-200 shadow-2xl">
               <img 
-                src="/assets/black-sedan.webp" 
+                src="/assets/executive-sedan-airport-transfer.webp" 
                 alt="Luxury Fleet" 
                 width="800" 
                 height="600" 

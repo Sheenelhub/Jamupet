@@ -54,11 +54,11 @@ export default function AccountSettingsPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-white pt-32 pb-20 px-6">
-        <div className="max-w-3xl mx-auto border border-gray-300 p-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-3">Account Settings</h1>
-          <p className="text-gray-600 mb-6">Sign in to manage your account.</p>
-          <Link to="/auth" className="inline-block px-6 py-3 bg-[#B35A38] text-white font-semibold hover:bg-[#8B4225] transition-colors">
+      <div className="bg-[#FDFCFB] min-h-screen pt-32 pb-20 px-6 font-sans selection:bg-[#C5A059] selection:text-white">
+        <div className="max-w-3xl mx-auto bg-white rounded-2xl border border-gray-100 shadow-[0_12px_34px_rgba(15,23,42,0.06)] p-8 text-center">
+          <h1 className="text-3xl font-bold text-gray-900 mb-3 font-serif">Account Settings</h1>
+          <p className="text-gray-600 mb-6 font-light">Sign in to manage your account.</p>
+          <Link to="/auth" className="inline-block px-8 py-3 bg-[#C5A059] text-white font-bold rounded-xl hover:bg-gray-900 transition-colors uppercase tracking-widest text-xs shadow-lg">
             Sign In
           </Link>
         </div>
@@ -67,28 +67,28 @@ export default function AccountSettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white pt-32 pb-20 px-6">
+    <div className="bg-[#FDFCFB] min-h-screen pt-32 pb-20 px-6 font-sans selection:bg-[#C5A059] selection:text-white">
       <div className="max-w-3xl mx-auto space-y-6">
-        <div className="border border-gray-300 p-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Account Settings</h1>
-          <p className="text-gray-600">Manage your account security and session controls.</p>
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-[0_12px_34px_rgba(15,23,42,0.06)] p-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2 font-serif">Account Settings</h1>
+          <p className="text-gray-600 font-light text-sm">Manage your account security and session controls.</p>
         </div>
 
-        <div className="border border-gray-300 p-8">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-[0_12px_34px_rgba(15,23,42,0.06)] p-8">
           <h2 className="text-xl font-bold text-gray-900 mb-4">Account Information</h2>
-          <div className="space-y-3 text-sm">
+          <div className="space-y-4 text-sm">
             <div>
-              <p className="text-gray-500">Email</p>
-              <p className="font-semibold text-gray-900">{user.email}</p>
+              <p className="text-gray-500 font-semibold mb-1">Email</p>
+              <p className="text-gray-900">{user.email}</p>
             </div>
             <div>
-              <p className="text-gray-500">User ID</p>
-              <p className="font-semibold text-gray-900 break-all">{user.id}</p>
+              <p className="text-gray-500 font-semibold mb-1">User ID</p>
+              <p className="text-gray-900 break-all font-mono text-xs bg-gray-50 p-2 rounded border border-gray-100 inline-block">{user.id}</p>
             </div>
           </div>
         </div>
 
-        <form onSubmit={handleUpdatePassword} className="border border-gray-300 p-8 space-y-5">
+        <form onSubmit={handleUpdatePassword} className="bg-white rounded-2xl border border-gray-100 shadow-[0_12px_34px_rgba(15,23,42,0.06)] p-8 space-y-6">
           <h2 className="text-xl font-bold text-gray-900">Change Password</h2>
           <div>
             <label className="block text-sm font-semibold text-gray-900 mb-2">New Password</label>
@@ -96,7 +96,7 @@ export default function AccountSettingsPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 bg-white text-gray-900 focus:outline-none focus:border-[#B35A38]"
+              className="w-full rounded-xl px-4 py-3 border border-gray-300 bg-white text-gray-900 focus:outline-none focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059] transition-all duration-300 hover:border-gray-400"
               placeholder="Enter new password"
             />
           </div>
@@ -106,33 +106,33 @@ export default function AccountSettingsPage() {
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 bg-white text-gray-900 focus:outline-none focus:border-[#B35A38]"
+              className="w-full rounded-xl px-4 py-3 border border-gray-300 bg-white text-gray-900 focus:outline-none focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059] transition-all duration-300 hover:border-gray-400"
               placeholder="Confirm new password"
             />
           </div>
 
           {status && (
-            <div className={`p-4 border ${status.type === "success" ? "bg-green-50 border-green-400 text-green-700" : "bg-red-50 border-red-400 text-red-700"}`}>
-              {status.message}
+            <div className={`p-4 rounded-xl border ${status.type === "success" ? "bg-green-50 border-green-200 text-green-700" : "bg-red-50 border-red-200 text-red-700"}`}>
+              <p className="text-sm font-medium">{status.message}</p>
             </div>
           )}
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-4 pt-2">
             <button
               type="submit"
               disabled={isSaving}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-[#B35A38] text-white font-semibold hover:bg-[#8B4225] disabled:opacity-50 transition-colors"
+              className="w-full sm:w-auto inline-flex justify-center items-center gap-2 px-8 py-3 bg-[#C5A059] text-white font-bold rounded-xl hover:bg-gray-900 disabled:opacity-50 transition-all uppercase tracking-widest text-xs shadow-lg"
             >
-              {isSaving ? <Loader size={18} className="animate-spin" /> : <KeyRound size={18} />}
+              {isSaving ? <Loader size={16} className="animate-spin" /> : <KeyRound size={16} />}
               {isSaving ? "Updating..." : "Update Password"}
             </button>
 
             <button
               type="button"
               onClick={handleSignOut}
-              className="inline-flex items-center gap-2 px-6 py-3 border border-red-500 text-red-600 font-semibold hover:bg-red-50 transition-colors"
+              className="w-full sm:w-auto inline-flex justify-center items-center gap-2 px-8 py-3 border border-red-200 text-red-600 font-bold rounded-xl hover:bg-red-50 hover:border-red-300 transition-all uppercase tracking-widest text-xs"
             >
-              <LogOut size={18} />
+              <LogOut size={16} />
               Sign Out
             </button>
           </div>

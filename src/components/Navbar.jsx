@@ -55,7 +55,7 @@ export default function Navbar() {
               alt="Jamupet Transit"
               width="156"
               height="80"
-              className="h-12 md:h-16 w-auto object-contain group-hover:opacity-80 transition-opacity"
+              className="h-16 md:h-20 w-auto object-contain group-hover:opacity-80 transition-opacity"
             />
           </Link>
 
@@ -213,39 +213,51 @@ export default function Navbar() {
       </nav>
 
       {/* Mobile Menu */}
-      <div className={`fixed inset-0 z-[2999] flex flex-col justify-center items-center bg-[#050505]/95 backdrop-blur-2xl transition-all duration-500 ease-in-out ${
+      <div className={`fixed inset-0 z-[2999] flex flex-col justify-start items-center bg-[#050505]/95 backdrop-blur-2xl transition-all duration-500 ease-in-out overflow-y-auto pt-24 pb-12 ${
         isOpen ? "opacity-100 visible" : "opacity-0 invisible pointer-events-none"
       }`}>
-        <div className="flex flex-col items-center gap-8 w-full px-6">
-          <Link to="/" className="text-2xl font-serif text-white hover:text-[#C5A059] transition-colors">Home</Link>
-          <Link to="/about" className="text-2xl font-serif text-white hover:text-[#C5A059] transition-colors">About Us</Link>
+        <div className="flex flex-col items-center gap-6 w-full px-6">
+          <Link to="/" onClick={() => setIsOpen(false)} className="text-2xl font-serif text-white hover:text-[#C5A059] transition-colors">Home</Link>
+          <Link to="/about" onClick={() => setIsOpen(false)} className="text-2xl font-serif text-white hover:text-[#C5A059] transition-colors">About Us</Link>
           <div className="w-12 h-[1px] my-2 bg-white/10" />
-          <Link to="/services" className="text-2xl font-serif text-[#C5A059]">Our Services</Link>
+          <Link to="/services" onClick={() => setIsOpen(false)} className="text-2xl font-serif text-[#C5A059]">Our Services</Link>
           {serviceItems.map((item) => (
             <HashLink key={item.name} smooth to={item.hash} onClick={() => setIsOpen(false)} className="text-sm font-light uppercase tracking-widest text-gray-400 hover:text-white">
               {item.name}
             </HashLink>
           ))}
           <div className="w-12 h-[1px] my-2 bg-white/10" />
-          <Link to="/destinations" className="text-2xl font-serif text-white hover:text-[#C5A059] transition-colors">Destinations</Link>
+          <Link to="/destinations" onClick={() => setIsOpen(false)} className="text-2xl font-serif text-white hover:text-[#C5A059] transition-colors">Destinations</Link>
           {user && (
-            <Link to="/bookings" className="relative text-2xl font-serif text-white hover:text-[#C5A059] transition-colors">
-              My Bookings
-              {unpaidCount > 0 && (
-                <span className="absolute -top-2 -right-5 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-[#C5A059] text-black text-[10px] font-bold shadow-md">
-                  {unpaidCount > 9 ? '9+' : unpaidCount}
-                </span>
-              )}
-            </Link>
+            <>
+              <Link to="/bookings" onClick={() => setIsOpen(false)} className="relative text-2xl font-serif text-white hover:text-[#C5A059] transition-colors">
+                My Bookings
+                {unpaidCount > 0 && (
+                  <span className="absolute -top-2 -right-5 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-[#C5A059] text-black text-[10px] font-bold shadow-md">
+                    {unpaidCount > 9 ? '9+' : unpaidCount}
+                  </span>
+                )}
+              </Link>
+              <Link to="/profile" onClick={() => setIsOpen(false)} className="text-2xl font-serif text-white hover:text-[#C5A059] transition-colors">Profile</Link>
+            </>
           )}
           
-          <div className="flex flex-col gap-4 mt-8 w-full max-w-[250px]">
-            <button 
-              onClick={() => { setIsOpen(false); setShowLoginModal(true); }}
-              className="w-full py-4 rounded-2xl text-xs font-bold uppercase tracking-[0.2em] transition-all border bg-transparent border-white/20 text-white hover:bg-white/10"
-            >
-              Client Login
-            </button>
+          <div className="flex flex-col gap-4 mt-6 w-full max-w-[250px]">
+            {!user ? (
+              <button 
+                onClick={() => { setIsOpen(false); setShowLoginModal(true); }}
+                className="w-full py-4 rounded-2xl text-xs font-bold uppercase tracking-[0.2em] transition-all border bg-transparent border-white/20 text-white hover:bg-white/10"
+              >
+                Client Login
+              </button>
+            ) : (
+              <button 
+                onClick={async () => { await authContext.signOut(); setIsOpen(false); navigate('/'); }}
+                className="w-full py-4 rounded-2xl text-xs font-bold uppercase tracking-[0.2em] transition-all border bg-transparent border-red-500/50 text-red-400 hover:bg-red-500/10"
+              >
+                Sign Out
+              </button>
+            )}
             <button 
               onClick={() => { setIsOpen(false); navigate("/booking"); }}
               className="w-full py-4 rounded-2xl text-xs font-bold uppercase tracking-[0.2em] transition-all shadow-lg bg-[#C5A059] text-black hover:bg-white"

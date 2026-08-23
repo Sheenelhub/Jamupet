@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import AdminLayout from '../../components/admin/AdminLayout'
 import BookingModal from '../../components/admin/BookingModal'
-import { exportToCSV } from '../../lib/exportUtils'
+import { exportToCSV, exportToPDF } from '../../lib/exportUtils'
 import {
   formatDateTime,
   getBookingDateTimeValue,
@@ -207,6 +207,11 @@ export default function BookingsManagement() {
     exportToCSV(buildExportRows(rows), `roam-bookings-${dateStamp}.csv`)
   }
 
+  const exportRowsToPDF = (rows) => {
+    const dateStamp = new Date().toISOString().split('T')[0]
+    exportToPDF(buildExportRows(rows), `roam-bookings-report-${dateStamp}.pdf`)
+  }
+
   const selectedRows = sortedBookings.filter((booking) => selectedIds.has(booking.id))
 
   return (
@@ -219,12 +224,12 @@ export default function BookingsManagement() {
 
         {error && <p className="text-sm text-red-600">{error}</p>}
 
-        <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-4">
+        <div className="bg-white shadow-[0_12px_34px_rgba(15,23,42,0.04)] border border-gray-100 rounded-2xl p-6 space-y-4">
           <div className="grid gap-4 md:grid-cols-5">
             <div>
-              <label className="text-xs font-semibold text-gray-500">Status</label>
+              <label className="text-xs font-bold tracking-wider uppercase text-gray-500 mb-1">Status</label>
               <select
-                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                className="mt-1 w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 transition-all duration-300 focus:outline-none focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059]"
                 value={filters.status}
                 onChange={(event) => setFilters((prev) => ({ ...prev, status: event.target.value }))}
               >
@@ -236,27 +241,27 @@ export default function BookingsManagement() {
               </select>
             </div>
             <div>
-              <label className="text-xs font-semibold text-gray-500">From</label>
+              <label className="text-xs font-bold tracking-wider uppercase text-gray-500 mb-1">From</label>
               <input
                 type="date"
-                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                className="mt-1 w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 transition-all duration-300 focus:outline-none focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059]"
                 value={filters.dateFrom}
                 onChange={(event) => setFilters((prev) => ({ ...prev, dateFrom: event.target.value }))}
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-gray-500">To</label>
+              <label className="text-xs font-bold tracking-wider uppercase text-gray-500 mb-1">To</label>
               <input
                 type="date"
-                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                className="mt-1 w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 transition-all duration-300 focus:outline-none focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059]"
                 value={filters.dateTo}
                 onChange={(event) => setFilters((prev) => ({ ...prev, dateTo: event.target.value }))}
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-gray-500">Service Type</label>
+              <label className="text-xs font-bold tracking-wider uppercase text-gray-500 mb-1">Service Type</label>
               <select
-                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                className="mt-1 w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 transition-all duration-300 focus:outline-none focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059]"
                 value={filters.serviceType}
                 onChange={(event) => setFilters((prev) => ({ ...prev, serviceType: event.target.value }))}
               >
@@ -269,30 +274,44 @@ export default function BookingsManagement() {
               </select>
             </div>
             <div>
-              <label className="text-xs font-semibold text-gray-500">Search</label>
+              <label className="text-xs font-bold tracking-wider uppercase text-gray-500 mb-1">Search</label>
               <input
                 type="text"
-                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                className="mt-1 w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 transition-all duration-300 focus:outline-none focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059]"
                 placeholder="ID, name, phone"
                 value={filters.search}
                 onChange={(event) => setFilters((prev) => ({ ...prev, search: event.target.value }))}
               />
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3 pt-2">
             <button
               type="button"
               onClick={resetFilters}
-              className="rounded-md border border-gray-300 px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+              className="rounded-xl border border-gray-300 px-4 py-2 text-xs font-bold tracking-wider uppercase text-gray-700 transition-colors hover:bg-gray-50"
             >
               Reset Filters
+            </button>
+            <button
+              type="button"
+              onClick={() => exportRowsToPDF(sortedBookings)}
+              className="rounded-xl bg-[#C5A059] px-4 py-2 text-xs font-bold tracking-wider uppercase text-white shadow-sm transition-transform hover:-translate-y-0.5 hover:shadow-md"
+            >
+              Generate PDF Report
             </button>
             {selectedRows.length > 0 && (
               <>
                 <button
                   type="button"
+                  onClick={() => exportRowsToPDF(selectedRows)}
+                  className="rounded-xl border border-[#C5A059] px-4 py-2 text-xs font-bold tracking-wider uppercase text-[#C5A059] transition-colors hover:bg-[#C5A059]/10"
+                >
+                  Export Selected to PDF
+                </button>
+                <button
+                  type="button"
                   onClick={() => exportRows(selectedRows)}
-                  className="rounded-md bg-[#B35A38] px-3 py-2 text-sm font-semibold text-white hover:opacity-90"
+                  className="rounded-xl border border-gray-300 px-4 py-2 text-xs font-bold tracking-wider uppercase text-gray-700 transition-colors hover:bg-gray-50"
                 >
                   Export Selected to CSV
                 </button>

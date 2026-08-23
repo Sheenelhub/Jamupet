@@ -21,7 +21,7 @@ export default function AdminLayout({ children }) {
 
   const handleSignOut = async () => {
     await signOut()
-    navigate('/isAdmin', { replace: true })
+    navigate('/admin/login', { replace: true })
   }
 
   return (
@@ -52,10 +52,10 @@ export default function AdminLayout({ children }) {
                     key={item.to}
                     to={item.to}
                     className={({ isActive }) =>
-                      `flex items-center gap-3 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                      `flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold tracking-wider uppercase transition-all duration-300 ${
                         isActive
-                          ? 'bg-[#B35A38] text-white'
-                          : 'text-gray-700 hover:bg-orange-50'
+                          ? 'bg-[#C5A059] text-white shadow-[0_8px_16px_rgba(197,160,89,0.2)]'
+                          : 'text-gray-500 hover:bg-[#C5A059]/10 hover:text-[#C5A059]'
                       }`
                     }
                     onClick={() => setSidebarOpen(false)}
@@ -94,10 +94,10 @@ export default function AdminLayout({ children }) {
               <h1 className="text-lg font-semibold text-gray-900">Jamupet Admin</h1>
             </div>
             <div className="flex items-center gap-3">
-              <div className="hidden sm:flex items-center gap-2 text-sm text-gray-600">
+              <div className="hidden sm:flex items-center gap-2 text-xs font-bold tracking-wider uppercase text-gray-500">
                 <span>{userLabel}</span>
                 {roleLabel && (
-                  <span className="rounded-full bg-orange-50 px-2 py-0.5 text-xs font-semibold text-[#B35A38]">
+                  <span className="rounded-full bg-[#C5A059]/10 px-2.5 py-1 text-[10px] text-[#C5A059]">
                     {roleLabel}
                   </span>
                 )}
@@ -105,7 +105,7 @@ export default function AdminLayout({ children }) {
               <button
                 type="button"
                 onClick={handleSignOut}
-                className="rounded-md bg-[#B35A38] px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:opacity-90"
+                className="rounded-xl bg-[#C5A059] px-4 py-2 text-xs font-bold tracking-wider uppercase text-white shadow-[0_4px_10px_rgba(197,160,89,0.2)] transition-transform hover:-translate-y-0.5"
               >
                 Sign Out
               </button>

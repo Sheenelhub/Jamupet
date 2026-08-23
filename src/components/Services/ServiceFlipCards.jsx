@@ -52,7 +52,7 @@ const services = [
     backTitle: "The Grand Entrance",
     backPoints: ["Pristine Executive Fleet", "Chauffeur in Uniform", "Multi-Car Packages"],
     cta: "Get a Quote",
-    link: "https://wa.me/254705416781?text=I%20need%20a%20custom%20quote%20for%20Wedding%20Travel" 
+    link: "https://wa.me/254722413102?text=I%20need%20a%20custom%20quote%20for%20Wedding%20Travel" 
   },
   {
     id: "safari",

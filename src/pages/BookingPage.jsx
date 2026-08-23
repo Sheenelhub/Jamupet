@@ -1,6 +1,7 @@
 import { useState } from "react";
 import ServiceSelector from "../components/ServiceSelector";
 import ServiceBookingForm from "../components/ServiceBookingForm";
+import SEO from "../components/SEO";
 
 export default function BookingPage() {
   const [selectedService, setSelectedService] = useState(null);
@@ -14,7 +15,13 @@ export default function BookingPage() {
   };
 
   return (
-    <>
+    <div className="bg-[#FDFCFB] min-h-screen relative font-sans selection:bg-[#C5A059] selection:text-white pb-32">
+      <SEO 
+        title="Book a Ride - Jamupet Transit"
+        description="Book your luxury airport transfer, intercity ride, or safari expedition online with Jamupet Transit."
+      />
+      
+      {/* GLOBAL BACK BUTTON */}
       {selectedService ? (
         <ServiceBookingForm 
           serviceType={selectedService} 
@@ -23,6 +30,6 @@ export default function BookingPage() {
       ) : (
         <ServiceSelector onSelectService={handleServiceSelect} />
       )}
-    </>
+    </div>
   );
 }

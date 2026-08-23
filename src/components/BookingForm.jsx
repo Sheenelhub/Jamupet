@@ -220,7 +220,7 @@ export default function BookingForm() {
   };
 
   const sendWhatsappConfirmation = () => {
-    const phoneNumber = "254705416781";
+    const phoneNumber = "254722413102";
     const message = `*NEW BOOKING INQUIRY*\n` +
       (formData.serviceCategory ? `*Service:* ${formData.serviceCategory}\n` : "") +
       `*From:* ${formData.pickup}\n` +

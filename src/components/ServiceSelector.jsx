@@ -58,9 +58,9 @@ export default function ServiceSelector({ onSelectService }) {
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-12">
         {/* Header */}
         <div className="booking-portal-enter text-center mb-10 sm:mb-16">
-          <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-4 leading-tight">
+          <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-4 leading-tight">
             Choose Your <span className="text-[#C5A059]">Service</span>
-          </h1>
+          </h2>
           <p className="text-gray-600 text-base sm:text-lg max-w-2xl mx-auto">
             Select a service to get started with your booking today
           </p>

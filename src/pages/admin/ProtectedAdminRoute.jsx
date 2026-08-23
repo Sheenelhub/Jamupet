@@ -25,7 +25,7 @@ export function ProtectedAdminRoute({ children, allowedRoles = [] }) {
           <h2 className="text-lg font-bold mb-2">Authentication Error</h2>
           <p>{error}</p>
           <div className="mt-6">
-            <button onClick={() => window.location.href = '/isAdmin'} className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+            <button onClick={() => window.location.href = '/admin/login'} className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
               Return to Login
             </button>
           </div>
@@ -35,7 +35,7 @@ export function ProtectedAdminRoute({ children, allowedRoles = [] }) {
   }
 
   if (!role || !allowedRoles.includes(role)) {
-    return <Navigate to="/isAdmin" replace />
+    return <Navigate to="/admin/login" replace />
   }
 
   return children
