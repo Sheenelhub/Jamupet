@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { getCompletedPaymentStatus, normalizePaymentStage } from '../lib/bookingPaymentFlow'
 
 const STATUS_NORMALIZATION = {
   pending: 'new',
@@ -373,8 +374,8 @@ export function useBookings() {
 	        .limit(1)
 	        .maybeSingle()
 
-	      const stage = payment?.payment_stage || booking?.payment_stage || 'reservation'
-	      const nextPaymentStatus = stage === 'final' ? 'paid' : 'reservation_paid'
+	      const stage = normalizePaymentStage(payment?.payment_stage || booking?.payment_stage)
+	      const nextPaymentStatus = getCompletedPaymentStatus(stage)
 
 	      if (payment?.id) {
 	        await supabase

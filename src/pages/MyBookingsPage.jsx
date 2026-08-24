@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Calendar, Clock, Car, MapPin, Loader, Pencil, Save, X, Ban, RotateCcw, AlertCircle, CheckCircle, Users, AlertTriangle, CreditCard } from "lucide-react";
+import { Calendar, Clock, Car, MapPin, Loader, Pencil, Save, X, Ban, RotateCcw, AlertCircle, CheckCircle, Users, AlertTriangle, CreditCard, ArrowLeft } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import { useAuthContext } from "../context/AuthContext";
 import {
@@ -11,6 +11,12 @@ import {
 import { verifyPaymentServerSide } from "../lib/paymentVerification";
 import { initiateMpesaStkPush, verifyMpesaReceipt } from "../lib/mpesa";
 import { sendBookingEmail } from "../lib/emailService";
+import {
+  getCompletedPaymentStatus,
+  hasPaidReservation,
+  isPendingPaymentStatus,
+  normalizePaymentStage
+} from "../lib/bookingPaymentFlow";
 
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -121,7 +127,7 @@ export default function MyBookingsPage() {
     () =>
       bookings.filter(
         (booking) =>
-          (booking.payment_status === "reservation_paid" || booking.payment_status === "paid") &&
+          hasPaidReservation(booking.payment_status) &&
           booking.status !== "cancelled" &&
           booking.reservation_paid_at &&
           new Date().getTime() - new Date(booking.reservation_paid_at).getTime() <= ONE_DAY_MS
@@ -217,7 +223,7 @@ export default function MyBookingsPage() {
     setMpesaReceiptBookingId(booking.id);
     setActionMessage(null);
     try {
-      const stage = booking.payment_stage || "reservation";
+      const stage = normalizePaymentStage(booking.payment_stage);
       const response = await verifyMpesaReceipt(supabase, {
         bookingId: booking.id,
         receipt,
@@ -228,7 +234,7 @@ export default function MyBookingsPage() {
         throw new Error(response?.error || "M-Pesa receipt verification failed.");
       }
 
-      const paymentStatus = stage === "final" ? "paid" : "reservation_paid";
+      const paymentStatus = getCompletedPaymentStatus(stage);
       setBookings((prev) =>
         prev.map((b) =>
           b.id === booking.id
@@ -247,7 +253,7 @@ export default function MyBookingsPage() {
         message: `Payment confirmed. M-Pesa receipt: ${receipt}.`
       });
       setMpesaReceiptInputs((prev) => ({ ...prev, [booking.id]: "" }));
-    } catch (err) {
+    } catch {
       setActionMessage({
         type: "error",
         message:
@@ -747,12 +753,27 @@ export default function MyBookingsPage() {
             <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 leading-tight">My Bookings</h1>
             <p className="text-gray-500 text-sm mt-1">Track all your confirmed, pending, and completed rides.</p>
           </div>
-          {cancellableBookings.length > 0 && (
-            <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-2 text-xs font-medium text-amber-700 flex items-center gap-2 max-w-xs md:max-w-none shadow-sm">
-              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-              You can cancel paid reservations within 24 hours of payment.
-            </div>
-          )}
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              to="/"
+              className="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100 transition-colors"
+            >
+              <ArrowLeft size={14} />
+              Back Home
+            </Link>
+            <Link
+              to="/booking"
+              className="inline-flex items-center gap-2 rounded-lg bg-[#C5A059] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1A1A1A] transition-colors"
+            >
+              New Booking
+            </Link>
+            {cancellableBookings.length > 0 && (
+              <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-2 text-xs font-medium text-amber-700 flex items-center gap-2 max-w-xs md:max-w-none shadow-sm">
+                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                You can cancel paid reservations within 24 hours of payment.
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Final Payment Reminder - simple golden notice */}
@@ -1040,7 +1061,7 @@ export default function MyBookingsPage() {
 
                       {/* Cancellation & Refund Detail Panel */}
                       {booking.status === "cancelled" &&
-                        (booking.payment_status === "reservation_paid" || booking.payment_status === "paid") && (
+                        hasPaidReservation(booking.payment_status) && (
                         <div className="bg-red-50/50 rounded-xl border border-red-100 p-4 mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                           <div>
                             <p className="text-gray-500 font-semibold">Refund Status</p>
@@ -1194,7 +1215,7 @@ export default function MyBookingsPage() {
                             </button>
                           )}
                           {booking.payment_method === "mpesa" &&
-                            ["reservation_pending", "final_pending"].includes(booking.payment_status) && (
+                            isPendingPaymentStatus(booking.payment_status) && (
                             <div className="w-full border border-amber-200 bg-amber-50/50 rounded-xl p-4 mt-3">
                               <p className="text-xs font-semibold text-amber-800">
                                 Enter your M-Pesa receipt code to confirm instantly:
