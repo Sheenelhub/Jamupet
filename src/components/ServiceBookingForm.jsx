@@ -10,8 +10,16 @@ import {
   createPaymentReference,
   formatKesFromCents,
   reverseGeocodeLocation,
-  startPaystackCheckout
+  startPaystackCheckout,
+  VEHICLE_MULTIPLIERS
 } from "../lib/paystack";
+import {
+  getCompletedPaymentStatus,
+  getPendingPaymentStatus,
+  hasPaidReservation,
+  isPendingPaymentStatus,
+  normalizePaymentStage
+} from "../lib/bookingPaymentFlow";
 import {
   searchLocationAliases,
   KENYA_AIRPORTS
@@ -40,7 +48,7 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
     cash: Banknote
   };
   const [reservationPaymentMethod, setReservationPaymentMethod] = useState("paystack");
-  const [finalPaymentMethod, setFinalPaymentMethod] = useState("paystack");
+  const FINAL_PAYMENT_METHOD = "paystack";
 
   // Service icons mapping
   const serviceIcons = {
@@ -51,8 +59,6 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
     "intercity-ride": MapPin,
     "wedding-travel": Heart,
     "safari-tour": Camera,
-    "full-day": Clock,
-    "excursion": ShoppingBag,
   };
 
   // Service-specific field configurations
@@ -146,7 +152,6 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
   const [mpesaProcessing, setMpesaProcessing] = useState(false);
   const [mpesaModalVisible, setMpesaModalVisible] = useState(false);
   const [mpesaCountdown, setMpesaCountdown] = useState(90);
-  const [mpesaReference, setMpesaReference] = useState(null);
   const [mpesaReceiptInput, setMpesaReceiptInput] = useState("");
   const [mpesaReceiptLoading, setMpesaReceiptLoading] = useState(false);
   const [dropPinMode, setDropPinMode] = useState(null);
@@ -367,7 +372,6 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
       setMpesaPendingStage(null);
       setMpesaProcessing(false);
       setMpesaModalVisible(false);
-      setMpesaReference(null);
     }
   }, [activeBooking]);
 
@@ -758,7 +762,7 @@ Thank you for booking with us!
       return;
     }
 
-    const paymentStage = stage === "final" ? "final" : "reservation";
+    const paymentStage = normalizePaymentStage(stage);
     const paymentKey = `${activeBooking.id}_${paymentStage}`;
 
     // Prevent concurrent payment attempts for same booking+stage
@@ -776,7 +780,7 @@ Thank you for booking with us!
     const amount =
       paymentStage === "final" ? activeBooking.finalPaymentAmount : activeBooking.reservationAmount;
     const selectedMethod =
-      paymentStage === "final" ? finalPaymentMethod : reservationPaymentMethod;
+      paymentStage === "final" ? FINAL_PAYMENT_METHOD : reservationPaymentMethod;
 
     if (!amount || amount <= 0) {
       delete paymentProcessingRef.current[paymentKey];
@@ -798,7 +802,7 @@ Thank you for booking with us!
 
     // Check if payment already exists for this booking+stage
     try {
-      const { data: existingPayments, error: checkError } = await supabase
+      const { data: existingPayments } = await supabase
         .from("payments")
         .select("id, status, payment_stage")
         .eq("booking_id", activeBooking.id)
@@ -844,7 +848,6 @@ Thank you for booking with us!
     setMpesaPendingStage(null);
     setMpesaProcessing(false);
     setMpesaModalVisible(false);
-    setMpesaReference(null);
     setMpesaReceiptInput("");
 
     setIsPaying(true);
@@ -873,7 +876,7 @@ Thank you for booking with us!
         await supabase
           .from("bookings")
           .update({
-            payment_status: paymentStage === "final" ? "final_pending" : "reservation_pending",
+            payment_status: getPendingPaymentStatus(paymentStage),
             payment_method: "cash",
             payment_stage: paymentStage,
             payment_reference: reference,
@@ -886,7 +889,7 @@ Thank you for booking with us!
           prev
             ? {
                 ...prev,
-                paymentStatus: paymentStage === "final" ? "final_pending" : "reservation_pending",
+                paymentStatus: getPendingPaymentStatus(paymentStage),
                 paymentMethod: "cash",
                 paymentStage: paymentStage,
                 paymentReference: reference
@@ -930,7 +933,7 @@ Thank you for booking with us!
           prev
             ? {
                 ...prev,
-                paymentStatus: paymentStage === "final" ? "final_pending" : "reservation_pending",
+                paymentStatus: getPendingPaymentStatus(paymentStage),
                 paymentMethod: "mpesa",
                 paymentStage,
                 paymentReference: response.reference || prev.paymentReference
@@ -938,7 +941,6 @@ Thank you for booking with us!
             : prev
         );
         setMpesaPendingStage(paymentStage);
-        setMpesaReference(response.reference || null);
         if (mpesaCountdownRef.current) {
           clearInterval(mpesaCountdownRef.current);
         }
@@ -986,7 +988,7 @@ Thank you for booking with us!
               prev
                 ? {
                     ...prev,
-                    paymentStatus: confirmedStage === "final" ? "paid" : "reservation_paid",
+                    paymentStatus: getCompletedPaymentStatus(confirmedStage),
                     paymentMethod: payment.payment_method || "mpesa",
                     paymentStage: confirmedStage,
                     paymentReference: receipt
@@ -1028,7 +1030,7 @@ Thank you for booking with us!
           const current = activeBookingRef.current;
           const stillPending =
             current?.paymentMethod === "mpesa" &&
-            ["reservation_pending", "final_pending"].includes(current?.paymentStatus);
+            isPendingPaymentStatus(current?.paymentStatus);
 
           if (stillPending) {
             setPaymentFeedback({
@@ -1111,7 +1113,7 @@ Thank you for booking with us!
               prev
                 ? {
                     ...prev,
-                    paymentStatus: paymentStage === "final" ? "paid" : "reservation_paid",
+                    paymentStatus: getCompletedPaymentStatus(paymentStage),
                     paymentMethod: "paystack",
                     paymentStage,
                     paymentReference: reference
@@ -1221,7 +1223,7 @@ Thank you for booking with us!
         prev
           ? {
               ...prev,
-              paymentStatus: stage === "final" ? "paid" : "reservation_paid",
+              paymentStatus: getCompletedPaymentStatus(stage),
               paymentMethod: "mpesa",
               paymentStage: stage,
               paymentReference: receipt
@@ -1252,11 +1254,9 @@ Thank you for booking with us!
       ? locationCoords[resolvedLocationFields.dropoffField]
       : null;
   const paymentStatusValue = activeBooking?.paymentStatus || "unpaid";
-  const paymentStatusIsPaid = ["reservation_paid", "paid"].includes(paymentStatusValue);
+  const paymentStatusIsPaid = hasPaidReservation(paymentStatusValue);
   const reservationPaymentDisabled =
     ["reservation_paid", "paid", "reservation_pending"].includes(paymentStatusValue);
-  const finalPaymentReady = ["reservation_paid", "final_pending"].includes(paymentStatusValue);
-  const finalPaymentDisabled = paymentStatusValue === "paid" || !finalPaymentReady;
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] pt-24 sm:pt-28 pb-14 sm:pb-20">
@@ -1278,7 +1278,7 @@ Thank you for booking with us!
             </div>
             <div className="min-w-0">
               <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 leading-tight">{config.label}</h1>
-              <p className="text-gray-500 text-sm">Complete your booking details below</p>
+              <p className="text-gray-500 text-sm">Simple 3-step flow: details, payment, confirmation</p>
             </div>
           </div>
 
@@ -1286,26 +1286,26 @@ Thank you for booking with us!
           <div className="flex items-center justify-center gap-0 mb-6 max-w-[240px] mx-auto">
             {/* Step 1 */}
             <div className="flex flex-col items-center gap-0.5">
-              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold border-2 transition-all duration-500 ${bookingStep >= 1 ? 'bg-green-500 border-green-500 text-white' : 'bg-white border-gray-300 text-gray-400'}`}>
+              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold border-2 transition-all duration-500 ${bookingStep >= 1 ? 'bg-[#C5A059] border-[#C5A059] text-white' : 'bg-white border-gray-300 text-gray-400'}`}>
                 {bookingStep > 1 ? <CheckCircle size={12} /> : '1'}
               </div>
-              <span className={`text-[8px] font-semibold uppercase tracking-wide ${bookingStep === 1 ? 'text-green-600' : 'text-gray-400'}`}>Details</span>
+              <span className={`text-[8px] font-semibold uppercase tracking-wide ${bookingStep === 1 ? 'text-[#8B6B2E]' : 'text-gray-400'}`}>Details</span>
             </div>
-            <div className={`flex-1 h-[2px] mb-3 transition-colors duration-500 ${bookingStep >= 2 ? 'bg-green-400' : 'bg-gray-200'}`}></div>
+            <div className={`flex-1 h-[2px] mb-3 transition-colors duration-500 ${bookingStep >= 2 ? 'bg-[#C5A059]' : 'bg-gray-200'}`}></div>
             {/* Step 2 */}
             <div className="flex flex-col items-center gap-0.5">
-              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold border-2 transition-all duration-500 ${bookingStep >= 2 ? 'bg-green-500 border-green-500 text-white' : 'bg-white border-gray-300 text-gray-400'}`}>
+              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold border-2 transition-all duration-500 ${bookingStep >= 2 ? 'bg-[#C5A059] border-[#C5A059] text-white' : 'bg-white border-gray-300 text-gray-400'}`}>
                 {bookingStep > 2 ? <CheckCircle size={12} /> : '2'}
               </div>
-              <span className={`text-[8px] font-semibold uppercase tracking-wide ${bookingStep === 2 ? 'text-green-600' : 'text-gray-400'}`}>Reserve</span>
+              <span className={`text-[8px] font-semibold uppercase tracking-wide ${bookingStep === 2 ? 'text-[#8B6B2E]' : 'text-gray-400'}`}>Payment</span>
             </div>
-            <div className={`flex-1 h-[2px] mb-3 transition-colors duration-500 ${bookingStep >= 3 ? 'bg-green-400' : 'bg-gray-200'}`}></div>
+            <div className={`flex-1 h-[2px] mb-3 transition-colors duration-500 ${bookingStep >= 3 ? 'bg-[#C5A059]' : 'bg-gray-200'}`}></div>
             {/* Step 3 */}
             <div className="flex flex-col items-center gap-0.5">
-              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold border-2 transition-all duration-500 ${bookingStep >= 3 ? 'bg-green-500 border-green-500 text-white' : 'bg-white border-gray-300 text-gray-400'}`}>
+              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold border-2 transition-all duration-500 ${bookingStep >= 3 ? 'bg-[#C5A059] border-[#C5A059] text-white' : 'bg-white border-gray-300 text-gray-400'}`}>
                 {bookingStep >= 3 ? <CheckCircle size={12} /> : '3'}
               </div>
-              <span className={`text-[8px] font-semibold uppercase tracking-wide ${bookingStep === 3 ? 'text-green-600' : 'text-gray-400'}`}>Confirmed</span>
+              <span className={`text-[8px] font-semibold uppercase tracking-wide ${bookingStep === 3 ? 'text-[#8B6B2E]' : 'text-gray-400'}`}>Confirmed</span>
             </div>
           </div>
         </div>
@@ -1687,7 +1687,7 @@ Thank you for booking with us!
                   </>
                 ) : (
                   <>
-                    Next
+                    Continue to Payment
                     <ArrowRight size={18} />
                   </>
                 )}
@@ -1913,7 +1913,7 @@ Thank you for booking with us!
               {activeBooking?.paymentMethod === "mpesa" &&
                 (mpesaProcessing ||
                   mpesaModalVisible ||
-                  ["reservation_pending", "final_pending"].includes(paymentStatusValue)) && (
+                  isPendingPaymentStatus(paymentStatusValue)) && (
                   <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
                     <p className="text-sm font-semibold text-gray-900">Confirm with receipt code</p>
                     <p className="text-xs text-gray-600 mt-1">
@@ -2001,7 +2001,7 @@ Thank you for booking with us!
 	                </div>
 	              </div>
 
-	              {(reservationPaymentMethod === "mpesa" || finalPaymentMethod === "mpesa") && (
+	              {reservationPaymentMethod === "mpesa" && (
 	                <div className="mt-3 space-y-2">
 	                  <label className="text-xs font-semibold text-gray-500">M-Pesa phone number</label>
 	                  <input
@@ -2040,15 +2040,22 @@ Thank you for booking with us!
 		            )}
 
 	            {/* Step Navigation Arrows */}
-	            <div className="flex items-center justify-between mt-6">
+	            <div className="flex items-center justify-between gap-3 mt-6">
               <button
                 type="button"
                 onClick={() => { setBookingStep(1); setSubmitStatus(null); }}
                 className="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 border border-gray-300 text-gray-700 hover:bg-gray-100 font-semibold text-sm transition-all"
               >
                 <ArrowLeft size={16} />
-                Back
+                Back to Details
               </button>
+              <a
+                href="/bookings"
+                className="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 border border-[#C5A059]/40 text-[#8B6B2E] hover:bg-[#C5A059]/10 font-semibold text-sm transition-all"
+              >
+                Track in My Bookings
+                <ArrowRight size={16} />
+              </a>
             </div>
           </div>
         ) : bookingStep === 3 ? (
