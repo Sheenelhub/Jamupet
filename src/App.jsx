@@ -3,6 +3,7 @@ import { HelmetProvider } from "react-helmet-async";
 import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { AdminAuthProvider } from "./context/AdminAuthContext";
+import ToastProvider from './components/ToastProvider';
 import ScrollToTop from "./components/ScrollToTop";
 import Preloader from "./components/Preloader";
 import Navbar from "./components/Navbar";
@@ -41,6 +42,7 @@ import { ProtectedAdminRoute } from "./pages/admin/ProtectedAdminRoute";
 
 // Added Accessibility Widget Import
 import AccessibilityWidget from './components/AccessibilityWidget';
+import GoogleOneTap from './components/GoogleOneTap';
 
 function AppContent({ isLoading }) {
   const location = useLocation();
@@ -75,6 +77,7 @@ function AppContent({ isLoading }) {
         <>
           <div className="relative z-[1000]">
             <Navbar />
+            <GoogleOneTap />
           </div>
           <AccessibilityWidget />
         </>
@@ -191,11 +194,13 @@ function App() {
     <HelmetProvider>
       <AuthProvider>
         <AdminAuthProvider>
-          <Router>
-            <ScrollToTop />
-            <Preloader isLoading={isLoading} />
-            <AppContent isLoading={isLoading} />
-          </Router>
+          <ToastProvider>
+            <Router>
+              <ScrollToTop />
+              <Preloader isLoading={isLoading} />
+              <AppContent isLoading={isLoading} />
+            </Router>
+          </ToastProvider>
         </AdminAuthProvider>
       </AuthProvider>
     </HelmetProvider>
