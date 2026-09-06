@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react'
 import { supabaseAuth } from '../lib/supabase'
-import React, { useEffect } from 'react'
 import { useToast } from './ToastProvider'
 
 // Google One Tap component
