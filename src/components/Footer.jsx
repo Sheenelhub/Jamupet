@@ -34,8 +34,8 @@ export default function Footer() {
     }
   };
 
-  const handleWhatsAppChat = () => {
-    const phoneNumber = "254722413102";
+  const handleWhatsAppChat = (phoneNum) => {
+    const phoneNumber = typeof phoneNum === 'string' ? phoneNum.replace(/[^0-9]/g, "") : "254722413102";
     const message = "Hello Jamupet Transit, I have a quick question about your services.";
     window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`, "_blank");
   };
@@ -130,11 +130,25 @@ export default function Footer() {
                   <span>Nairobi, Kenya<br/>Serving East Africa</span>
                 </li>
                 <li 
-                  onClick={handleWhatsAppChat}
+                  onClick={() => handleWhatsAppChat('+254722413102')}
                   className="flex items-center gap-3 text-gray-400 text-sm hover:text-[#C5A059] transition-colors cursor-pointer group"
                 >
                   <Phone size={18} className="group-hover:text-[#C5A059] text-gray-500 transition-colors" />
                   <span>+254 722 413 102</span>
+                </li>
+                <li 
+                  onClick={() => handleWhatsAppChat('+254715244107')}
+                  className="flex items-center gap-3 text-gray-400 text-sm hover:text-[#C5A059] transition-colors cursor-pointer group"
+                >
+                  <Phone size={18} className="group-hover:text-[#C5A059] text-gray-500 transition-colors" />
+                  <span>+254 715 244 107</span>
+                </li>
+                <li 
+                  onClick={() => handleWhatsAppChat('+254705416781')}
+                  className="flex items-center gap-3 text-gray-400 text-sm hover:text-[#C5A059] transition-colors cursor-pointer group"
+                >
+                  <Phone size={18} className="group-hover:text-[#C5A059] text-gray-500 transition-colors" />
+                  <span>+254 705 416 781</span>
                 </li>
                 <li 
                   onClick={() => window.location.href = 'mailto:jamupetlogistics@gmail.com'}

@@ -711,7 +711,7 @@ export default function MyBookingsPage() {
 
             <div class="footer">
               <p>Thank you for choosing Jamupet Transit for your journey.</p>
-              <p>For inquiries, please contact us at jamupetlogistics@gmail.com | 0722413102</p>
+              <p>For inquiries, please contact us at jamupetlogistics@gmail.com | 0722413102 | 0715244107 | 0705416781</p>
             </div>
           </div>
           <script>
