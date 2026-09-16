@@ -17,8 +17,10 @@ export default function BookingPage() {
   return (
     <div className="bg-[#FDFCFB] min-h-screen relative font-sans selection:bg-[#C5A059] selection:text-white pb-32">
       <SEO 
-        title="Book a Ride - Jamupet Transit"
-        description="Book your luxury airport transfer, intercity ride, or safari expedition online with Jamupet Transit."
+        title="Book VIP Transport | Airport Transfers Nairobi"
+        description="Book your luxury airport transfer, intercity ride, or safari expedition online with Jamupet Transit. Reliable VIP transportation services in Kenya."
+        keywords="book airport transfer Nairobi, VIP transport booking, hire executive car Kenya, book chauffeur Nairobi"
+        canonical="https://jamupettransit.com/booking"
       />
       
       {/* GLOBAL BACK BUTTON */}

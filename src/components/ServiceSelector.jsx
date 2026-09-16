@@ -1,31 +1,32 @@
 import { Plane, Hotel, MapPin, Heart, Camera, Clock, ShoppingBag } from "lucide-react";
+import { formatKesFromCents } from "../lib/paystack";
 
 const SERVICES = [
   {
     id: "airport-transfer",
     name: "Airport Transfers",
-    description: "Punctual, stress-free arrivals at JKIA & Wilson. Flat Rate: KES 5,000.",
+    description: <>Punctual, stress-free arrivals at JKIA & Wilson. Flat Rate: {formatKesFromCents(500000, { inline: true, usdClassName: 'font-bold text-gray-900 group-hover:text-gray-900 transition-colors' })}.</>,
     icon: Plane,
     iconColor: "#C5A059"
   },
   {
     id: "hotel-transfer",
     name: "Hotel Transfers",
-    description: "Seamless transit direct to your Nairobi accommodation. Flat Rate: KES 5,000.",
+    description: <>Seamless transit direct to your Nairobi accommodation. Flat Rate: {formatKesFromCents(500000, { inline: true, usdClassName: 'font-bold text-gray-900 group-hover:text-gray-900 transition-colors' })}.</>,
     icon: Hotel,
     iconColor: "#C5A059"
   },
   {
     id: "full-day",
     name: "Full Day Nairobi",
-    description: "8 hours of chauffeur-driven SUV service in Nairobi (up to 100km). Flat Rate: KES 12,000.",
+    description: <>8 hours of chauffeur-driven SUV service in Nairobi (up to 100km). Flat Rate: {formatKesFromCents(1200000, { inline: true, usdClassName: 'font-bold text-gray-900 group-hover:text-gray-900 transition-colors' })}.</>,
     icon: Clock,
     iconColor: "#C5A059"
   },
   {
     id: "excursion",
     name: "Excursion",
-    description: "Errands, meetings, lunch, dinner, or shopping (max 3 hours). Flat Rate: KES 5,000.",
+    description: <>Errands, meetings, lunch, dinner, or shopping (max 3 hours). Flat Rate: {formatKesFromCents(500000, { inline: true, usdClassName: 'font-bold text-gray-900 group-hover:text-gray-900 transition-colors' })}.</>,
     icon: ShoppingBag,
     iconColor: "#C5A059"
   },

@@ -16,7 +16,7 @@ import {
   Star, 
   Play
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import BackButton from "../components/BackButton";
 import SEO from "../components/SEO";
 
@@ -26,6 +26,8 @@ const stats = [
   { label: "Elite Drivers", value: "40+" },
   { label: "Corporate Partners", value: "15+" },
 ];
+
+
 
 export default function AboutPage() {
   const navigate = useNavigate();
@@ -40,8 +42,10 @@ export default function AboutPage() {
     // Base background is a very soft, warm pearl white (#FDFCFB) to match the gold branding
     <div className="bg-[#FDFCFB] min-h-screen text-gray-900 font-sans selection:bg-[#C5A059] selection:text-white overflow-hidden">
       <SEO 
-        title="About Us - Luxury Transport & Chauffeurs Kenya"
-        description="Learn about Jamupet Transit's commitment to premium, reliable, and discreet luxury transportation services in Kenya."
+        title="About Us | Premium Chauffeur Services Nairobi"
+        description="Learn about Jamupet Transit's commitment to premium, reliable, and discreet luxury transportation services in Kenya. Experienced VIP chauffeurs."
+        keywords="chauffeur services Nairobi, professional drivers Kenya, VIP transportation services Kenya, luxury transport"
+        canonical="https://jamupettransit.com/about"
       />
       <BackButton />
 
@@ -176,12 +180,12 @@ export default function AboutPage() {
             </div>
 
             <div className="pt-6">
-              <button 
-                onClick={() => navigate("/booking")}
-                className="bg-white border border-gray-200 text-gray-900 px-8 py-4 rounded-xl font-bold hover:border-[#C5A059] hover:bg-[#C5A059] hover:text-white transition-all flex items-center gap-3 text-sm group shadow-sm"
+              <Link 
+                to="/booking"
+                className="inline-flex bg-white border border-gray-200 text-gray-900 px-8 py-4 rounded-xl font-bold hover:border-[#C5A059] hover:bg-[#C5A059] hover:text-white transition-all items-center gap-3 text-sm group shadow-sm"
               >
                 Access Booking Portal <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-              </button>
+              </Link>
             </div>
           </div>
 

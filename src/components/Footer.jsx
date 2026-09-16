@@ -104,10 +104,7 @@ export default function Footer() {
                 Redefining East African travel. We provide discreet, reliable, and premium chauffeur services tailored to the highest global standards.
               </p>
               <div className="flex gap-4">
-                <SocialIcon icon={<Instagram size={18} />} />
-                <SocialIcon icon={<Facebook size={18} />} />
-                <SocialIcon icon={<Linkedin size={18} />} />
-                <SocialIcon icon={<Twitter size={18} />} />
+                {/* Social icons hidden temporarily as requested */}
               </div>
             </div>
 

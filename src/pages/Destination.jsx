@@ -34,8 +34,10 @@ export default function Destinations() {
   return (
     <div className="pt-32 pb-32 bg-[#FDFCFB] min-h-screen text-gray-900">
       <SEO 
-        title="Top Safari Destinations in Kenya - Jamupet Transit"
-        description="Discover Kenya's premium safari destinations like Maasai Mara, Amboseli, and Tsavo with Jamupet Transit's luxury travel packages."
+        title="Luxury Transport Kenya | Safari Destinations & Transfers"
+        description="Discover Kenya's premium safari destinations like Maasai Mara, Amboseli, and Tsavo with Jamupet Transit's luxury travel and executive car rental packages."
+        keywords="luxury safari transport Kenya, VIP airport transfers Nairobi, executive car hire Kenya, Maasai Mara transport"
+        canonical="https://jamupettransit.com/destinations"
       />
       <BackButton />
       <div className="max-w-7xl mx-auto px-6 relative z-10">

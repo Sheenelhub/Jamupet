@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, Link } from "react-router-dom";
 import { CheckCircle2, Building, TrendingUp, ShieldCheck, ArrowRight, Star, Car, Users } from "lucide-react";
+import { formatKesFromCents } from "../lib/paystack";
 import BackButton from "../components/BackButton";
 import SEO from "../components/SEO";
 import ServiceFlipCards from "../components/Services/ServiceFlipCards";
@@ -46,8 +47,10 @@ export default function Services() {
   return (
     <div className="bg-[#FDFCFB] min-h-screen text-gray-900 selection:bg-[#C5A059] selection:text-white">
       <SEO 
-        title="Luxury Transport Services - Jamupet Transit Kenya"
-        description="Explore our range of premium transport solutions including airport transfers, executive rentals, and B2B fleet management in Nairobi."
+        title="Executive Car Rental Nairobi | Luxury Transport Kenya"
+        description="Explore premium transport solutions including VIP airport transfers, executive car rentals, and B2B fleet management in Nairobi, Kenya."
+        keywords="executive car rental Nairobi, luxury transport Kenya, chauffeur services Nairobi, premium airport shuttle service"
+        canonical="https://jamupettransit.com/services"
       />
       <BackButton />
 
@@ -134,7 +137,7 @@ export default function Services() {
               <h3 className="text-2xl font-bold text-gray-900 mb-2">Transfers</h3>
               <p className="text-gray-500 text-sm mb-8 font-light">Punctual drop-offs & pick-ups for airport & hotels.</p>
               <div className="mb-10">
-                <span className="text-4xl font-black text-gray-900">KES 5,000</span>
+                <div className="text-4xl font-black text-gray-900">{formatKesFromCents(500000, { inline: true, usdClassName: 'text-4xl font-black text-gray-900', kesClassName: 'text-sm text-gray-400 font-normal' })}</div>
                 <span className="text-gray-400 text-xs tracking-widest uppercase block mt-2">Flat Rate per Transfer</span>
               </div>
               <ul className="space-y-4 mb-10">
@@ -144,9 +147,9 @@ export default function Services() {
                   </li>
                 ))}
               </ul>
-              <button onClick={() => navigate("/booking")} className="w-full py-4 rounded-xl border border-gray-200 text-gray-900 font-bold hover:bg-[#C5A059] hover:border-[#C5A059] hover:text-white transition-colors text-xs uppercase tracking-widest bg-gray-50">
+              <Link to="/booking" className="w-full py-4 rounded-xl border border-gray-200 text-gray-900 font-bold hover:bg-[#C5A059] hover:border-[#C5A059] hover:text-white transition-colors text-xs uppercase tracking-widest bg-gray-50 block text-center">
                 Book Transfer
-              </button>
+              </Link>
             </div>
 
             {/* Full Day Nairobi Card */}
@@ -157,7 +160,7 @@ export default function Services() {
               <h3 className="text-2xl font-bold text-gray-900 mb-2 text-center">Full Day Nairobi</h3>
               <p className="text-gray-500 text-sm mb-8 font-light text-center">8 hours chauffeur-driven service within Nairobi & environs.</p>
               <div className="mb-10 text-center">
-                <span className="text-5xl font-black text-[#C5A059]">KES 12,000</span>
+                <div className="text-5xl font-black text-[#C5A059]">{formatKesFromCents(1200000, { inline: true, usdClassName: 'text-5xl font-black text-[#C5A059]', kesClassName: 'text-sm text-[#C5A059]/70 font-normal' })}</div>
                 <span className="text-gray-400 text-xs tracking-widest uppercase block mt-3">8 Hours & Up to 100kms</span>
               </div>
               <ul className="space-y-4 mb-10">
@@ -167,9 +170,9 @@ export default function Services() {
                   </li>
                 ))}
               </ul>
-              <button onClick={() => navigate("/booking")} className="w-full py-4 rounded-xl bg-[#C5A059] text-white font-bold hover:bg-gray-900 transition-colors text-xs uppercase tracking-widest shadow-lg">
+              <Link to="/booking" className="w-full py-4 rounded-xl bg-[#C5A059] text-white font-bold hover:bg-gray-900 transition-colors text-xs uppercase tracking-widest shadow-lg block text-center">
                 Book Full Day
-              </button>
+              </Link>
             </div>
 
             {/* Excursion & Custom Card */}
@@ -177,19 +180,19 @@ export default function Services() {
               <h3 className="text-2xl font-bold text-gray-900 mb-2">Excursion & Custom</h3>
               <p className="text-gray-500 text-sm mb-8 font-light">Short errands or tailor-made safari itineraries.</p>
               <div className="mb-10">
-                <span className="text-4xl font-black text-gray-900">From KES 5,000</span>
+                <div className="text-4xl font-black text-gray-900">From {formatKesFromCents(500000, { inline: true, usdClassName: 'text-4xl font-black text-gray-900', kesClassName: 'text-sm text-gray-400 font-normal' })}</div>
                 <span className="text-gray-400 text-xs tracking-widest uppercase block mt-2">Excursions & Safaris</span>
               </div>
               <ul className="space-y-4 mb-10">
-                {['Excursions (Max 3 hrs) KES 5,000', 'Dinner, shopping & quick errands', 'Custom Safari itineraries', 'Wedding travel & special events'].map((feature, i) => (
+                {[`Excursions (Max 3 hrs) ${formatKesFromCents(500000, { inline: true, usdClassName: 'font-semibold', kesClassName: 'text-xs text-gray-400 font-normal' }).props.children[0].props.children}`, 'Dinner, shopping & quick errands', 'Custom Safari itineraries', 'Wedding travel & special events'].map((feature, i) => (
                   <li key={i} className="flex items-center gap-3 text-sm text-gray-600 font-light">
                     <CheckCircle2 size={16} className="text-[#C5A059]" /> {feature}
                   </li>
                 ))}
               </ul>
-              <button onClick={() => navigate("/booking")} className="w-full py-4 rounded-xl border border-gray-200 text-gray-900 font-bold hover:bg-[#C5A059] hover:border-[#C5A059] hover:text-white transition-colors text-xs uppercase tracking-widest bg-gray-50">
+              <Link to="/booking" className="w-full py-4 rounded-xl border border-gray-200 text-gray-900 font-bold hover:bg-[#C5A059] hover:border-[#C5A059] hover:text-white transition-colors text-xs uppercase tracking-widest bg-gray-50 block text-center">
                 Book Excursion
-              </button>
+              </Link>
             </div>
           </div>
         </div>

@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /profile/
+Disallow: /settings/
+Disallow: /bookings/
+Disallow: /auth/
+
+Sitemap: https://jamupettransit.com/sitemap.xml

@@ -1,12 +1,13 @@
 import { useNavigate } from "react-router-dom";
 import { Check, ArrowRight, Star, MapPin } from "lucide-react";
+import { formatKesFromCents } from "../lib/paystack";
 
 const packages = [
   {
     id: 1,
     title: "City Executive",
     route: "JKIA ⇄ Nairobi Hotels",
-    price: "From KES 3,500",
+    price: <>From {formatKesFromCents(350000, { inline: true, usdClassName: 'text-3xl font-bold text-gray-900', kesClassName: 'text-sm text-gray-400 font-normal' })}</>,
     duration: "Per Transfer",
     features: [
       "VIP Meet & Greet at Arrivals",
@@ -34,7 +35,7 @@ const packages = [
     id: 3,
     title: "Intercity Escape",
     route: "Nairobi ⇄ Naivasha / Nakuru",
-    price: "From KES 18,000",
+    price: <>From {formatKesFromCents(1800000, { inline: true, usdClassName: 'text-3xl font-bold text-gray-900', kesClassName: 'text-sm text-gray-400 font-normal' })}</>,
     duration: "Per Day",
     features: [
       "Luxury SUV (Up to 7 Pax)",

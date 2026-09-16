@@ -6,19 +6,33 @@ export default function SEO({
   description, 
   keywords, 
   canonical, 
-  ogImage = '/jts-logoo.png',
+  ogImage = 'https://jamupettransit.com/cars.jpg',
   ogType = 'website',
   twitterHandle = '@JamupetTransit'
 }) {
   const siteName = "Jamupet Transit";
   
-  // Ensure title is under 60 chars as requested
-  const formattedTitle = title ? `${title.substring(0, 50)} | ${siteName}` : siteName;
+  let htmlTitle = siteName;
+  let ogTitle = siteName;
+  
+  if (title) {
+    // og:title allows 60-90 chars
+    ogTitle = title.length <= 90 ? title : title.substring(0, 90);
+    
+    // HTML title is strict 60 max
+    if (title.includes(siteName)) {
+      htmlTitle = title.substring(0, 60);
+    } else if (title.length + siteName.length + 3 <= 60) {
+      htmlTitle = `${title} | ${siteName}`;
+    } else {
+      htmlTitle = title.substring(0, 60);
+    }
+  }
 
   return (
     <Helmet>
       {/* Standard metadata tags */}
-      <title>{formattedTitle}</title>
+      <title>{htmlTitle}</title>
       <meta name="description" content={description} />
       {keywords && <meta name="keywords" content={keywords} />}
       
@@ -27,7 +41,7 @@ export default function SEO({
       
       {/* OpenGraph tags */}
       <meta property="og:type" content={ogType} />
-      <meta property="og:title" content={formattedTitle} />
+      <meta property="og:title" content={ogTitle} />
       <meta property="og:description" content={description} />
       <meta property="og:site_name" content={siteName} />
       <meta property="og:image" content={ogImage} />
@@ -36,7 +50,7 @@ export default function SEO({
       {/* Twitter Card tags */}
       <meta name="twitter:creator" content={twitterHandle} />
       <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:title" content={formattedTitle} />
+      <meta name="twitter:title" content={ogTitle} />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={ogImage} />
     </Helmet>

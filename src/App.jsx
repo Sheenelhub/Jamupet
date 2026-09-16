@@ -88,8 +88,9 @@ function AppContent({ isLoading }) {
           <Route path="/" element={
             <>
               <SEO 
-                title="Premium Airport Transfers & Safari Tours in Kenya"
+                title="Luxury Transport Kenya | Executive Car Rental Nairobi"
                 description="Experience seamless, reliable luxury transport in Kenya. From JKIA airport transfers to Maasai Mara safaris, Jamupet Transit offers executive chauffeur services."
+                keywords="luxury transport Kenya, executive car rental Nairobi, VIP airport transfers, chauffeur services Nairobi, premium car hire"
                 canonical="https://jamupettransit.com/"
               />
               <Hero />
