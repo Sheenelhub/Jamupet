@@ -439,7 +439,7 @@ export default function MyBookingsPage() {
 	                  : b
 	              )
 	            );
-	            setActionMessage({ type: "success", message: "Reservation paid successfully. Your safari booking is confirmed." });
+	            setActionMessage({ type: "success", message: "Reservation paid successfully. Your expedition booking is confirmed." });
 
 	            try {
 	              await sendBookingEmail({

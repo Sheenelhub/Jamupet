@@ -16,7 +16,7 @@ const coverage = [
     locations: ["Nairobi (All Areas)", "Mombasa", "Kisumu", "Nakuru", "Eldoret"]
   },
   {
-    category: "Safari Destinations",
+    category: "Expedition Destinations",
     icon: <TreePine className="text-[#C5A059]" size={28} />,
     locations: ["Maasai Mara", "Amboseli", "Tsavo East/West", "Lake Nakuru", "Samburu"]
   }
@@ -34,9 +34,9 @@ export default function Destinations() {
   return (
     <div className="pt-32 pb-32 bg-[#FDFCFB] min-h-screen text-gray-900">
       <SEO 
-        title="Luxury Transport Kenya | Safari Destinations & Transfers"
-        description="Discover Kenya's premium safari destinations like Maasai Mara, Amboseli, and Tsavo with Jamupet Transit's luxury travel and executive car rental packages."
-        keywords="luxury safari transport Kenya, VIP airport transfers Nairobi, executive car hire Kenya, Maasai Mara transport"
+        title="Luxury Transport Kenya | Expedition Destinations & Transfers"
+        description="Discover Kenya's premium expedition destinations like Maasai Mara, Amboseli, and Tsavo with Jamupet Transit's luxury travel and executive car rental packages."
+        keywords="luxury expedition transport Kenya, VIP airport transfers Nairobi, executive car hire Kenya, Maasai Mara transport"
         canonical="https://jamupettransit.com/destinations"
       />
       <BackButton />

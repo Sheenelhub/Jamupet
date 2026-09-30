@@ -54,7 +54,7 @@ export default function Footer() {
             <div className="max-w-xl text-center lg:text-left">
               <h3 className="text-2xl md:text-3xl font-bold font-serif mb-2 text-white">Join Our Private List</h3>
               <p className="text-gray-400 font-light text-sm">
-                Subscribe to receive exclusive travel itineraries, seasonal Safari offers, and corporate logistic insights in East Africa.
+                Subscribe to receive exclusive travel itineraries, seasonal Expedition offers, and corporate logistic insights in East Africa.
               </p>
             </div>
             
@@ -96,7 +96,8 @@ export default function Footer() {
               <div>
                 <img 
                   src="/jts-logoo.png" 
-                  alt="Jamupet Transit"
+                  alt="Jamupet Transit Official Logo - jamupettransit.com"
+                  title="Jamupet Transit"
                   className="h-14 w-auto object-contain mb-4"
                 />
               </div>

@@ -14,6 +14,7 @@ import ServiceSelector from "./components/ServiceSelector";
 import AboutTeaser from "./components/AboutTeaser";
 import Packages from "./components/Packages";
 import Features from "./components/Features";
+import MomentsGallery from "./components/MomentsGallery";
 
 import CTA from "./components/CTA";
 import FAQ from "./components/FAQ";
@@ -89,7 +90,7 @@ function AppContent({ isLoading }) {
             <>
               <SEO 
                 title="Luxury Transport Kenya | Executive Car Rental Nairobi"
-                description="Experience seamless, reliable luxury transport in Kenya. From JKIA airport transfers to Maasai Mara safaris, Jamupet Transit offers executive chauffeur services."
+                description="Experience seamless, reliable luxury transport in Kenya. From JKIA airport transfers to Maasai Mara expeditions, Jamupet Transit offers executive chauffeur services."
                 keywords="luxury transport Kenya, executive car rental Nairobi, VIP airport transfers, chauffeur services Nairobi, premium car hire"
                 canonical="https://jamupettransit.com/"
               />
@@ -97,6 +98,7 @@ function AppContent({ isLoading }) {
               <ServiceSelector onSelectService={(id) => navigate('/booking', { state: { serviceType: id } })} />
               <AboutTeaser />
               <Packages />
+              <MomentsGallery />
               <Features /> 
               <FAQ/>
               <CTA />

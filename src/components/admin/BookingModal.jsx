@@ -192,7 +192,7 @@ export default function BookingModal({ booking, isOpen, onClose, onStatusChange,
 
 	          {isSafariQuote && (
 	            <form onSubmit={handleQuoteSubmit} className="rounded-lg border border-[#C5A059]/30 bg-[#C5A059]/5 p-4">
-	              <h3 className="text-sm font-semibold text-gray-900 mb-3">Safari Quote</h3>
+	              <h3 className="text-sm font-semibold text-gray-900 mb-3">Expedition Quote</h3>
 	              {notes && <p className="mb-3 text-xs text-gray-600">{notes}</p>}
 	              <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
 	                <div className="flex-1">

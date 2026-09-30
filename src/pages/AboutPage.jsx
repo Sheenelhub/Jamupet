@@ -220,7 +220,7 @@ export default function AboutPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <FleetCard title="Executive Sedan" img="/assets/executive-sedan-airport-transfer.webp" pax="1-3" bags="2" fallback="https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?q=80&w=800" />
             <FleetCard title="Luxury SUV" img="/assets/luxury-suv-chauffeur-kenya.webp" pax="1-6" bags="4" fallback="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?q=80&w=800" />
-            <FleetCard title="Safari Cruiser" img="/assets/custom-safari-tour-van-kenya.webp" pax="1-7" bags="6" fallback="https://images.unsplash.com/photo-1516426122078-c23e76319801?q=80&w=800" />
+            <FleetCard title="Expedition Cruiser" img="/assets/custom-safari-tour-van-kenya.webp" pax="1-7" bags="6" fallback="https://images.unsplash.com/photo-1516426122078-c23e76319801?q=80&w=800" />
           </div>
         </div>
       </section>

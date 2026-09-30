@@ -53,6 +53,44 @@ export default function SEO({
       <meta name="twitter:title" content={ogTitle} />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={ogImage} />
+      
+      {/* Structured Data (JSON-LD) for Image SEO and Brand Association */}
+      <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "Organization",
+              "@id": "https://jamupettransit.com/#organization",
+              "name": "Jamupet Transit",
+              "url": "https://jamupettransit.com",
+              "logo": "https://jamupettransit.com/assets/logo.png",
+              "image": [
+                "https://jamupettransit.com/assets/executive-sedan-airport-transfer.webp",
+                "https://jamupettransit.com/assets/luxury-suv-chauffeur-kenya.webp",
+                "https://jamupettransit.com/assets/custom-safari-tour-van-kenya.webp",
+                "https://jamupettransit.com/assets/luggage-loaded.webp",
+                "https://jamupettransit.com/assets/maasaimara.webp",
+                "https://jamupettransit.com/assets/naivasha.webp",
+                "https://jamupettransit.com/assets/roadtrips.webp"
+              ]
+            },
+            {
+              "@type": "LocalBusiness",
+              "@id": "https://jamupettransit.com/#localBusiness",
+              "name": "Jamupet Transit",
+              "image": "https://jamupettransit.com/assets/executive-sedan-airport-transfer.webp",
+              "url": "https://jamupettransit.com",
+              "telephone": "+254712345678", // Consider updating with real number
+              "address": {
+                "@type": "PostalAddress",
+                "addressLocality": "Nairobi",
+                "addressCountry": "KE"
+              }
+            }
+          ]
+        })}
+      </script>
     </Helmet>
   );
 }

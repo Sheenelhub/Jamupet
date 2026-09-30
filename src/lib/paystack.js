@@ -342,7 +342,7 @@ export const VEHICLE_MULTIPLIERS = {
   "Van": 3.0,
   "Van (10-seater)": 3.0,
   "Van (14-seater)": 3.5,
-  "Safari Van (15-seater)": 3.5,
+  "Expedition Van (15-seater)": 3.5,
   "Truck": 4.0,
   "Luxury Car": 4.0,
   "Limousine": 8.0

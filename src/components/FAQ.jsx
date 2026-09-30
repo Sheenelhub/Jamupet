@@ -17,7 +17,7 @@ const faqs = [
   },
   {
     question: "Do you provide services outside of Nairobi?",
-    answer: "Absolutely. While our headquarters are in Nairobi, our Intercity and Safari Class fleets are equipped to take you anywhere in East Africa, including Mombasa, Naivasha, Nanyuki, and the Maasai Mara."
+    answer: "Absolutely. While our headquarters are in Nairobi, our Intercity and Expedition Class fleets are equipped to take you anywhere in East Africa, including Mombasa, Naivasha, Nanyuki, and the Maasai Mara."
   },
   {
     question: "Are your chauffeurs fully vetted?",

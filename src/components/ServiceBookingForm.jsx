@@ -100,10 +100,10 @@ export default function ServiceBookingForm({ serviceType, onBack }) {
       ]
     },
     "safari-tour": {
-      label: "Safari Tours",
+      label: "Expedition Tours",
       fields: [
         { name: "pickup", label: "Pickup Location", placeholder: "Hotel or Airport", required: true },
-        { name: "destination", label: "Safari Destination", placeholder: "e.g., Maasai Mara", required: true },
+        { name: "destination", label: "Expedition Destination", placeholder: "e.g., Maasai Mara", required: true },
         { name: "startDate", label: "Start Date", type: "date", required: true },
         { name: "duration", label: "Duration (Days)", type: "number", min: 1, max: 14, required: true }
       ]

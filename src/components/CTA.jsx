@@ -18,7 +18,8 @@ export default function CTA() {
       <div className="absolute inset-0 z-0">
         <img 
           src="/assets/chauffers-careers.webp" 
-          alt="Luxury Chauffeur Service" 
+          alt="Jamupet Transit Executive Chauffeur Service in Kenya - jamupettransit.com" 
+          title="Jamupet Transit Premium Chauffeurs"
           width="1920"
           height="1080"
           className="w-full h-full object-cover scale-105 opacity-20 grayscale"
@@ -47,7 +48,7 @@ export default function CTA() {
             </h2>
             
             <p className="text-gray-600 text-base md:text-lg max-w-2xl mx-auto font-light mb-12">
-              Whether it is a seamless airport transfer, a corporate roadshow, or a bespoke safari, our executive fleet is ready to move you across East Africa with unmatched precision and comfort.
+              Whether it is a seamless airport transfer, a corporate roadshow, or a bespoke expedition, our executive fleet is ready to move you across East Africa with unmatched precision and comfort.
             </p>
 
             {/* Action Buttons */}

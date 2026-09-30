@@ -76,10 +76,10 @@ export default function Services() {
           },
           {
             "@type": "Question",
-            "name": "Can I get a daily rate for a Luxury SUV or Safari Tour?",
+            "name": "Can I get a daily rate for a Luxury SUV or Expedition Tour?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Yes! We offer custom daily rates for our Luxury SUVs and specialized Safari cruisers. They are ideal for intercity rides, corporate teams, and tourist expeditions."
+              "text": "Yes! We offer custom daily rates for our Luxury SUVs and specialized expedition cruisers. They are ideal for intercity rides, corporate teams, and traveler expeditions."
             }
           }
         ]
@@ -108,7 +108,7 @@ export default function Services() {
             </h1>
           </div>
           <p className="text-gray-600 text-base md:text-lg font-light max-w-sm border-l-2 border-[#C5A059]/30 pl-6 mb-2">
-            Professional logistics for the discerning traveler,<strong> tourist</strong>, and elite property partner.
+            Professional logistics for the discerning traveler,<strong> explorer</strong>, and elite property partner.
           </p>
         </div>
       </section>
@@ -124,7 +124,7 @@ export default function Services() {
           <div className="text-center max-w-3xl mx-auto mb-20">
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">Designed for <span className="italic text-[#C5A059] font-light">Comfort & Style.</span></h2>
             <p className="text-gray-600 font-light leading-relaxed text-sm md:text-base">
-              Why compromise on quality when you can have both? We make it easy to <strong className="text-gray-900 font-medium">save money with our rentals</strong> without sacrificing luxury. Whether you are looking for highly competitive, <strong className="text-gray-900 font-medium">cheap rental transfer services</strong> or premium chauffeur rates for a multi-day safari, our pricing adapts to your specific needs.
+              Why compromise on quality when you can have both? We make it easy to <strong className="text-gray-900 font-medium">save money with our rentals</strong> without sacrificing luxury. Whether you are looking for highly competitive, <strong className="text-gray-900 font-medium">cheap rental transfer services</strong> or premium chauffeur rates for a multi-day expedition, our pricing adapts to your specific needs.
             </p>
             <p className="text-[#B35A38] text-[10px] font-bold uppercase tracking-[0.2em] mt-8 bg-[#B35A38]/5 border border-[#B35A38]/10 inline-block px-6 py-3 rounded-full">
               Rates are flexible based on itinerary

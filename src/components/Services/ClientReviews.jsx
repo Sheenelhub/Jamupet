@@ -16,7 +16,7 @@ const reviews = [
   },
   { 
     name: "The Miller Family",
-    role: "Safari Travelers",
+    role: "Expedition Travelers",
     text: "A seamless, blessed journey from the airport to the Mara. They live out their values in every mile. Highly recommended.",
     rating: 5
   }

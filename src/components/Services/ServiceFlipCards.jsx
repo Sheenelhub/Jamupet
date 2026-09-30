@@ -56,12 +56,12 @@ const services = [
   },
   {
     id: "safari",
-    title: "Safari Tours",
+    title: "Expedition Tours",
     icon: <Camera size={32} />,
-    frontText: "Custom expeditions for locals and tourists.",
+    frontText: "Custom expeditions for locals and travelers.",
     backTitle: "Into the Wild",
-    backPoints: ["Modified Safari Cruisers", "Expert Driver-Guides", "Multi-Day Packages"],
-    cta: "Plan Safari",
+    backPoints: ["Modified Expedition Cruisers", "Expert Driver-Guides", "Multi-Day Packages"],
+    cta: "Plan Expedition",
     link: "/booking" 
   }
 ];

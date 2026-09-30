@@ -19,13 +19,13 @@ const packages = [
   },
   {
     id: 2,
-    title: "The Safari Class",
+    title: "The Expedition Class",
     route: "Nairobi ⇄ Mara / Ol Pejeta",
     price: "Custom Quote",
     duration: "Multi-Day",
     features: [
       "Dedicated Expert Driver-Guide",
-      "Modified 4x4 Safari Cruiser",
+      "Modified 4x4 Expedition Cruiser",
       "Unlimited Game Drives",
       "Pop-up Roof & VHF Radio"
     ],

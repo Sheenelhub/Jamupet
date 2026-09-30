@@ -12,7 +12,8 @@ export default function Hero() {
       <div className="absolute inset-0 z-0">
         <img
           src="/hero1.webp"
-          alt="Luxury Transit"
+          alt="Jamupet Transit Luxury Chauffeur and Expedition Services - jamupettransit.com"
+          title="Jamupet Transit Premium Fleet"
           width="800" 
           height="600" 
           className="w-full h-full object-cover"
@@ -37,7 +38,7 @@ export default function Hero() {
                     'Airport Transfers.',
                     'Hotel Transfers.',
                     'Executive Chauffeurs.',
-                    'Safari Experiences.',
+                    'Expedition Experiences.',
                     'Travel with Confidence.',
                     'Book Now.'
                   ],
@@ -101,7 +102,7 @@ export default function Hero() {
         <div className="p-6 md:p-8 flex flex-col gap-3 group hover:bg-gray transition-all cursor-default">
           <Palmtree className="text-[#C5A059] w-6 h-6 md:w-8 md:h-8 group-hover:scale-110 transition-transform" strokeWidth={1.5} />
           <div>
-            <h3 className="text-gray-900 uppercase tracking-widest text-[11px] font-bold mb-1">Safari Tours</h3>
+            <h3 className="text-gray-900 uppercase tracking-widest text-[11px] font-bold mb-1">Expedition Tours</h3>
             <p className="text-gray-500 text-[12px] leading-relaxed">Explore the wild in premium comfort.</p>
           </div>
         </div>

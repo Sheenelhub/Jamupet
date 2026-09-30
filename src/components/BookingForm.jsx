@@ -388,7 +388,7 @@ export default function BookingForm() {
                 <Car size={18} className="text-[#B35A38]" /> 03. Vehicle Class
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {['Executive Sedan', 'Luxury SUV', 'Safari Class'].map((type) => (
+                {['Executive Sedan', 'Luxury SUV', 'Expedition Class'].map((type) => (
                   <button key={type} type="button" onClick={() => setFormData({...formData, vehicleType: type})} className={`p-6 rounded-2xl border-2 transition-all flex flex-col items-center gap-3 ${formData.vehicleType === type ? 'border-[#B35A38] bg-[#B35A38]/5 text-[#B35A38]' : 'border-gray-100 text-gray-400 hover:border-gray-200 hover:bg-gray-50'}`}>
                     <Car size={24} />
                     <span className="font-bold text-xs uppercase tracking-tighter">{type}</span>

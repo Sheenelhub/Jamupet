@@ -46,8 +46,8 @@ const SERVICES = [
   },
   {
     id: "safari-tour",
-    name: "Safari Tours",
-    description: "Custom expeditions for locals and tourists. (Custom Quote).",
+    name: "Expedition Tours",
+    description: "Custom expeditions for locals and travelers. (Custom Quote).",
     icon: Camera,
     iconColor: "#C5A059"
   }

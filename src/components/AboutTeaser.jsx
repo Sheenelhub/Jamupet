@@ -16,7 +16,8 @@ export default function AboutTeaser() {
             <div className="relative rounded-[2rem] overflow-hidden border border-gray-200 shadow-2xl">
               <img 
                 src="/assets/executive-sedan-airport-transfer.webp" 
-                alt="Luxury Fleet" 
+                alt="Jamupet Transit Luxury Fleet Executive Sedan Airport Transfer - jamupettransit.com" 
+                title="Jamupet Transit Executive Sedan in Nairobi"
                 width="800" 
                 height="600" 
                 className="w-full h-[500px] object-cover hover:scale-105 transition-transform duration-700" 
@@ -53,7 +54,7 @@ export default function AboutTeaser() {
 
             <ul className="space-y-4 pt-2">
               {[
-                "Executive sedans, luxury SUVs, and safari cruisers.",
+                "Executive sedans, luxury SUVs, and expedition cruisers.",
                 "Flexible options for corporate events to weddings.",
                 "Courteous chauffeurs trained for safe, private journeys."
               ].map((item, i) => (
